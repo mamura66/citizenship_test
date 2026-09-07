@@ -15,7 +15,7 @@
 <!-- Shown until boot() has actually finished. Both the gate and the shell start hidden:
      a rail whose buttons are live while /api/progress is still in flight loses whatever
      the visitor clicked, because boot() then re-renders from saved progress. -->
-<div class="booting" id="booting"><p>Loading your account…</p></div>
+<div class="booting" id="booting"><p data-i18n="boot.loading">Loading your account…</p></div>
 
 <!-- ========== Country gate. Reached only by an account that has no country yet, which
      in practice means someone who signed up with Google - the consent screen has nowhere
@@ -28,8 +28,8 @@
       <rect x="37" y="70" width="26" height="6.5" rx="3.25" fill="#fff"/>
       <rect x="44" y="78" width="12" height="10" rx="3" fill="#fff" opacity=".85"/>
     </svg>
-    <h1>Which country's citizenship test are you taking?</h1>
-    <p>
+    <h1 data-i18n="gate.title">Which country's citizenship test are you taking?</h1>
+    <p data-i18n="gate.explain">
       This sets your questions, your pass mark and your local answers. It stays fixed to
       your account once you choose, so pick the country you're actually applying in.
     </p>
@@ -58,34 +58,34 @@
          on the person's own filing, so it has to be theirs to choose. Studying the wrong
          pool is the failure this prevents. -->
     <div id="versionBlock" hidden>
-      <p class="label" style="margin:0 0 7px 10px">Test version</p>
+      <p class="label" style="margin:0 0 7px 10px" data-i18n="rail.version">Test version</p>
       <div class="vers" id="versions" role="group"></div>
       <p class="ver-note" id="versionNote"></p>
     </div>
 
     <div>
-      <p class="label" style="margin:0 0 7px 10px">Mode</p>
+      <p class="label" style="margin:0 0 7px 10px" data-i18n="rail.mode">Mode</p>
       <div class="modes">
-        <button class="mode" data-mode="study">Study</button>
-        <button class="mode" data-mode="practice">Practice test</button>
-        <button class="mode" data-mode="interview">Interview<span class="lock" data-lockicon>Paid</span></button>
-        <button class="mode" data-mode="performance">Performance</button>
-        <button class="mode" id="insightsLink" data-mode="insights" hidden>Insights<span class="lock">Owner</span></button>
+        <button class="mode" data-mode="study"><span data-i18n="mode.study">Study</span></button>
+        <button class="mode" data-mode="practice"><span data-i18n="mode.practice">Practice test</span></button>
+        <button class="mode" data-mode="interview"><span data-i18n="mode.interview">Interview</span><span class="lock" data-lockicon data-i18n="badge.paid">Paid</span></button>
+        <button class="mode" data-mode="performance"><span data-i18n="mode.performance">Performance</span></button>
+        <button class="mode" id="insightsLink" data-mode="insights" hidden><span data-i18n="mode.insights">Insights</span><span class="lock" data-i18n="badge.owner">Owner</span></button>
       </div>
     </div>
 
     <div id="topicsBlock">
-      <p class="label" style="margin:0 0 7px 10px">Sections</p>
+      <p class="label" style="margin:0 0 7px 10px" data-i18n="rail.sections">Sections</p>
       <div class="topics" id="topics"></div>
     </div>
 
     <div class="rail-foot">
       <div class="who" id="who"></div>
-      <a href="/">← Back to the website</a>
-      <a href="/support">Support</a>
-      <a href="/terms">Terms</a>
-      <a href="/privacy-web">Privacy</a>
-      <button class="signout" id="signOut">Sign out</button>
+      <a href="/" data-i18n="rail.backToSite">← Back to the website</a>
+      <a href="/support" data-i18n="rail.support">Support</a>
+      <a href="/terms" data-i18n="rail.terms">Terms</a>
+      <a href="/privacy-web" data-i18n="rail.privacy">Privacy</a>
+      <button class="signout" id="signOut" data-i18n="rail.signOut">Sign out</button>
     </div>
   </nav>
 
@@ -107,6 +107,7 @@
 <!-- Paddle.js draws the checkout overlay. Paddle is merchant of record, so the card
      details are entered in their iframe and never touch this page or our Worker. -->
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script src="/strings.js"></script>
 <script src="/countries.js"></script>
 <script src="/app.js"></script>
 </body>

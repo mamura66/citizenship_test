@@ -21,7 +21,10 @@ export const SESSION_COOKIE = 'pfc_session';
 const EMAIL_RE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
 const MIN_PASSWORD = 10;
 
-function validate({ email, password, name, country }, { requireCountry }) {
+/* The country is checked separately, in register(), because "is this country available"
+   is now a question about whether its pack exists - which means asking the asset router,
+   which means awaiting. Everything checkable from the request body alone stays here. */
+function validate({ email, password, name }) {
   const e = normalizeEmail(email);
   if (!e || e.length > 254 || !EMAIL_RE.test(e)) return 'Enter a valid email address.';
   if (typeof password !== 'string' || password.length < MIN_PASSWORD) {
@@ -31,7 +34,6 @@ function validate({ email, password, name, country }, { requireCountry }) {
   // A password that is just the email address is the one composition rule worth having.
   if (password.trim().toLowerCase() === e) return 'Your password cannot be your email address.';
   if (name != null && String(name).length > 80) return 'That name is too long.';
-  if (requireCountry && !isReadyCountry(country)) return 'Choose the country you are applying in.';
   return null;
 }
 
@@ -56,8 +58,11 @@ export async function register(request, env, ctx) {
   let body;
   try { body = await readJson(request); } catch { return fail(400, 'bad_body', 'Could not read that request.'); }
 
-  const problem = validate(body, { requireCountry: true });
+  const problem = validate(body);
   if (problem) return fail(400, 'invalid', problem);
+  if (!(await isReadyCountry(env, body.country))) {
+    return fail(400, 'invalid', 'Choose the country you are applying in.');
+  }
 
   const email = normalizeEmail(body.email);
   const existing = await getUserByEmail(env, email);

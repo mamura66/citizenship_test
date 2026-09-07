@@ -48,7 +48,7 @@ export async function setCountry(request, env, ctx) {
     return json({ user: publicUser(ctx.user, await hasPaidAccess(env, ctx.user, ctx.session)) });
   }
 
-  if (!isReadyCountry(code)) return fail(400, 'invalid', 'That country is not available yet.');
+  if (!(await isReadyCountry(env, code))) return fail(400, 'invalid', 'That country is not available yet.');
 
   const user = await putUser(env, { ...ctx.user, country: code, countryLockedAt: Date.now() });
   return json({ user: publicUser(user, await hasPaidAccess(env, user, ctx.session)) });

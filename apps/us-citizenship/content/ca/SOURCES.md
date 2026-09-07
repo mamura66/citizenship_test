@@ -55,7 +55,11 @@ Structure as counted on 2026-09-07:
   ("Who is your Member of Parliament?", "What is the capital of your province or
   territory?").
 
-That is 31 items in total, of which only 3 are in multiple-choice form. So even with
+That is 31 items in total, of which only 3 are in multiple-choice form. The
+28 was counted in a real browser (Playwright/Chromium, 2026-09-07): the page has one
+heading "Study Questions" for the worked examples and one "Other Study Questions:" heading
+above a list of exactly 28 question-shaped items. An earlier automated read of the same
+page reported 23, so re-count rather than trusting a summary. So even with
 permission, Canada is a small official set plus a large free study guide — a
 study-guide-led product, not a question-bank-led one.
 

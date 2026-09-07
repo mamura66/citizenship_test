@@ -1,0 +1,15 @@
+{
+ "generated": "2026-09-07T17:59:25Z",
+ "note": "Written by tools/sync-content.sh from the files it copied. Never edit by hand.",
+ "packs": {
+  "de": [
+   "einbuergerungstest.json"
+  ],
+  "us": [
+   "civics-2008.json",
+   "civics-2025.json",
+   "reading-vocab.json",
+   "writing-vocab.json"
+  ]
+ }
+}

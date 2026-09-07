@@ -96,6 +96,14 @@
         },
         {
           "@type": "Question",
+          "name": "Which countries can I use this for?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The United States today, and Germany's Einb\u00fcrgerungstest next. A country needs its government to publish the real question pool, which not every country does \u2014 Canada and Australia publish a study guide but not the questions, and the Life in the UK question bank is confidential and unpublished. Where the questions are public, the whole app follows: the questions, the pass mark, and the interface in that country's own language."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "Which version of the test applies to me?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -184,28 +192,26 @@
         questions for that country, how many you'll be asked, the pass mark, and the
         answers that depend on where you live.
       </p>
-      <p class="clarify">
-        <strong>The United States is ready today.</strong> Canada, the United Kingdom and
-        Australia are on the way — each one a set of official questions, not a different
-        website to learn.
+      <!-- Written cautiously on purpose, and corrected upwards by /country-strip.js once
+           it has checked which content packs actually exist. A marketing page that names a
+           country it cannot serve is the one mistake worth designing out here. -->
+      <p class="clarify" id="countryLine">
+        <strong>The United States is ready today.</strong> Germany is next — the same app
+        with a different set of official questions, not a different website to learn.
       </p>
 
+      <!-- Two chips, not five. The three that used to be here - Canada, the United
+           Kingdom, Australia - have no published question pool, so listing them as
+           "coming soon" was a promise nobody could keep. The Countries section below says
+           why in words. `data-country` is what /country-strip.js matches on. -->
       <div class="ctry-strip">
-        <span class="ctry-chip is-live">
+        <span class="ctry-chip is-live" data-country="us">
           <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#fff"/><rect y="0" width="19" height="0.77" fill="#B31942"/><rect y="1.54" width="19" height="0.77" fill="#B31942"/><rect y="3.08" width="19" height="0.77" fill="#B31942"/><rect y="4.62" width="19" height="0.77" fill="#B31942"/><rect y="6.15" width="19" height="0.77" fill="#B31942"/><rect y="7.69" width="19" height="0.77" fill="#B31942"/><rect y="9.23" width="19" height="0.77" fill="#B31942"/><rect width="7.6" height="5.38" fill="#0A3161"/></svg></span>
-          United States <b>Ready now</b>
+          United States <b data-chip-state>Ready now</b>
         </span>
-        <span class="ctry-chip">
-          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#fff"/><rect width="4.75" height="10" fill="#D80621"/><rect x="14.25" width="4.75" height="10" fill="#D80621"/><path d="M9.5 2.6l.66 1.5 1.42-.47-.57 1.5 1.33.47-1.33.76.28 1.04-1.42-.28-.37 1.22-.37-1.22-1.42.28.28-1.04L6.66 5.6l1.33-.47-.57-1.5 1.42.47z" fill="#D80621"/></svg></span>
-          Canada <span>Coming soon</span>
-        </span>
-        <span class="ctry-chip">
-          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#012169"/><path d="M0 0l19 10M19 0L0 10" stroke="#fff" stroke-width="2"/><path d="M0 0l19 10M19 0L0 10" stroke="#C8102E" stroke-width="1.1"/><path d="M9.5 0v10M0 5h19" stroke="#fff" stroke-width="3.2"/><path d="M9.5 0v10M0 5h19" stroke="#C8102E" stroke-width="1.9"/></svg></span>
-          United Kingdom <span>Coming soon</span>
-        </span>
-        <span class="ctry-chip">
-          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#00008B"/><rect width="9.5" height="5" fill="#012169"/><path d="M0 0l9.5 5M9.5 0L0 5" stroke="#fff" stroke-width=".9"/><path d="M4.75 0v5M0 2.5h9.5" stroke="#fff" stroke-width="1.6"/><path d="M4.75 0v5M0 2.5h9.5" stroke="#C8102E" stroke-width=".9"/><circle cx="14" cy="7" r=".8" fill="#fff"/><circle cx="16.4" cy="4.1" r=".6" fill="#fff"/><circle cx="15.2" cy="8.6" r=".45" fill="#fff"/></svg></span>
-          Australia <span>Coming soon</span>
+        <span class="ctry-chip" data-country="de">
+          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="3.334" y="0" fill="#000"/><rect width="19" height="3.333" y="3.334" fill="#DD0000"/><rect width="19" height="3.333" y="6.667" fill="#FFCE00"/></svg></span>
+          Germany <span data-chip-state>Coming next</span>
         </span>
       </div>
 
@@ -364,8 +370,22 @@
       test you aren't taking. If you pick the wrong one, tell us and we'll fix it.
     </p>
     <p>
-      The United States is live. We're building the others in the order people ask for
-      them — if yours isn't here yet, <a href="/support">say so</a> and it moves up.
+      Which country comes next isn't really up to us. A country can only be here if its
+      government publishes the actual questions — the United States does, and so does
+      Germany, where the full Einbürgerungstest catalogue is available to anyone. Where
+      that's true, adding a country is a set of questions and a translation, and nothing
+      else changes.
+    </p>
+    <p>
+      Where it isn't true, we'd rather say so than keep you waiting. Canada and Australia
+      publish a study guide but not the questions themselves, and the Life in the UK
+      question bank is confidential Crown copyright — it isn't published and it isn't
+      going to be. We won't invent questions and call them official, so for those tests
+      the honest answer is that we don't have one yet.
+    </p>
+    <p>
+      If your country publishes its questions and isn't here, <a href="/support">tell
+      us</a> — that's genuinely how this list grows.
     </p>
   </div>
 </section>
@@ -438,6 +458,17 @@
       </p>
     </div>
     <div class="qa">
+      <h3>Which countries can I use this for?</h3>
+      <p>
+        The United States today, and Germany's Einbürgerungstest next. A country needs its
+        government to publish the real question pool, which not every country does — Canada
+        and Australia publish a study guide but not the questions, and the Life in the UK
+        question bank is confidential and unpublished. Where the questions are public, the
+        whole app follows: the questions, the pass mark, and the interface in that
+        country's own language.
+      </p>
+    </div>
+    <div class="qa">
       <h3>Which version of the test applies to me?</h3>
       <p>
         For the United States, that depends on your Form N-400 filing date and the rules in
@@ -507,6 +538,8 @@
     </p>
   </div>
 </footer>
+<script src="/countries.js"></script>
+<script src="/country-strip.js"></script>
 <script src="/nav.js"></script>
 <script src="/analytics.js"></script>
 </body>

@@ -77,15 +77,21 @@ done
 # ---- the manifest the website reads -------------------------------------------------
 # Scanned out of the destination, so it can only ever describe files that are really there.
 python3 - "$DST" <<'PY'
-import json, os, sys, datetime
+import json, os, shutil, sys, datetime
 
 dst = sys.argv[1]
 
-# A pack that says its own licence has not been cleared does not go in the manifest, and
-# therefore cannot be chosen on the website. The flag is the content author's, and this is
-# what makes it bite: without it, "pending-legal-review" is a note in a file that the
-# website happily ignores. Spain's pack is held outside apps/ entirely for the same reason;
-# this covers the case where a pack is publishable-looking but flagged.
+# A pack that says its own licence has not been cleared is REMOVED from the website's
+# content directory, not merely left out of the manifest.
+#
+# Leaving it out of the manifest stops it being chosen. It does not stop it being served:
+# everything under site/public/ is a public URL, so a pack copied there is published the
+# moment the site deploys, whether or not anything links to it. For material whose terms
+# have not been cleared, being published IS the problem - that is exactly why Spain's pack
+# is held outside apps/ altogether. So the file is deleted here.
+#
+# The flag is the content author's. This is what makes it bite: without it,
+# "pending-legal-review" is a note in a file that the website happily publishes anyway.
 HELD = ('pending-legal-review', 'blocked', 'hold')
 
 def held_back(path):
@@ -110,13 +116,32 @@ for code in sorted(os.listdir(dst)):
     for f in sorted(os.listdir(d)):
         if not f.endswith('.json') or not os.path.isfile(os.path.join(d, f)):
             continue
-        status = held_back(os.path.join(d, f))
+        full = os.path.join(d, f)
+        status = held_back(full)
         if status:
+            os.remove(full)
             withheld.append((code, f, status))
         else:
             files.append(f)
     if files:
         packs[code] = files
+    else:
+        # Nothing left to serve for this country. The artwork goes too: a picture question's
+        # images ARE the withheld pack's content, and deleting the JSON while leaving them
+        # under site/public/ publishes exactly the material the flag exists to hold back.
+        # Verified with a synthetic held-back country carrying one image: before this, the
+        # pack was removed and the image was still served.
+        if any(w[0] == code for w in withheld):
+            img = os.path.join(d, 'img')
+            if os.path.isdir(img):
+                shutil.rmtree(img)
+                print(f"  {code}: artwork removed too - it belongs to the held-back pack")
+        # rmdir, not rmtree, for whatever is left: an unexpected leftover file should be a
+        # visible error rather than something this quietly deletes.
+        try:
+            os.rmdir(d)
+        except OSError:
+            print(f"  {code}: no servable pack, but {d} is not empty - left alone")
 
 out = {
     'generated': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -128,8 +153,8 @@ with open(os.path.join(dst, 'packs.json'), 'w', encoding='utf-8') as f:
     f.write('\n')
 print(f"  manifest: {len(packs)} countr{'y' if len(packs) == 1 else 'ies'} with packs -> packs.json")
 for code, f, status in withheld:
-    print(f"  {code}/{f}: kept OUT of the manifest - licence.reviewStatus is {status!r}, "
-          f"so the country is not selectable")
+    print(f"  {code}/{f}: NOT published - licence.reviewStatus is {status!r}. Removed from "
+          f"the website's content directory, so it is neither selectable nor fetchable.")
 PY
 
 # ---- does the website know about what was synced, and vice versa? --------------------

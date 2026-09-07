@@ -40,24 +40,36 @@ fetch('/api/config')
   .catch(() => {});
 
 /* Countries come from the shared list, and only the live ones are selectable - offering a
-   country we have no question pack for would be a promise we cannot keep. */
+   country we have no question pack for would be a promise we cannot keep.
+   
+   Awaited, because "which countries are live" is now answered by looking for each
+   country's content pack rather than by a flag somebody maintains (see countries.js). It
+   is a handful of parallel HEAD requests against the CDN, and the form is usable the
+   moment they land. The server checks the same fact again on submit, so a stale page
+   cannot register an account against a country we cannot serve. */
 if (isSignup) {
   const sel = $('#country');
-  READY_COUNTRIES.forEach((c) => {
-    const o = document.createElement('option');
-    o.value = c.code;
-    o.textContent = `${c.name} — ${c.test}`;
-    sel.appendChild(o);
-  });
-  if (READY_COUNTRIES.length === 1) sel.value = READY_COUNTRIES[0].code;
+  countriesReady().then((ready) => {
+    ready.forEach((c) => {
+      const o = document.createElement('option');
+      o.value = c.code;
+      o.textContent = `${c.name} — ${c.test}`;
+      sel.appendChild(o);
+    });
+    if (ready.length === 1) sel.value = ready[0].code;
 
-  const soon = COUNTRIES.filter((c) => !c.ready);
-  if (soon.length) {
-    const o = document.createElement('option');
-    o.disabled = true;
-    o.textContent = `${soon.map((c) => c.name).join(', ')} — coming`;
-    sel.appendChild(o);
-  }
+    const soon = COUNTRIES.filter((c) => !c.ready);
+    if (soon.length) {
+      const o = document.createElement('option');
+      o.disabled = true;
+      // An empty value, explicitly. A browser defaults an option's value to its own text,
+      // so without this the row carries "Spain, Canada, ... - coming" as a country code -
+      // harmless while it is disabled, and a bad request the moment it is not.
+      o.value = '';
+      o.textContent = `${soon.map((c) => c.name).join(', ')} — coming`;
+      sel.appendChild(o);
+    }
+  });
 }
 
 form.addEventListener('submit', async (e) => {

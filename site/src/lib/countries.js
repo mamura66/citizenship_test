@@ -1,8 +1,96 @@
 /* The server's allowlist of country codes.
  *
- * Deliberately not the same list as COUNTRIES in public/app.js: the browser needs names,
- * flags and test titles to draw the picker, the server needs only to know which codes may
- * be written to an account. Adding a country means adding the content pack, the row in
- * app.js, and the code here. */
-export const READY_COUNTRIES = ['us'];
-export const isReadyCountry = (code) => READY_COUNTRIES.includes(String(code || '').toLowerCase());
+ * Deliberately not the same list as COUNTRIES in public/countries.js: the browser needs
+ * names, flags and test titles to draw the picker, the server needs only to know which
+ * codes may be written to an account.
+ *
+ * WHAT MAKES A COUNTRY AVAILABLE. Not a line in this file. A country is available when its
+ * question pack exists as a static asset, and that is checked by asking the asset router
+ * for the file. So the same fact - "is there a pack?" - answers the picker in the browser
+ * and the allowlist on the server, and the two cannot disagree about a country the way two
+ * hand-maintained lists eventually would.
+ *
+ * The country is locked to an account for good once written (see routes/me.js), so this is
+ * the last gate before a decision nobody can take back. Getting it from the file rather
+ * than from a flag is the point: an account can never be locked to a test we have no
+ * questions for.
+ */
+
+/* code -> the pack that has to exist for that country to be selectable. A country absent
+ * from this map is refused outright; a country present but with no file on disk is refused
+ * until the file lands.
+ *
+ * Canada, the United Kingdom and Australia are absent. None of them publishes the question
+ * pool the real test draws from: Canada publishes a study guide, the Life in the UK bank is
+ * confidential Crown copyright, and Australia publishes a twenty-question practice sample
+ * and says so. There is a pack for that Australian sample, and it declares its own licence
+ * as pending review - so it is kept out of the website's content manifest as well as out of
+ * this map. Two locks, on purpose. */
+export const COUNTRY_PACKS = {
+  us: '/content/us/civics-2025.json',
+  de: '/content/de/einbuergerungstest.json',
+  // Spain is here and its pack is not, deliberately: the CCSE questions are held back
+  // pending a licence question, so there is no file and Spain is refused by the ordinary
+  // "no pack" path. If the licence is cleared, the pack lands and Spain works.
+  es: '/content/es/ccse.json',
+};
+
+/* A NOTE ON THE UNITED KINGDOM'S CODE, before somebody wastes an afternoon on it.
+ *
+ * Accounts store `uk`. That is what public/countries.js offers, what the sign-up form
+ * posts, and what is already written on live accounts, so it is not changing. ISO 3166-1
+ * says `GB`, which is why a content folder has appeared at apps/us-citizenship/content/gb/.
+ *
+ * If a UK pack ever exists, the entry here has to read '/content/gb/<file>' against the key
+ * `uk` - the account code and the folder name are allowed to differ, and mapping them in
+ * one place is cheaper than migrating every stored account. There is nothing to do today:
+ * the Life in the UK question bank is confidential Crown copyright and is not published,
+ * so no pack is coming. */
+
+/* Assets do not change without a deploy, so the answer is worth keeping. The short TTL is
+ * for `wrangler dev`, where a pack can appear under a running Worker - a permanent cache
+ * would keep saying "not yet" for the rest of the session. */
+const TTL_MS = 60_000;
+const cache = new Map();
+
+/** The hostname is irrelevant to the asset binding, which routes on the path. A fixed
+ *  origin is used rather than the request's, so this cannot be influenced by a Host
+ *  header. */
+const ASSET_ORIGIN = 'https://assets.invalid';
+
+async function packExists(env, path) {
+  if (!env || !env.ASSETS) {
+    // The binding is missing, which is a broken deployment, not an available country.
+    // Failing closed means nobody can register; failing open would mean an account locked
+    // to a test with no questions in it. The first is visible and fixable.
+    console.error('ASSETS binding missing - no country can be offered');
+    return false;
+  }
+  const hit = cache.get(path);
+  if (hit && Date.now() - hit.at < TTL_MS) return hit.ready;
+  let ready = false;
+  try {
+    const res = await env.ASSETS.fetch(new Request(new URL(path, ASSET_ORIGIN), { method: 'HEAD' }));
+    ready = res.ok;
+  } catch (err) {
+    console.error(`could not check for ${path}:`, err && err.message ? err.message : err);
+    ready = false;
+  }
+  cache.set(path, { ready, at: Date.now() });
+  return ready;
+}
+
+/** Whether an account may be created against, or locked to, this country code. */
+export async function isReadyCountry(env, code) {
+  const path = COUNTRY_PACKS[String(code || '').toLowerCase()];
+  if (!path) return false;
+  return packExists(env, path);
+}
+
+/** Every code whose pack is actually there. Not used to gate anything - isReadyCountry is
+ *  the gate - but useful to report the state of the world in one call. */
+export async function readyCountryCodes(env) {
+  const codes = Object.keys(COUNTRY_PACKS);
+  const flags = await Promise.all(codes.map((c) => isReadyCountry(env, c)));
+  return codes.filter((_, i) => flags[i]);
+}
