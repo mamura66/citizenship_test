@@ -313,6 +313,19 @@ date to compare against.
 * **The country is locked once set.** These 460 questions belong to the German test only;
   a recorded answer here is meaningless against any other country's sections.
 
+## Two validators, and which owns what
+
+`tools/validate-content-pack.py` is the shared one every pack must pass. It owns ids,
+duplicate detection (text **and** options together - a shared stem is not a duplicate
+here), answer-is-an-option, `correctIndex` validity, the image references and licence
+rules, and the PDF-extraction hygiene checks. Those hygiene checks were written for this
+pack first and have been moved there, since Spain and the UK will also come out of PDFs.
+It also walks `stateCategories` now; it used to walk only `categories`, which meant these
+160 state questions were getting no structural checks at all.
+
+`validate.py` in this directory is the Germany-specific supplement: the exact 300 + 10x16
+shape against a named list of the sixteen Bundeslaender. Run both.
+
 ## Regenerating and re-verifying
 
 `validate.py` in this directory is the gate. Run it after any change:

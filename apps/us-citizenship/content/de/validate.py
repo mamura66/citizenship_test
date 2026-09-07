@@ -3,6 +3,17 @@
 
 Run:  python3 apps/us-citizenship/content/de/validate.py
 
+This is the Germany-specific supplement. Run `tools/validate-content-pack.py` as well -
+it is the shared validator every pack has to pass, and it owns everything that is not
+peculiar to Germany: ids, duplicate detection, answer-is-an-option, correctIndex validity,
+image references and licence, and the PDF-extraction hygiene checks (mojibake, leftover
+Wingdings checkbox glyphs, invisible control characters, truncation ellipses) that were
+first written here and have since been generalised there, because Spain and the UK will be
+extracted from PDFs too.
+
+What is left here is the part only Germany knows: the exact 300 + 10x16 shape, against a
+named list of the sixteen Bundeslaender.
+
 Asserts the invariants that matter for this pack:
   * exactly 300 nationwide questions and 160 state-specific ones (10 x 16 Bundeslaender)
   * every question has exactly 4 options with exactly one marked correct

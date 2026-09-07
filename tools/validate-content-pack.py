@@ -45,6 +45,21 @@ NON_US_SPELLINGS = {
 # Fields we write ourselves, so locale rules apply to them.
 AUTHORED_TEXT_FIELDS = ("disclosure",)
 
+# Damage that PDF extraction does silently. Every one of these has a real cause: UTF-8
+# read as Latin-1 turns "ä" into "Ã¤"; the catalogue draws its empty answer boxes with a
+# Wingdings private-use glyph that comes through as text; and a soft hyphen or zero-width
+# space is invisible in a diff but breaks a string comparison against the source. Germany
+# is the first pack extracted from a PDF, and Spain and the UK will be too.
+MOJIBAKE = ("\u00c3\u00a4", "\u00c3\u00b6", "\u00c3\u00bc", "\u00c3\u009f",
+            "\u00c3\u201e", "\u00c3\u2013", "\u00c3\u0153", "\u00e2\u20ac",
+            "\ufffd")
+CHECKBOX_GLYPHS = ("\uf0a3", "\u25a1", "\u2610")
+BAD_CONTROL = ("\ufeff", "\u200b", "\u00ad")
+PLACEHOLDER_RE = re.compile(r"\b(TODO|TBD|FIXME|XXX|PLACEHOLDER|LOREM|Lorem ipsum)\b", re.I)
+# A trailing ellipsis is how a sentence-completion stem is legitimately written. One wedged
+# between word characters means the text was truncated during extraction.
+TRUNCATED_RE = re.compile(r"\w\.\.\.\w|\w\u2026\w")
+
 
 class Report:
     def __init__(self, path):
@@ -130,6 +145,28 @@ def check_locale(pack, r):
                 r.warn(f"{field}: {word!r} does not match language {lang} (expected {better!r})")
 
 
+def check_extraction_damage(label, value, r):
+    """Text that came out of a PDF wrong in ways a reader would not notice."""
+    if not isinstance(value, str):
+        return
+    if "  " in value:
+        r.warn(f"{label}: double space -> {value[:70]!r}")
+    for bad in MOJIBAKE:
+        if bad in value:
+            r.error(f"{label}: mojibake {bad!r} - UTF-8 read as Latin-1 -> {value[:70]!r}")
+    for glyph in CHECKBOX_GLYPHS:
+        if glyph in value:
+            r.error(f"{label}: leftover checkbox glyph U+{ord(glyph):04X} from the source PDF")
+    for ctrl in BAD_CONTROL:
+        if ctrl in value:
+            r.error(f"{label}: invisible character U+{ord(ctrl):04X} (BOM, zero-width space "
+                    f"or soft hyphen) - breaks any comparison against the source")
+    if PLACEHOLDER_RE.search(value):
+        r.error(f"{label}: placeholder text -> {value[:70]!r}")
+    if TRUNCATED_RE.search(value):
+        r.error(f"{label}: ellipsis inside a word, so the text was truncated -> {value[:70]!r}")
+
+
 def check_questions(pack, r):
     cats = pack.get("categories") or []
     if not cats:
@@ -201,6 +238,9 @@ def check_questions(pack, r):
                         restems.setdefault(text.lower(), []).append(label)
                     if text != q.get("question"):
                         r.error(f"{label}: question text has leading/trailing whitespace")
+                    check_extraction_damage(f"{label} question", q.get("question"), r)
+                    for oi, opt in enumerate(q.get("options") or []):
+                        check_extraction_damage(f"{label} option {oi + 1}", opt, r)
 
                 answers = q.get("answers")
                 if not isinstance(answers, list) or not answers:
