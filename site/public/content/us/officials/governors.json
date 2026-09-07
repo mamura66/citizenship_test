@@ -1,0 +1,215 @@
+{
+  "_comment": "STATE-LEVEL DYNAMIC DATA - changes with elections and resignations. All 50 names cross-verified name-by-name against the National Governors Association (nga.org/governors), the governors' own official association, with zero mismatches. Party is NOT displayed anywhere in the app, so it is retained for reference only and is not verified.",
+  "lastVerified": "2026-09-05",
+  "verificationStatus": "CROSS_VERIFIED_TWO_SOURCES",
+  "governors": {
+    "Alabama": {
+      "name": "Kay Ivey",
+      "party": "Republican"
+    },
+    "Alaska": {
+      "name": "Mike Dunleavy",
+      "party": "Republican"
+    },
+    "Arizona": {
+      "name": "Katie Hobbs",
+      "party": "Democratic"
+    },
+    "Arkansas": {
+      "name": "Sarah Huckabee Sanders",
+      "party": "Republican"
+    },
+    "California": {
+      "name": "Gavin Newsom",
+      "party": "Democratic"
+    },
+    "Colorado": {
+      "name": "Jared Polis",
+      "party": "Democratic"
+    },
+    "Connecticut": {
+      "name": "Ned Lamont",
+      "party": "Democratic"
+    },
+    "Delaware": {
+      "name": "Matt Meyer",
+      "party": "Democratic"
+    },
+    "Florida": {
+      "name": "Ron DeSantis",
+      "party": "Republican"
+    },
+    "Georgia": {
+      "name": "Brian Kemp",
+      "party": "Republican"
+    },
+    "Hawaii": {
+      "name": "Josh Green",
+      "party": "Democratic"
+    },
+    "Idaho": {
+      "name": "Brad Little",
+      "party": "Republican"
+    },
+    "Illinois": {
+      "name": "JB Pritzker",
+      "party": "Democratic"
+    },
+    "Indiana": {
+      "name": "Mike Braun",
+      "party": "Republican"
+    },
+    "Iowa": {
+      "name": "Kim Reynolds",
+      "party": "Republican"
+    },
+    "Kansas": {
+      "name": "Laura Kelly",
+      "party": "Democratic"
+    },
+    "Kentucky": {
+      "name": "Andy Beshear",
+      "party": "Democratic"
+    },
+    "Louisiana": {
+      "name": "Jeff Landry",
+      "party": "Republican"
+    },
+    "Maine": {
+      "name": "Janet Mills",
+      "party": "Democratic"
+    },
+    "Maryland": {
+      "name": "Wes Moore",
+      "party": "Democratic"
+    },
+    "Massachusetts": {
+      "name": "Maura Healey",
+      "party": "Democratic"
+    },
+    "Michigan": {
+      "name": "Gretchen Whitmer",
+      "party": "Democratic"
+    },
+    "Minnesota": {
+      "name": "Tim Walz",
+      "party": "Democratic-Farmer-Labor"
+    },
+    "Mississippi": {
+      "name": "Tate Reeves",
+      "party": "Republican"
+    },
+    "Missouri": {
+      "name": "Mike Kehoe",
+      "party": "Republican"
+    },
+    "Montana": {
+      "name": "Greg Gianforte",
+      "party": "Republican"
+    },
+    "Nebraska": {
+      "name": "Jim Pillen",
+      "party": "Republican"
+    },
+    "Nevada": {
+      "name": "Joe Lombardo",
+      "party": "Republican"
+    },
+    "New Hampshire": {
+      "name": "Kelly Ayotte",
+      "party": "Republican"
+    },
+    "New Jersey": {
+      "name": "Mikie Sherrill",
+      "party": "Democratic"
+    },
+    "New Mexico": {
+      "name": "Michelle Lujan Grisham",
+      "party": "Democratic"
+    },
+    "New York": {
+      "name": "Kathy Hochul",
+      "party": "Democratic"
+    },
+    "North Carolina": {
+      "name": "Josh Stein",
+      "party": "Democratic"
+    },
+    "North Dakota": {
+      "name": "Kelly Armstrong",
+      "party": "Republican"
+    },
+    "Ohio": {
+      "name": "Mike DeWine",
+      "party": "Republican"
+    },
+    "Oklahoma": {
+      "name": "Kevin Stitt",
+      "party": "Republican"
+    },
+    "Oregon": {
+      "name": "Tina Kotek",
+      "party": "Democratic"
+    },
+    "Pennsylvania": {
+      "name": "Josh Shapiro",
+      "party": "Democratic"
+    },
+    "Rhode Island": {
+      "name": "Dan McKee",
+      "party": "Democratic"
+    },
+    "South Carolina": {
+      "name": "Henry McMaster",
+      "party": "Republican"
+    },
+    "South Dakota": {
+      "name": "Larry Rhoden",
+      "party": "Republican"
+    },
+    "Tennessee": {
+      "name": "Bill Lee",
+      "party": "Republican"
+    },
+    "Texas": {
+      "name": "Greg Abbott",
+      "party": "Republican"
+    },
+    "Utah": {
+      "name": "Spencer Cox",
+      "party": "Republican"
+    },
+    "Vermont": {
+      "name": "Phil Scott",
+      "party": "Republican"
+    },
+    "Virginia": {
+      "name": "Abigail Spanberger",
+      "party": "Democratic"
+    },
+    "Washington": {
+      "name": "Bob Ferguson",
+      "party": "Democratic"
+    },
+    "West Virginia": {
+      "name": "Patrick Morrisey",
+      "party": "Republican"
+    },
+    "Wisconsin": {
+      "name": "Tony Evers",
+      "party": "Democratic"
+    },
+    "Wyoming": {
+      "name": "Mark Gordon",
+      "party": "Republican"
+    }
+  },
+  "specialCases": {
+    "District of Columbia": "No governor - test answer should state D.C. does not have a governor."
+  },
+  "sources": [
+    "https://www.nga.org/governors/  (primary cross-check, 2026-09-05)",
+    "https://en.wikipedia.org/wiki/List_of_current_United_States_governors  (original snapshot)"
+  ],
+  "nextReviewDue": "2026-11-04 — the day after the 3 November 2026 midterms, when many of these change."
+}

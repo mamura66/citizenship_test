@@ -1,0 +1,75 @@
+{
+  // Worker + static assets. Cloudflare serves ./public directly for everything except the
+  // paths in `run_worker_first`; those reach src/worker.js. That keeps the marketing site
+  // and the question packs on the CDN while the API and the sign-in wall run as code.
+  "name": "uscitizenship-pulse-site",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-05",
+  // Also expose a *.workers.dev URL. The custom domain inherits pastclimate.com's
+  // zone security, which is currently issuing a bot challenge to every client
+  // (cf-mitigated: challenge) - unusable for a URL Apple has to fetch. workers.dev
+  // sits outside the zone, so it is a working fallback.
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "./public",
+    // The Worker needs to be able to fetch an asset itself, to serve the app page once it
+    // has checked the session.
+    "binding": "ASSETS",
+    // Serve the nearest 404.html rather than pretending every path is the app.
+    "not_found_handling": "404-page",
+    // Without this the asset router would answer /api/* and /app from ./public before the
+    // Worker ever ran - /api/* would 404 and the app page would load signed out.
+    // The sign-in pages are worker-first too, only so the www -> apex canonicalisation
+    // can run on them. Without it, someone landing on www stays on www, the session
+    // cookie is set for the apex, and their POST to /api/auth/login meets a 301 - which
+    // browsers retry as a GET, so signing in from www would simply fail.
+    "run_worker_first": [
+      "/api/*", "/app", "/app.html",
+      "/login", "/login.html", "/signup", "/signup.html",
+      "/forgot", "/forgot.html", "/reset", "/reset.html"
+    ]
+  },
+  // Cloudflare Email Service. Used for one thing: the password reset link. No API key and
+  // no DNS records, because the domain is already on this account - the runtime
+  // authenticates the send itself.
+  "send_email": [{ "name": "EMAIL" }],
+  // Users, sessions, entitlements and progress. See src/lib/store.js for the key layout.
+  "kv_namespaces": [
+    { "binding": "PFC", "id": "7dc1d7e034fe45c99f257b0766dfc0db" }
+  ],
+  "vars": {
+    // Non-secret configuration only. The secrets - GOOGLE_CLIENT_ID/SECRET,
+    // PADDLE_API_KEY and PADDLE_WEBHOOK_SECRET - are set with `wrangler secret put` and
+    // never live in this file.
+    //
+    // Sandbox until Sandeep says otherwise. Going live means: a Paddle live account (its
+    // own product, price, keys and webhook), swapping the three values below, and
+    // flipping this to "production". While it says sandbox the app shows a banner saying
+    // payments are tests.
+    // The canonical origin. Password reset links and the Google redirect URI are built
+    // from this and never from the request's Host header - see src/lib/origin.js.
+    "PUBLIC_ORIGIN": "https://prepareforcitizenship.com",
+    "PADDLE_ENVIRONMENT": "sandbox",
+    // The address password-reset mail is sent from. Must be on a domain on this
+    // Cloudflare account, or Email Service refuses the send as an unverified sender.
+    //
+    // hello@ rather than noreply@ on purpose: someone who gets an unexpected password
+    // reset email will reply to it asking what is going on, and that reply has to reach a
+    // person. Cloudflare Email Routing forwards hello@ to a real inbox, so it does.
+    "MAIL_FROM": "Prepare for Citizenship <hello@prepareforcitizenship.com>",
+    // Designed to be public - Paddle.js needs it in the page. Safe in the repo.
+    "PADDLE_CLIENT_TOKEN": "test_5ad1b7afa445e5a65e4dc1fd1ac",
+    // The one-time $9.99 "Full access" price on pro_01m1xkf5ck788ze3fdcb6b9qc1.
+    "PADDLE_PRICE_ID": "pri_01m1xkw4z2dpkvhqvgn3zp22mh"
+  },
+  // Custom domain. Cloudflare creates the DNS record and certificate for this
+  // subdomain on deploy; nothing else on pastclimate.com is touched.
+  "routes": [
+    { "pattern": "prepareforcitizenship.com", "custom_domain": true },
+    { "pattern": "www.prepareforcitizenship.com", "custom_domain": true },
+    // Kept so the URLs Apple already has on file keep resolving. pastclimate.com is
+    // behind Under Attack Mode, so that hostname still returns a bot challenge.
+    { "pattern": "pulse.pastclimate.com", "custom_domain": true }
+  ]
+}

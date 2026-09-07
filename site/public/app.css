@@ -1,0 +1,288 @@
+/* Prepare for Citizenship - web app.
+   Console shell (desktop-first rail + pane) wearing the App Parity identity, so the
+   website and the iPhone app read as one product: IBM Plex, #0FA968 accent, soft cards
+   on a green-biased neutral. Country-agnostic by construction - every label that names
+   a country comes from the loaded country pack, never from the CSS or markup. */
+
+:root {
+  --page: #ffffff;
+  --rail: #f4f7f5;
+  --card: #ffffff;
+  --line: rgba(11, 31, 23, 0.11);
+  --ink: #0b1f17;
+  --ink-2: rgba(11, 31, 23, 0.62);
+  --ink-3: rgba(11, 31, 23, 0.4);
+  --accent: #0fa968;
+  --accent-soft: rgba(15, 169, 104, 0.11);
+  --good: #0a7d4f;
+  --good-soft: rgba(10, 125, 79, 0.1);
+  --bad: #c0392b;
+  --bad-soft: rgba(192, 57, 43, 0.09);
+  --warn: #ce7a1b;
+  --shadow: 0 10px 30px rgba(11, 31, 23, 0.07);
+  --rail-w: 236px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #05130d;
+    --rail: #0b2118;
+    --card: #0f2c20;
+    --line: rgba(230, 251, 240, 0.14);
+    --ink: #e6fbf0;
+    --ink-2: rgba(230, 251, 240, 0.64);
+    --ink-3: rgba(230, 251, 240, 0.42);
+    --accent: #35e28c;
+    --accent-soft: rgba(53, 226, 140, 0.15);
+    --good: #35e28c;
+    --good-soft: rgba(53, 226, 140, 0.14);
+    --bad: #ff6b5e;
+    --bad-soft: rgba(255, 107, 94, 0.14);
+    --warn: #f2a93b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+}
+:root[data-theme="dark"] {
+  --page: #05130d; --rail: #0b2118; --card: #0f2c20;
+  --line: rgba(230, 251, 240, 0.14);
+  --ink: #e6fbf0; --ink-2: rgba(230, 251, 240, 0.64); --ink-3: rgba(230, 251, 240, 0.42);
+  --accent: #35e28c; --accent-soft: rgba(53, 226, 140, 0.15);
+  --good: #35e28c; --good-soft: rgba(53, 226, 140, 0.14);
+  --bad: #ff6b5e; --bad-soft: rgba(255, 107, 94, 0.14);
+  --warn: #f2a93b; --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+.mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+.label {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* ============ country gate ============ */
+.gate { min-height: 100vh; display: grid; place-items: center; padding: 40px 24px; }
+.gate-in { width: 100%; max-width: 560px; }
+.gate h1 { font-size: clamp(28px, 4.4vw, 38px); letter-spacing: -0.025em; line-height: 1.1; margin: 14px 0 12px; text-wrap: balance; }
+.gate p { color: var(--ink-2); margin: 0 0 26px; }
+.countries { display: grid; gap: 10px; }
+.country {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 15px 17px; color: var(--ink);
+}
+.country:hover:not(:disabled) { border-color: var(--accent); }
+.country:disabled { opacity: 0.5; cursor: not-allowed; }
+.country .flag { flex: none; width: 34px; height: 24px; border-radius: 3px; border: 1px solid var(--line); overflow: hidden; }
+.country b { display: block; font-size: 16px; font-weight: 600; }
+.country small { color: var(--ink-3); font-size: 13px; }
+.country .soon { margin-left: auto; }
+.gate-note { font-size: 13.5px; color: var(--ink-3); margin-top: 22px; line-height: 1.5; }
+
+/* ============ shell ============ */
+.shell { display: grid; grid-template-columns: var(--rail-w) 1fr; min-height: 100vh; }
+
+/* Both cells have to be allowed to be narrower than the widest thing inside them.
+   A grid item's automatic minimum size is its min-content width, and a 1fr track takes
+   its floor from that - so the horizontal chip row of sections in the narrow rail (a
+   grid laid out in columns, whose min-content is every chip side by side) set the floor
+   at roughly 1500px and scrolled the whole document sideways in Study mode. */
+.rail, .pane { min-width: 0; }
+
+.rail { background: var(--rail); border-right: 1px solid var(--line); padding: 18px 14px 24px; display: flex; flex-direction: column; gap: 20px; }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 14.5px; letter-spacing: -0.01em; }
+.torch { width: 26px; height: 26px; border-radius: 7px; flex: none; }
+
+.picked { display: flex; align-items: center; gap: 9px; padding: 9px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.picked .flag { width: 22px; height: 15px; border-radius: 2px; border: 1px solid var(--line); overflow: hidden; flex: none; }
+.picked b { font-size: 13.5px; font-weight: 600; }
+.picked small { display: block; font-size: 11px; color: var(--ink-3); }
+
+.modes { display: grid; gap: 3px; }
+.mode { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; background: transparent; border: 0; border-radius: 8px; padding: 8px 10px; color: var(--ink-2); font-size: 14px; }
+.mode:hover { background: var(--accent-soft); color: var(--ink); }
+.mode[aria-current="true"] { background: var(--accent); color: #fff; font-weight: 500; }
+.mode .lock { margin-left: auto; font-size: 10.5px; opacity: 0.75; }
+
+.topics { display: grid; gap: 1px; }
+.topic { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left; background: transparent; border: 0; border-radius: 7px; padding: 6px 10px; color: var(--ink-2); font-size: 13px; }
+.topic:hover { background: var(--accent-soft); color: var(--ink); }
+.topic[aria-current="true"] { background: var(--card); color: var(--ink); font-weight: 500; box-shadow: inset 0 0 0 1px var(--line); }
+.rail-foot { margin-top: auto; display: grid; gap: 8px; }
+.rail-foot a { color: var(--ink-3); font-size: 12.5px; text-decoration: none; }
+.rail-foot a:hover { color: var(--ink); }
+
+/* ============ pane ============ */
+.pane { padding: 26px 34px 60px; max-width: 900px; }
+.crumb { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.pane h2 { font-size: 24px; letter-spacing: -0.02em; margin: 0 0 6px; }
+.pane .sub { color: var(--ink-2); margin: 0 0 22px; max-width: 62ch; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow); }
+.q { font-size: 22px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.3; margin: 8px 0 0; text-wrap: balance; }
+
+.opts { display: grid; gap: 8px; margin-top: 18px; }
+.opt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--page); border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; color: var(--ink); font-size: 15px; }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:disabled { cursor: default; }
+.opt .k { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--rail); color: var(--ink-3); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; }
+.opt[data-state="right"] { background: var(--good-soft); border-color: var(--good); }
+.opt[data-state="right"] .k { background: var(--good); color: #fff; }
+.opt[data-state="wrong"] { background: var(--bad-soft); border-color: var(--bad); }
+.opt[data-state="wrong"] .k { background: var(--bad); color: #fff; }
+.opt[data-state="dim"] { opacity: 0.45; }
+
+.answers { display: grid; gap: 7px; margin-top: 14px; }
+.answers li { list-style: none; display: flex; gap: 9px; align-items: flex-start; color: var(--ink); font-size: 15px; }
+.answers .tick { color: var(--accent); flex: none; }
+.note { font-size: 13px; color: var(--ink-2); font-style: italic; }
+
+.btn { background: var(--accent); color: #fff; border: 0; border-radius: 11px; padding: 12px 22px; font-weight: 600; font-size: 15px; }
+.btn:hover { filter: brightness(1.06); }
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn.quiet { background: transparent; color: var(--ink-2); }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+
+.flip { border: 0; background: transparent; padding: 0; width: 100%; text-align: left; }
+.progress { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; margin: 0 0 20px; }
+.progress i { display: block; height: 3px; background: var(--accent); border-radius: 2px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 22px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; }
+.stat b { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 21px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+
+.locked { text-align: center; padding: 40px 24px; }
+.locked .disc { width: 62px; height: 62px; border-radius: 50%; background: var(--accent-soft); display: grid; place-items: center; margin: 0 auto 16px; font-size: 26px; }
+.locked h3 { font-size: 20px; margin: 0 0 8px; }
+.locked p { color: var(--ink-2); max-width: 46ch; margin: 0 auto 20px; }
+.price { font-family: 'IBM Plex Mono', monospace; font-size: 32px; font-weight: 600; letter-spacing: -0.02em; }
+
+@media (max-width: 800px) {
+  .shell { grid-template-columns: 1fr; }
+  .rail { border-right: 0; border-bottom: 1px solid var(--line); }
+  .topics { grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; gap: 4px; padding-bottom: 4px; }
+  .modes { grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; }
+  .mode { justify-content: center; }
+  .mode .lock { margin-left: 4px; }
+  /* Wrapping, not one row: on a 320px phone five items in a single row either clip or
+     force the page wider. */
+  .rail-foot { margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; column-gap: 16px; row-gap: 6px; }
+  .rail-foot .who { flex: 0 0 100%; }
+  .pane { padding: 22px 20px 60px; }
+}
+/* Four modes across a small phone leaves each about 70px, which cuts "Performance" in
+   half. Two rows of two fits the words instead. */
+@media (max-width: 560px) {
+  .modes { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ============ account, in the rail foot ============ */
+.who { border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 2px; }
+.who b { display: block; font-size: 12.5px; font-weight: 600; overflow-wrap: anywhere; }
+.who small { display: block; font-size: 11px; color: var(--ink-3); }
+.signout {
+  background: transparent; border: 0; padding: 0; text-align: left;
+  color: var(--ink-3); font-size: 12.5px; text-decoration: underline;
+}
+.signout:hover { color: var(--ink); }
+
+/* ============ checkout ============ */
+/* The paywall's own message line: a failed or abandoned checkout has to say so on the
+   screen the person is looking at, not in the console. */
+.pay-msg { font-size: 13.5px; margin: 14px 0 0; }
+/* Sentence case, not the uppercase .label treatment - it is a reassurance to be read, not
+   an eyebrow to be scanned. */
+.pay-note { font-size: 12.5px; color: var(--ink-3); margin: 14px 0 0; }
+.pay-msg.bad { color: var(--bad); }
+.pay-msg.good { color: var(--good); }
+.btn:disabled { opacity: 0.6; cursor: progress; }
+
+/* Sandbox banner. Deliberately loud: nobody should be able to mistake a test payment for
+   a real one, and nobody should see this in production. */
+.sandbox {
+  background: var(--warn); color: #fff; text-align: center;
+  font-size: 12.5px; font-weight: 600; padding: 7px 14px;
+}
+.sandbox a { color: #fff; }
+
+/* Shown until boot() has finished. See the note in app.html: the shell must not be
+   interactive while progress is still loading. */
+.booting { min-height: 100vh; display: grid; place-items: center; }
+.booting p { color: var(--ink-3); font-size: 14px; }
+
+/* ============ performance ============
+   The screen people are meant to want to show somebody. Every figure comes from answers
+   actually given, so the design's job is to make real data legible rather than to make
+   thin data look impressive. */
+
+.perf-help { color: var(--ink-3); font-size: 13px; margin: 7px 0 0; }
+
+.perf-top { display: grid; grid-template-columns: auto 1fr; gap: 26px; align-items: center; }
+.perf-dial { text-align: center; }
+.dial { width: 128px; height: 128px; display: block; }
+.perf-dial-note {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--ink-3); margin: 6px 0 0;
+}
+.perf-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 16px 12px; }
+.perf-figures b {
+  display: block; font-size: 25px; font-weight: 600; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+
+/* The map. One cell per question, grouped by section - the shape of the whole test at a
+   glance, and the thing that makes progress feel like territory rather than a number. */
+.map { display: grid; gap: 9px; margin-top: 14px; }
+.map-row { display: grid; grid-template-columns: minmax(0, 132px) 1fr; gap: 12px; align-items: center; }
+.map-name {
+  font-size: 12px; color: var(--ink-2); line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.map-cells { display: flex; flex-wrap: wrap; gap: 3px; }
+.c {
+  display: block; width: 11px; height: 11px; border-radius: 2.5px;
+  background: var(--line); flex: none;
+}
+.c.r { background: var(--accent); }
+.c.w { background: var(--bad); }
+.c.u { background: var(--line); }
+.map-key { display: flex; gap: 16px; margin: 14px 0 0; font-size: 12px; color: var(--ink-3); }
+.map-key span { display: flex; align-items: center; gap: 6px; }
+
+/* Thirty days of activity. Bars, not a heatmap grid: the question is "have I been keeping
+   at it", which a silhouette answers faster than shaded squares. */
+.spark { display: flex; align-items: flex-end; gap: 3px; height: 56px; margin-top: 14px; }
+.spark i { flex: 1; background: var(--line); border-radius: 2px 2px 0 0; min-height: 3px; }
+.spark i.on { background: var(--accent); }
+
+.trend { width: 100%; height: auto; display: block; margin-top: 10px; }
+
+.sec-list { display: grid; gap: 15px; margin-top: 14px; }
+.sec-head { display: flex; gap: 10px; align-items: baseline; font-size: 14.5px; }
+.sec-name { flex: 1; }
+.sec-pct { font-variant-numeric: tabular-nums; }
+.sec-bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.sec-bar i { display: block; height: 6px; border-radius: 3px; }
+.sec-go {
+  background: transparent; border: 0; padding: 5px 0 0; margin: 0;
+  color: var(--accent); font-size: 13px; text-align: left;
+}
+.sec-go:hover { text-decoration: underline; }
+
+@media (max-width: 620px) {
+  .perf-top { grid-template-columns: 1fr; gap: 18px; justify-items: center; }
+  .perf-figures { width: 100%; }
+  .map-row { grid-template-columns: 1fr; gap: 4px; }
+}

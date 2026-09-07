@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prepare for Citizenship</title>
+<meta name="description" content="Study the official civics test in your browser. Choose your country, study by topic, and take practice tests in the real format.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+<!-- Shown until boot() has actually finished. Both the gate and the shell start hidden:
+     a rail whose buttons are live while /api/progress is still in flight loses whatever
+     the visitor clicked, because boot() then re-renders from saved progress. -->
+<div class="booting" id="booting"><p>Loading your account…</p></div>
+
+<!-- ========== Country gate. Reached only by an account that has no country yet, which
+     in practice means someone who signed up with Google - the consent screen has nowhere
+     to ask. A password signup collects it on the form. ========== -->
+<main class="gate" id="gate">
+  <div class="gate-in">
+    <svg width="44" height="44" viewBox="0 0 100 100" aria-hidden="true">
+      <rect width="100" height="100" rx="20" fill="#0FA968"/>
+      <path d="M50 15 C60.5 32 68 36.5 68 48.5 C68 60.5 60 68.5 50 68.5 C40 68.5 32 60.5 32 48.5 C32 36.5 39.5 32 50 15 Z" fill="#fff"/>
+      <rect x="37" y="70" width="26" height="6.5" rx="3.25" fill="#fff"/>
+      <rect x="44" y="78" width="12" height="10" rx="3" fill="#fff" opacity=".85"/>
+    </svg>
+    <h1>Which country's citizenship test are you taking?</h1>
+    <p>
+      This sets your questions, your pass mark and your local answers. It stays fixed to
+      your account once you choose, so pick the country you're actually applying in.
+    </p>
+    <div class="countries" id="countries"></div>
+    <p class="gate-note" id="gateNote"></p>
+  </div>
+</main>
+
+<!-- ========== The console ========== -->
+<div class="shell" id="shell" hidden>
+  <nav class="rail">
+    <div class="brand">
+      <svg class="torch" viewBox="0 0 100 100" aria-hidden="true">
+        <rect width="100" height="100" rx="20" fill="#0FA968"/>
+        <path d="M50 15 C60.5 32 68 36.5 68 48.5 C68 60.5 60 68.5 50 68.5 C40 68.5 32 60.5 32 48.5 C32 36.5 39.5 32 50 15 Z" fill="#fff"/>
+        <rect x="37" y="70" width="26" height="6.5" rx="3.25" fill="#fff"/>
+        <rect x="44" y="78" width="12" height="10" rx="3" fill="#fff" opacity=".85"/>
+      </svg>
+      Prepare for Citizenship
+    </div>
+
+    <div class="picked" id="picked"></div>
+
+    <!-- Which version of the test. Drawn only when the loaded country has more than one
+         live version: two are in force for the United States and which one applies depends
+         on the person's own filing, so it has to be theirs to choose. Studying the wrong
+         pool is the failure this prevents. -->
+    <div id="versionBlock" hidden>
+      <p class="label" style="margin:0 0 7px 10px">Test version</p>
+      <div class="vers" id="versions" role="group"></div>
+      <p class="ver-note" id="versionNote"></p>
+    </div>
+
+    <div>
+      <p class="label" style="margin:0 0 7px 10px">Mode</p>
+      <div class="modes">
+        <button class="mode" data-mode="study">Study</button>
+        <button class="mode" data-mode="practice">Practice test</button>
+        <button class="mode" data-mode="interview">Interview<span class="lock" data-lockicon>Paid</span></button>
+        <button class="mode" data-mode="performance">Performance</button>
+      </div>
+    </div>
+
+    <div id="topicsBlock">
+      <p class="label" style="margin:0 0 7px 10px">Sections</p>
+      <div class="topics" id="topics"></div>
+    </div>
+
+    <div class="rail-foot">
+      <div class="who" id="who"></div>
+      <a href="/">← Back to the website</a>
+      <a href="/support">Support</a>
+      <a href="/terms">Terms</a>
+      <a href="/privacy-web">Privacy</a>
+      <button class="signout" id="signOut">Sign out</button>
+    </div>
+  </nav>
+
+  <main class="pane" id="pane"></main>
+</div>
+
+<!-- The one live region, kept outside the pane on purpose: render() replaces the pane's
+     contents wholesale, and a live region that arrives already populated is not reliably
+     announced. This node is created once and only ever has its text replaced. -->
+<p id="live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+<!-- Paddle.js draws the checkout overlay. Paddle is merchant of record, so the card
+     details are entered in their iframe and never touch this page or our Worker. -->
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script src="/countries.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

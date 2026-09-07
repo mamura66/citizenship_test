@@ -1,0 +1,17 @@
+{
+  "_comment": "THIS FILE CHANGES WITH ELECTIONS/APPOINTMENTS. It must be served from a remotely-updatable source (backend config / CMS / remote JSON), NEVER hardcoded into an app binary shipped to app stores - the #1 recurring 1-2 star complaint across competitor apps (Citizen Now, Brisbane's app) was stale officials after an update cycle. Verify against uscis.gov/citizenship/testupdates before every release and on a recurring schedule (see BUILD_PLAN.md content-freshness section).",
+  "lastVerified": "2026-09-05",
+  "verifiedAgainst": [
+    "https://www.whitehouse.gov/administration/  (President, Vice President)",
+    "https://www.supremecourt.gov/about/biographies.aspx  (Chief Justice)",
+    "https://www.house.gov/leadership  (Speaker of the House)"
+  ],
+  "president": "Donald Trump",
+  "presidentParty": "Republican",
+  "vicePresident": "JD Vance",
+  "speakerOfTheHouse": "Mike Johnson",
+  "chiefJustice": "John Roberts",
+  "supremeCourtSeats": 9,
+  "refreshCadence": "Re-verify on every app release, and additionally: after every presidential inauguration (Jan 20), after any Speaker of the House election, and after any Supreme Court confirmation/retirement announcement.",
+  "nextReviewDue": "2026-11-04 (midterms), and again in January 2027 when the new Congress elects a Speaker."
+}

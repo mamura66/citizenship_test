@@ -1,0 +1,121 @@
+/* Sign in / create account.
+   Same identity as the console and the marketing site - IBM Plex, #0FA968, white ground -
+   because arriving at a sign-in page that looks like a different product is how people
+   decide a site cannot be trusted with their email address. */
+
+:root {
+  --page: #ffffff;
+  --card: #ffffff;
+  --tint: #f4f7f5;
+  --line: rgba(11, 31, 23, 0.13);
+  --ink: #0b1f17;
+  --ink-2: rgba(11, 31, 23, 0.62);
+  --ink-3: rgba(11, 31, 23, 0.42);
+  --accent: #0fa968;
+  --accent-soft: rgba(15, 169, 104, 0.1);
+  --bad: #c0392b;
+  --bad-soft: rgba(192, 57, 43, 0.08);
+  --shadow: 0 10px 30px rgba(11, 31, 23, 0.07);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #05130d; --card: #0f2c20; --tint: #0b2118;
+    --line: rgba(230, 251, 240, 0.15);
+    --ink: #e6fbf0; --ink-2: rgba(230, 251, 240, 0.64); --ink-3: rgba(230, 251, 240, 0.44);
+    --accent: #35e28c; --accent-soft: rgba(53, 226, 140, 0.14);
+    --bad: #ff6b5e; --bad-soft: rgba(255, 107, 94, 0.13);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+}
+:root[data-theme="dark"] {
+  --page: #05130d; --card: #0f2c20; --tint: #0b2118;
+  --line: rgba(230, 251, 240, 0.15);
+  --ink: #e6fbf0; --ink-2: rgba(230, 251, 240, 0.64); --ink-3: rgba(230, 251, 240, 0.44);
+  --accent: #35e28c; --accent-soft: rgba(53, 226, 140, 0.14);
+  --bad: #ff6b5e; --bad-soft: rgba(255, 107, 94, 0.13);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  display: grid;
+  place-items: start center;
+  padding: 44px 20px 64px;
+}
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.auth { width: 100%; max-width: 400px; }
+
+.mark { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 15px; }
+.mark svg { width: 30px; height: 30px; border-radius: 8px; flex: none; }
+
+h1 { font-size: 27px; letter-spacing: -0.025em; line-height: 1.15; margin: 26px 0 8px; text-wrap: balance; }
+.lede { color: var(--ink-2); margin: 0 0 26px; font-size: 15px; }
+
+form { display: grid; gap: 15px; }
+label { display: grid; gap: 6px; font-size: 13.5px; font-weight: 500; }
+input, select {
+  font: inherit;
+  font-size: 15.5px;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 11px 13px;
+  width: 100%;
+}
+input:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.hint { font-size: 12.5px; color: var(--ink-3); font-weight: 400; }
+
+button.primary {
+  font: inherit; font-weight: 600; font-size: 15.5px; cursor: pointer;
+  background: var(--accent); color: #fff; border: 0; border-radius: 11px; padding: 13px 20px;
+  margin-top: 4px;
+}
+button.primary:hover:not(:disabled) { filter: brightness(1.06); }
+button.primary:disabled { opacity: 0.55; cursor: progress; }
+
+.or { display: flex; align-items: center; gap: 14px; color: var(--ink-3); font-size: 12.5px; margin: 22px 0; }
+.or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* Google's brand guidance: their mark, unaltered, on a neutral button - never recoloured
+   into our green. */
+.google {
+  display: flex; align-items: center; justify-content: center; gap: 11px;
+  width: 100%; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer;
+  background: var(--card); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 11px; padding: 12px 18px;
+  text-decoration: none;
+}
+.google:hover { background: var(--tint); }
+.google svg { width: 18px; height: 18px; flex: none; }
+
+.alt { margin: 26px 0 0; font-size: 14.5px; color: var(--ink-2); text-align: center; }
+.alt a, .foot a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.alt a:hover, .foot a:hover { text-decoration: underline; }
+
+.msg { border-radius: 11px; padding: 11px 14px; font-size: 14px; margin: 0 0 18px; }
+.msg.bad { background: var(--bad-soft); border: 1px solid var(--bad); color: var(--bad); }
+
+.foot { margin: 30px 0 0; font-size: 12.5px; color: var(--ink-3); text-align: center; line-height: 1.7; }
+.foot a { color: var(--ink-3); font-weight: 400; text-decoration: underline; }
+
+/* The free/paid promise, stated where the person is deciding whether to hand over an
+   email address - not buried on the pricing page. */
+.promise { background: var(--tint); border: 1px solid var(--line); border-radius: 13px; padding: 15px 17px; margin: 0 0 26px; }
+.promise p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+.promise b { color: var(--ink); font-weight: 600; }
+
+/* The forgotten-password link sits under the password field, where someone looks the
+   moment their first guess fails. */
+.hint-link { font-size: 12.5px; color: var(--accent); text-decoration: none; font-weight: 400; justify-self: start; }
+.hint-link:hover { text-decoration: underline; }

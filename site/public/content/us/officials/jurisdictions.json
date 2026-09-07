@@ -1,0 +1,58 @@
+{
+  "purpose": "Non-state jurisdictions that USCIS's state-specific civics questions explicitly cover. The official question notes tell D.C. and U.S. territory residents what to answer for the governor, state capital, and U.S. senator questions, so these residents must be able to pick their jurisdiction in the app. Answer wording below mirrors those USCIS notes (see the `note` fields in civics-2025.json / civics-2008.json).",
+  "sourceRetrieved": "2026-09-05",
+  "governorsNotTracked": "Resolved 2026-09-05: territory governors are published by the National Governors Association alongside the states, so they are now carried here and cross-verified from the same source. D.C. still has no governor - its answer stays the official USCIS one.",
+  "jurisdictions": {
+    "District of Columbia": {
+      "kind": "federal district",
+      "capital": null,
+      "capitalAnswer": "D.C. is not a state and has no capital.",
+      "governor": null,
+      "governorAnswer": "D.C. does not have a governor.",
+      "senatorAnswer": "D.C. has no U.S. senators."
+    },
+    "Puerto Rico": {
+      "kind": "territory",
+      "capital": "San Juan",
+      "capitalAnswer": null,
+      "governor": "Jenniffer González-Colón",
+      "governorAnswer": null,
+      "senatorAnswer": "U.S. territories have no U.S. senators."
+    },
+    "Guam": {
+      "kind": "territory",
+      "capital": "Hagåtña",
+      "capitalAnswer": null,
+      "governor": "Lou Leon Guerrero",
+      "governorAnswer": null,
+      "senatorAnswer": "U.S. territories have no U.S. senators."
+    },
+    "U.S. Virgin Islands": {
+      "kind": "territory",
+      "capital": "Charlotte Amalie",
+      "capitalAnswer": null,
+      "governor": "Albert Bryan",
+      "governorAnswer": null,
+      "senatorAnswer": "U.S. territories have no U.S. senators."
+    },
+    "American Samoa": {
+      "kind": "territory",
+      "capital": "Pago Pago",
+      "capitalAnswer": null,
+      "governor": "Pula'ali'i Nikolao Pula",
+      "governorAnswer": null,
+      "senatorAnswer": "U.S. territories have no U.S. senators."
+    },
+    "Northern Mariana Islands": {
+      "kind": "territory",
+      "capital": "Saipan",
+      "capitalAnswer": null,
+      "governor": "David M. Apatang",
+      "governorAnswer": null,
+      "senatorAnswer": "U.S. territories have no U.S. senators."
+    }
+  },
+  "sources": [
+    "https://www.nga.org/governors/  (territory governors, 2026-09-05)"
+  ]
+}

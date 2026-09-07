@@ -1,0 +1,14 @@
+# Local development only. Copy to .dev.vars (gitignored) and fill in.
+# In production every one of these is set with `wrangler secret put NAME`
+# except PADDLE_ENVIRONMENT, PADDLE_CLIENT_TOKEN and PADDLE_PRICE_ID, which are
+# not secret and live in wrangler.jsonc / the dashboard.
+
+# Google OAuth client (Web application) - console.cloud.google.com
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Paddle. Sandbox values while testing; sandbox and live are separate accounts.
+PADDLE_ENVIRONMENT=sandbox
+PADDLE_CLIENT_TOKEN=
+PADDLE_PRICE_ID=
+PADDLE_WEBHOOK_SECRET=

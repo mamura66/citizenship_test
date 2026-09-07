@@ -1,0 +1,39 @@
+{
+  "cli": {
+    "version": ">= 23.2.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "environment": "production"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6808512010",
+        "appleId": "sandeep.sandha@gmail.com",
+        "appleTeamId": "JHFSYZ8D3Q",
+        "ascApiKeyPath": "/Users/sandeepsandha/Downloads/AuthKey_P49ALKJGF4.p8",
+        "ascApiKeyId": "P49ALKJGF4",
+        "ascApiKeyIssuerId": "bb54e550-8eee-4734-9973-7443014f2a74"
+      }
+    }
+  }
+}

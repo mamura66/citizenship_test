@@ -1,0 +1,43 @@
+.DS_Store
+node_modules/
+
+# Secrets. Nothing here ever gets committed - this repository is public.
+#
+# Cloudflare secrets are set with `wrangler secret put` and live only in Cloudflare.
+# EAS reads the app's keys from its own encrypted environment.
+# App Store Connect .p8 keys stay on the machine; only their path appears in config.
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+*.p8
+*.pem
+*.key
+*.p12
+*.keystore
+*.jks
+*.mobileprovision
+
+# Local build and tool state
+site/.wrangler/
+apps/*/.expo/
+apps/*/dist/
+apps/*/ios/
+apps/*/android/
+*.log
+
+# Scratch
+.claude/
+
+# Kept local, not published. This repository is public.
+#
+# An internal triage of our own legal exposure is not something to hand to the
+# internet - it stays on disk, and in whatever counsel we engage.
+docs/LEGAL_REVIEW.md
+
+# Timestamped local backups, taken before overwriting things. Backups belong on the
+# machine, not in the history.
+**/_backup_*/
+**/.backup_*/

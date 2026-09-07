@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Reset your password · Prepare for Citizenship</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/auth.css">
+</head>
+<body>
+<main class="auth">
+  <a class="mark" href="/"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="20" fill="#0FA968"/><path d="M50 15 C60.5 32 68 36.5 68 48.5 C68 60.5 60 68.5 50 68.5 C40 68.5 32 60.5 32 48.5 C32 36.5 39.5 32 50 15 Z" fill="#fff"/><rect x="37" y="70" width="26" height="6.5" rx="3.25" fill="#fff"/><rect x="44" y="78" width="12" height="10" rx="3" fill="#fff" opacity=".85"/></svg> Prepare for Citizenship</a>
+
+  <h1>Reset your password</h1>
+  <p class="lede">Enter the email address on your account and we'll send you a link to choose a new password.</p>
+
+  <p class="msg bad" id="msg" hidden></p>
+
+  <form id="form" novalidate>
+    <label>Email
+      <input type="email" name="email" autocomplete="email" required autocapitalize="none" spellcheck="false">
+    </label>
+    <button class="primary" type="submit">Send the link</button>
+  </form>
+
+  <div id="done" hidden>
+    <div class="promise">
+      <p><b>Check your email.</b> If there's an account with that address, a reset link is
+         on its way. It works once and expires in an hour.</p>
+    </div>
+    <p class="alt">Nothing arrived? Look in your spam folder, then <a href="/forgot">try again</a>.</p>
+  </div>
+
+  <p class="alt" id="backLink">Remembered it? <a href="/login">Sign in</a></p>
+
+  <p class="foot">
+    <a href="/terms">Terms</a> · <a href="/privacy-web">Privacy</a> · <a href="/support">Support</a><br>
+    If you signed up with Google, use the Google button on the sign-in page instead.
+  </p>
+</main>
+<script src="/reset.js"></script>
+</body>
+</html>

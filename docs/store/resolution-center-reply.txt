@@ -1,0 +1,140 @@
+Thank you for the review. Answers to each numbered item are below, and this same
+information has also been added to the Notes field of the App Review Information
+section for future submissions.
+
+1. SCREEN RECORDING
+
+A screen recording captured on a physical iPhone running the latest iOS is attached.
+It begins with launching the app from the home screen and shows the typical user flow,
+including reaching the in-app purchase screen.
+
+Please note the following about the flows you listed:
+
+- Account registration, login and account deletion: the app has no accounts. There is
+  no registration, no login, and no credentials of any kind. Nothing is stored on our
+  servers, so there is no account for a user to delete. Every feature is available
+  immediately on launch.
+- User-generated content: the app has none. Users cannot create, post or share content,
+  so there are no reporting or blocking mechanisms to demonstrate.
+- Accessing paid content: shown in the recording.
+
+2. PURPOSE AND TARGET AUDIENCE
+
+US Citizenship Test 2026-Pulse is a study aid for lawful permanent residents (green card
+holders) preparing for the naturalization civics test, which is taken during the USCIS
+Form N-400 interview.
+
+The problem it solves: an applicant must be ready to answer questions drawn from the
+official civics pool - up to 128 questions on the 2025 test, 100 on the 2008 test - plus
+four questions whose answers depend on the state they live in. The official study
+materials are PDFs and printed lists, which are difficult to study from and give the
+applicant no sense of whether they are ready.
+
+The value it provides: the official questions in a study format organised by the same
+sections USCIS uses; practice tests in the real interview format and pass threshold;
+a spoken-question mode so the applicant hears the questions aloud before interview day;
+and a readiness measure calculated only from their own completed practice tests.
+
+3. SETTING UP AND ACCESSING THE MAIN FEATURES
+
+No account, no registration, no login and no credentials are required. There is nothing
+to sign in to and no demo account is needed. Every feature is reachable immediately
+after install.
+
+On first launch there is a three-screen introduction: a welcome screen, an optional
+first name and interview date, and a screen describing how the app handles data. Both
+personal fields can be skipped.
+
+The app then has five tabs:
+
+- Home - readiness gauge, recent practice scores, and a countdown to the interview date
+  if one was entered.
+- Study - flashcards for every official question. Tap "All topics" to study one official
+  USCIS section at a time. "Read question" uses the device's own text-to-speech.
+- Practice - a practice test in the real interview format. Choose the number of questions
+  and the pass threshold, then answer.
+- Interview - spoken practice. The app reads a question aloud, the user answers out loud
+  to themselves and then self-grades.
+- Settings - appearance, civics test version (2025 or 2008), the user's state, Restore
+  Purchases, and the privacy and disclaimer text.
+
+No sample files are required. All content ships inside the app.
+
+4. EXTERNAL SERVICES, TOOLS AND PLATFORMS
+
+- Apple StoreKit / the App Store - processes the in-app purchase. We never see payment
+  details.
+- RevenueCat (revenuecat.com) - in-app purchase management. It receives an anonymous
+  identifier generated per installation and the purchase record for this app. It does
+  not receive any name, email address, or anything the user typed into the app. We use
+  anonymous app user IDs only and never call its login API.
+- Apple's on-device speech synthesis (AVSpeechSynthesizer) - reads questions aloud. It
+  runs entirely on the device and makes no network request. The microphone is never
+  accessed, and no audio is recorded, stored or transmitted.
+- Expo / EAS - build tooling only. Not present at runtime.
+
+There is no backend server, no authentication service, no analytics or crash-reporting
+SDK, no advertising SDK, and no AI or machine-learning service. All civics content is
+bundled in the binary, so the app makes no network requests to fetch content. The only
+network traffic is the purchase check to RevenueCat and Apple.
+
+5. REGIONAL DIFFERENCES
+
+There are none. The app behaves identically in every region and is available worldwide
+in English only. The subject matter is United States civics, but nothing is gated,
+altered or hidden by region. The in-app purchase is the same single product at the same
+price tier in every territory.
+
+6. REGULATED INDUSTRY AND THIRD-PARTY MATERIAL
+
+The app is a study aid. It does not provide legal advice, immigration advice, or any
+immigration service. It does not prepare or submit any government form and takes no part
+in any application. This is stated inside the app on the onboarding screen and in
+Settings > About, and in the App Store description.
+
+All civics questions, their official answers, and the reading and writing vocabulary
+lists are works of the United States Government published by U.S. Citizenship and
+Immigration Services. They are in the public domain under 17 U.S.C. section 105 and are
+taken from USCIS's published test materials at uscis.gov - the 2025 civics test
+(Form M-1778) and the 2008 100-question civics test. No permission is required to
+reproduce works of the U.S. Government.
+
+The four photographs of national officeholders are likewise public-domain works of the
+U.S. Government, with per-image sources recorded in our project files.
+
+The app is independent. It is not affiliated with, endorsed by, or sponsored by USCIS,
+the Department of Homeland Security, or any government agency. It does not use any
+government seal, logo or trademark, and does not use "USCIS" or any agency name in its
+app name or icon. The non-affiliation statement appears in three places in the product:
+the onboarding screen, Settings > About, and the App Store description.
+
+7. WHAT USERS CAN BUY, AND HOW TO REACH THE PURCHASE
+
+There is one in-app purchase: "Lifetime Access" (product ID lifetime_access), a
+non-consumable priced at $9.99. It is a single one-time purchase. There is no
+subscription and no recurring charge.
+
+Free forever, with no purchase required: all flashcards for every official question,
+study by topic, read-aloud, the user's state-specific answers, the readiness screen,
+and one complete practice test.
+
+The purchase unlocks: unlimited practice tests, and the full mock interview mode.
+
+To reach the purchase screen:
+
+1. Open the Practice tab and complete one full practice test through to the results
+   screen. This first test is free.
+2. Start a second practice test. The purchase screen appears at that point.
+
+There are two other routes to the same screen: Settings > "View lifetime unlock", or the
+Interview tab > "Unlock Mock Interview".
+
+Restore Purchases is available both on the purchase screen and in Settings, since the
+purchase is a non-consumable tied to the customer's Apple ID.
+
+Please note: on a fresh install, the purchase screen appears after the first free
+practice test, as described above. On our own test device the purchase had already been
+made, so the app may appear already unlocked in the recording; the purchase screen is
+shown there via Settings > "View lifetime unlock", which is the same screen.
+
+We are happy to provide anything further that would help complete the review.

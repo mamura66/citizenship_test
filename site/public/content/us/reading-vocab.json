@@ -1,0 +1,24 @@
+{
+  "source": "USCIS M-1178 style list, rev. 07/14 - https://www.uscis.gov/sites/default/files/document/guides/reading_vocab_largeprint.pdf",
+  "sourceRetrieved": "2026-09-01",
+  "note": "Each reading test sentence uses vocabulary from this list. Applicant must read 1 of up to 3 sentences correctly.",
+  "categories": {
+    "people": ["Abraham Lincoln", "George Washington"],
+    "civics": ["American flag", "Bill of Rights", "capital", "citizen", "city", "Congress", "country", "Father of Our Country", "government", "President", "right", "Senators", "state/states", "White House"],
+    "places": ["America", "United States", "U.S."],
+    "holidays": ["Presidents' Day", "Memorial Day", "Flag Day", "Independence Day", "Labor Day", "Columbus Day", "Thanksgiving"],
+    "questionWords": ["How", "What", "When", "Where", "Who", "Why"],
+    "verbs": ["can", "come", "do/does", "elects", "have/has", "is/are/was/be", "lives/lived", "meet", "name", "pay", "vote", "want"],
+    "otherFunction": ["a", "for", "here", "in", "of", "on", "the", "to", "we"],
+    "otherContent": ["colors", "dollar bill", "first", "largest", "many", "most", "north", "one", "people", "second", "south"]
+  },
+  "sampleSentencesDisclaimer": "USCIS does not publish a fixed official sentence bank for the reading test - the officer selects/generates sentences using only this vocabulary. The sentences below are NOT official USCIS content; they are practice sentences we constructed from the official vocabulary list above, for study purposes only.",
+  "sampleSentences": [
+    "Citizens can vote.",
+    "I want to be a citizen.",
+    "What is the capital?",
+    "Who is the President now?",
+    "The flag is red, white, and blue.",
+    "We elect the President in November."
+  ]
+}

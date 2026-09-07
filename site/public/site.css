@@ -1,0 +1,335 @@
+/* Landing page for US Citizenship Test 2026-Pulse.
+   Palette, type and accent are taken from the app itself (src/theme/theme.ts) so the
+   site and the product read as one thing: IBM Plex Sans + Mono, Old Glory red/blue for
+   the flag chips, and the app's green #0FA968 as the single accent on white. */
+
+:root {
+  --ground: #ffffff;
+  --tint: #f4f7f5;        /* the app's surface colour: a green-biased neutral */
+  --line: rgba(11, 31, 23, 0.1);
+  --ink: #0b1f17;         /* the app's textPrimary */
+  --ink-2: rgba(11, 31, 23, 0.62);
+  --ink-3: rgba(11, 31, 23, 0.4);
+  --accent: #0fa968;
+  --accent-soft: rgba(15, 169, 104, 0.1);
+  --flag-red: #b31942;
+  --flag-blue: #0a3161;
+  --shadow: 0 18px 50px rgba(11, 31, 23, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+.narrow { max-width: 660px; }
+
+/* ---------- nav ---------- */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-in {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mark { width: 32px; height: 32px; border-radius: 8px; flex: none; }
+.nav b { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.nav-links { margin-left: auto; display: flex; gap: 22px; align-items: center; }
+.nav-links a { color: var(--ink-2); text-decoration: none; font-size: 15px; }
+.nav-links a:hover { color: var(--ink); }
+@media (max-width: 680px) { .nav-links a.hide-sm { display: none; } }
+
+/* ---------- type ---------- */
+h1 {
+  font-size: clamp(38px, 6.4vw, 62px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  margin: 0 0 20px;
+  text-wrap: balance;
+}
+h2 {
+  font-size: clamp(26px, 3.4vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+  font-weight: 700;
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px; }
+h3.spaced { margin-top: 30px; }
+p { margin: 0 0 16px; color: var(--ink-2); }
+.lede { font-size: 20px; line-height: 1.5; color: var(--ink-2); }
+.eyebrow {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 14px;
+}
+a { color: var(--accent); }
+
+/* ---------- sections ---------- */
+section { padding: 92px 0; }
+section.tinted { background: var(--tint); }
+section.hero { padding: 76px 0 92px; }
+.center { text-align: center; }
+.center p { margin-left: auto; margin-right: auto; }
+
+/* ---------- hero ---------- */
+.quote {
+  border-left: 2px solid var(--accent);
+  padding: 2px 0 2px 18px;
+  margin: 0 0 26px;
+  font-style: italic;
+  color: var(--ink-2);
+  max-width: 34rem;
+}
+.quote cite { display: block; font-style: normal; font-size: 14px; color: var(--ink-3); margin-top: 8px; }
+
+/* The 2026-vs-2025 explainer: quieter than the lede, louder than a footnote. */
+.clarify {
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  background: var(--accent-soft);
+  border-radius: 12px;
+  padding: 14px 16px;
+  max-width: 34rem;
+  margin: 0 0 24px;
+}
+.clarify strong { color: var(--ink); }
+
+/* Value points, ticked. Carries the three things that decide whether someone
+   keeps reading, so it sits above the buttons rather than under them. */
+.value { list-style: none; padding: 0; margin: 0 0 26px; }
+.value li { position: relative; padding-left: 26px; margin-bottom: 8px; font-size: 16.5px; color: var(--ink); }
+.value li::before {
+  content: "";
+  position: absolute;
+  left: 3px; top: 9px;
+  width: 9px; height: 5px;
+  border-left: 2.5px solid var(--accent);
+  border-bottom: 2.5px solid var(--accent);
+  transform: rotate(-45deg);
+}
+
+.cta-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 14px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 14px 26px;
+  border-radius: 12px;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.note { font-size: 14px; color: var(--ink-3); margin: 0; }
+
+/* start, not end: `end` anchored the phone's BOTTOM to the copy's bottom, which
+   pushed the first line 109px below the top of the image. The eyebrow should sit
+   level with the top of the phone, same as the feature rows. */
+.hero-grid { display: grid; grid-template-columns: 1fr 300px; gap: 56px; align-items: start; }
+@media (max-width: 880px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; } }
+
+.phone {
+  width: 100%;
+  /* Without height:auto the HTML height attribute becomes the rendered height and the
+     image stretches vertically inside its column. aspect-ratio keeps the 1284x2778
+     device ratio even if those attributes are ever dropped. */
+  height: auto;
+  aspect-ratio: 1284 / 2778;
+  object-fit: contain;
+  border-radius: 30px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  display: block;
+}
+
+/* ---------- feature rows ---------- */
+/* start, not center: the copy's first line should sit level with the top of the
+   phone beside it. The images are ~600px tall against ~200px of text, so centring
+   pushed every heading down into the middle of the row. */
+.row { display: grid; grid-template-columns: 1fr 280px; gap: 60px; align-items: start; }
+.row > img { grid-column: 2; }
+.row > div { grid-column: 1; }
+
+/* Mirrored row: the phone moves to the left. Done with explicit grid-column, NOT with
+   `order` - grid auto-placement follows order, so ordering the text second put the
+   IMAGE into the wide 1fr track and squeezed the text into the 280px one, which is why
+   one screenshot rendered far larger than the rest. Naming the columns keeps the phone
+   in the 280px track whichever side it sits on. */
+.row.flip { grid-template-columns: 280px 1fr; }
+.row.flip > img { grid-column: 1; }
+.row.flip > div { grid-column: 2; }
+
+.row > img, .row.flip > img { grid-row: 1; }
+.row > div, .row.flip > div { grid-row: 1; }
+
+.row + .row { margin-top: 92px; }
+
+@media (max-width: 880px) {
+  .row, .row.flip { grid-template-columns: 1fr; gap: 28px; }
+  /* Single column: let everything flow in document order, text then phone. */
+  .row > img, .row > div, .row.flip > img, .row.flip > div { grid-column: 1; grid-row: auto; }
+}
+
+/* ---------- cards ---------- */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.cards > div { background: var(--ground); padding: 26px 24px; }
+.cards p { margin: 0; font-size: 15.5px; }
+.cards .ico { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+
+/* ---------- pricing ---------- */
+.tiers { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 34px; }
+@media (max-width: 720px) { .tiers { grid-template-columns: 1fr; } }
+.tier { border: 1px solid var(--line); border-radius: 16px; padding: 30px 28px; background: var(--ground); }
+.tier.lead { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.price { font-family: 'IBM Plex Mono', monospace; font-size: 38px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 2px; color: var(--ink); }
+.price small { font-size: 14px; font-weight: 400; color: var(--ink-3); letter-spacing: 0; }
+.tier ul { list-style: none; padding: 0; margin: 18px 0 0; }
+.tier li { position: relative; padding-left: 24px; margin-bottom: 9px; color: var(--ink-2); font-size: 15.5px; }
+.tier li::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 9px;
+  width: 8px; height: 4px;
+  border-left: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: rotate(-45deg);
+}
+
+/* ---------- faq ---------- */
+details { border-bottom: 1px solid var(--line); padding: 20px 0; }
+details:first-of-type { border-top: 1px solid var(--line); }
+summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; display: flex; align-items: center; gap: 12px; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "+"; color: var(--accent); font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+details[open] summary::before { content: "–"; }
+details p { margin: 14px 0 0 24px; font-size: 16px; }
+
+/* ---------- footer ---------- */
+footer { border-top: 1px solid var(--line); padding: 44px 0 60px; }
+.foot-in { display: flex; flex-wrap: wrap; gap: 18px 30px; align-items: baseline; }
+footer a { color: var(--ink-2); text-decoration: none; font-size: 15px; }
+footer a:hover { color: var(--ink); }
+.disclaimer { flex-basis: 100%; font-size: 13.5px; color: var(--ink-3); line-height: 1.6; margin: 0; max-width: 62rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn:hover { transform: none; }
+}
+
+
+/* ============ country-neutral panels ============
+   The home page used to show US screenshots as if they were the product. They now sit
+   inside the United States card in the Countries section, where a screenshot belongs to
+   a country rather than standing for the whole product. These panels carry the hero and
+   feature slots instead - drawn, so they never imply one country. */
+
+.hero-panel {
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 18px 14px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.hero-panel .label {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--ink-3); margin: 0;
+}
+.hero-panel .panel-note {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0;
+}
+
+.bars { display: grid; gap: 11px; }
+.bars > div { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: baseline; }
+.bars span { font-size: 13.5px; color: var(--ink-2); }
+.bars b { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.bars i {
+  grid-column: 1 / -1; height: 6px; border-radius: 3px;
+  background: linear-gradient(to right, var(--c) 0 var(--w), var(--line) var(--w) 100%);
+}
+
+.mockq { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0; color: var(--ink); line-height: 1.3; }
+.mockopts { display: grid; gap: 6px; }
+.mockopts > div {
+  display: flex; align-items: center; gap: 9px;
+  border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px;
+  font-size: 13.5px; color: var(--ink-2);
+}
+.mockopts b {
+  flex: none; width: 20px; height: 20px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--tint);
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-3); font-weight: 500;
+}
+.mockopts .right { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.mockopts .right b { background: var(--accent); color: #fff; }
+
+/* ============ countries ============ */
+.ctry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 34px; }
+@media (max-width: 780px) { .ctry-grid { grid-template-columns: 1fr; } }
+.ctry {
+  background: var(--ground); border: 1px solid var(--line); border-radius: 16px;
+  padding: 24px 24px 0; display: flex; flex-direction: column; overflow: hidden;
+}
+.ctry.live { border-color: var(--accent); }
+.ctry-head { margin-bottom: 10px; }
+.live-tag { color: var(--accent); }
+.ctry h3 { font-size: 19px; margin: 0 0 8px; letter-spacing: -0.015em; }
+.ctry p { font-size: 14.5px; }
+.ctry img {
+  width: 74%; max-width: 250px; height: auto; align-self: center;
+  border-radius: 18px 18px 0 0; border: 1px solid var(--line); border-bottom: 0;
+  margin-top: 8px;
+}
+.ctry .panel-note {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3); padding-bottom: 24px;
+}
+
+/* Who is signed in, in the marketing nav. Present only when the page has asked the
+   server and been told - see nav.js. */
+.nav-who {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  max-width: 15ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 640px) { .nav-who { display: none; } }
