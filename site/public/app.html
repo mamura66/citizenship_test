@@ -70,6 +70,7 @@
         <button class="mode" data-mode="practice">Practice test</button>
         <button class="mode" data-mode="interview">Interview<span class="lock" data-lockicon>Paid</span></button>
         <button class="mode" data-mode="performance">Performance</button>
+        <button class="mode" id="insightsLink" data-mode="insights" hidden>Insights<span class="lock">Owner</span></button>
       </div>
     </div>
 
@@ -88,7 +89,14 @@
     </div>
   </nav>
 
-  <main class="pane" id="pane"></main>
+  <div class="pane-wrap">
+    <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="i-sun"><circle cx="12" cy="12" r="4.6"/><g stroke-linecap="round"><path d="M12 2.6v2.4M12 19v2.4M2.6 12h2.4M19 12h2.4M5.4 5.4l1.7 1.7M16.9 16.9l1.7 1.7M18.6 5.4l-1.7 1.7M7.1 16.9l-1.7 1.7"/></g></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="i-moon"><path d="M20 14.2A8.4 8.4 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z"/></svg>
+      <span class="theme-label">Dark</span>
+    </button>
+    <main class="pane" id="pane"></main>
+  </div>
 </div>
 
 <!-- The one live region, kept outside the pane on purpose: render() replaces the pane's

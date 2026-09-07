@@ -5,8 +5,8 @@ import Purchases, { LOG_LEVEL, type CustomerInfo } from 'react-native-purchases'
 
 // ============================================================================
 // PURCHASE ABSTRACTION - real RevenueCat on iOS and Android. The only other
-// path is a local mock used by the web design preview, which is not shipped;
-// see the SAFETY note below for why native never falls back to it.
+// path is a local mock for the web design preview, and it is reachable ONLY when
+// somebody opts in explicitly; see the SAFETY note below.
 //
 // Both paths share one public interface so no screen code needs to know which
 // is active. See docs/BUILD_PLAN.md "Payments" for setup context.
@@ -39,15 +39,33 @@ const REVENUECAT_API_KEY =
 
 const USE_REAL_REVENUECAT = Platform.OS !== 'web' && !!REVENUECAT_API_KEY;
 
-// SAFETY: a build with no RevenueCat key must NOT fall back to the local mock -
-// that would grant lifetime access for free to everyone. The mock exists ONLY for
-// the web design preview, which is not a shipping target. On iOS and Android,
-// with or without a key, there is no path that grants an entitlement locally:
-// if the key is missing (bad EAS environment binding, Android not set up yet)
-// purchases fail CLOSED with a clear message instead of unlocking.
-// eas.json binds each build profile to an EAS environment so the key is injected.
-const USE_MOCK_PURCHASES = !USE_REAL_REVENUECAT && Platform.OS === 'web';
+// SAFETY: the mock grants the entitlement locally, so a missing key must never be
+// what selects it. It used to be - the condition was
+// `!USE_REAL_REVENUECAT && Platform.OS === 'web'` - which meant the mock was
+// chosen for the *absence* of configuration. Nothing shipped that way, because
+// the Expo web build is not deployed (the public site is the separate Cloudflare
+// Worker in site/, which decides access server-side from a verified Paddle
+// payment). But `expo export --platform web` on a machine without .env.local
+// would have produced a bundle that handed out lifetime access to every visitor,
+// and that is one command away from a real incident.
+//
+// So the mock now needs somebody to ask for it, by name, on web only:
+//
+//     EXPO_PUBLIC_MOCK_PURCHASES=1 npx expo start --web
+//
+// Anything else fails CLOSED. No key on iOS or Android (bad EAS environment
+// binding, Android not configured yet) means purchases are unavailable and the
+// paywall says so; it never means access is granted. eas.json binds each build
+// profile to an EAS environment so the real key is injected, and the flag below
+// is never set in any of those environments.
+const MOCK_PURCHASES_OPT_IN = process.env.EXPO_PUBLIC_MOCK_PURCHASES === '1';
+const USE_MOCK_PURCHASES = Platform.OS === 'web' && MOCK_PURCHASES_OPT_IN && !USE_REAL_REVENUECAT;
 const PURCHASES_UNAVAILABLE = !USE_REAL_REVENUECAT && !USE_MOCK_PURCHASES;
+
+// Named in every user-facing message, because "the store" is vague and the
+// recovery step differs (re-signing in with a different Apple ID vs a Google
+// account). iOS is the only shipping platform today; Android is planned.
+const STORE_NAME = Platform.OS === 'android' ? 'Google Play' : 'the App Store';
 
 // Apple's FIRST product fetch after an in-app purchase is created can take
 // 60s+ on a cold cache; a short timeout turns "slow" into a false "failed".
@@ -63,13 +81,35 @@ function withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> 
   ]);
 }
 
+/**
+ * Why a restore ended the way it did.
+ *
+ * Restore used to answer `{ success: false, restored: false }` for a store error,
+ * a network failure AND an account that genuinely owns nothing, and both callers
+ * turned all three into "No previous purchase found for this account." That tells
+ * a customer who has paid, and whose Wi-Fi dropped, that they never bought the
+ * app - which sends them to request a refund or buy a second copy instead of
+ * simply retrying. The outcomes are worded separately now.
+ */
+export type RestoreResult =
+  | { outcome: 'restored' }
+  /** The store answered, and this account owns no entitlement. */
+  | { outcome: 'no-purchase' }
+  /** We never got an answer, so we know nothing about what they own. */
+  | { outcome: 'store-unreachable'; error: string }
+  /** This build has no purchase backend at all. */
+  | { outcome: 'unavailable' };
+
 interface PurchaseContextValue {
   isPro: boolean;
   loading: boolean;
   priceDisplay: string;
   usingRealBackend: boolean;
+  /** True when the local mock is standing in for a real store. Screens must say so
+   *  on screen: a stub that looks like the real thing is how a purchase bug hides. */
+  usingMockBackend: boolean;
   purchaseLifetime: () => Promise<{ success: boolean; error?: string }>;
-  restorePurchases: () => Promise<{ success: boolean; restored: boolean }>;
+  restorePurchases: () => Promise<RestoreResult>;
 }
 
 const PurchaseContext = createContext<PurchaseContextValue | null>(null);
@@ -156,19 +196,21 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
       }
     }
     if (PURCHASES_UNAVAILABLE) {
+      // Fail closed and say so. Never grant anything from here.
       return {
         success: false,
-        error: 'In-app purchases are not available in this build. Please update the app from the App Store.',
+        error: `In-app purchases aren't available in this build, so nothing can be unlocked here. Please update the app from ${STORE_NAME}.`,
       };
     }
-    // Mock path - web design preview only (never reached on iOS/Android).
+    // Mock path - web design preview only, and only with EXPO_PUBLIC_MOCK_PURCHASES=1.
+    // Unreachable on iOS and Android, and unreachable on web without the opt-in.
     await new Promise((r) => setTimeout(r, 600));
     await AsyncStorage.setItem(STORAGE_KEY, 'true');
     setIsPro(true);
     return { success: true };
   };
 
-  const restorePurchases = async () => {
+  const restorePurchases = async (): Promise<RestoreResult> => {
     if (USE_REAL_REVENUECAT) {
       try {
         const customerInfo = await Purchases.restorePurchases();
@@ -177,17 +219,19 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
         // ID, offline, transient failure) must not revoke access from someone who
         // has already paid - RevenueCat's own listener handles real expiry.
         if (restored) setIsPro(true);
-        return { success: true, restored };
-      } catch (e) {
-        return { success: false, restored: false };
+        return restored ? { outcome: 'restored' } : { outcome: 'no-purchase' };
+      } catch (e: any) {
+        // A thrown error means the check never completed. We do NOT know whether
+        // this account owns the product, so we must not say it owns nothing.
+        return { outcome: 'store-unreachable', error: e?.message ?? `Couldn't reach ${STORE_NAME}.` };
       }
     }
-    if (PURCHASES_UNAVAILABLE) return { success: false, restored: false };
+    if (PURCHASES_UNAVAILABLE) return { outcome: 'unavailable' };
     await new Promise((r) => setTimeout(r, 500));
     const v = await AsyncStorage.getItem(STORAGE_KEY);
     const restored = v === 'true';
     if (restored) setIsPro(true);
-    return { success: true, restored };
+    return restored ? { outcome: 'restored' } : { outcome: 'no-purchase' };
   };
 
   const value = useMemo(
@@ -196,6 +240,7 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
       loading,
       priceDisplay: LIFETIME_PRICE_DISPLAY,
       usingRealBackend: USE_REAL_REVENUECAT,
+      usingMockBackend: USE_MOCK_PURCHASES,
       purchaseLifetime,
       restorePurchases,
     }),
@@ -209,6 +254,24 @@ export function usePurchase() {
   const ctx = useContext(PurchaseContext);
   if (!ctx) throw new Error('usePurchase must be used within PurchaseProvider');
   return ctx;
+}
+
+/**
+ * The message to show for a restore outcome, shared by the paywall and Settings so
+ * the two cannot drift. 'store-unreachable' deliberately does NOT claim anything
+ * about what the account owns, and says the purchase is still intact.
+ */
+export function restoreMessage(result: RestoreResult): string {
+  switch (result.outcome) {
+    case 'restored':
+      return 'Purchase restored — you have full access.';
+    case 'no-purchase':
+      return `No purchase found on this ${Platform.OS === 'android' ? 'Google' : 'Apple'} account. If you bought it with a different one, sign in with that account and try again.`;
+    case 'store-unreachable':
+      return `Couldn't reach ${STORE_NAME} to check your purchases, so we don't know yet — your purchase is safe. Check your connection and try again.`;
+    case 'unavailable':
+      return `In-app purchases aren't available in this build, so there's nothing to restore here.`;
+  }
 }
 
 export { LIFETIME_PRODUCT_ID, ENTITLEMENT_ID };

@@ -1,0 +1,21 @@
+# prepareforcitizenship.com
+#
+# Everything public is crawlable. The signed-in product is not: those pages either need a
+# session or are a step in one, so a crawler indexing them would list URLs that only ever
+# redirect, and /api/* has nothing a search engine should hold.
+
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /app.html
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot
+Disallow: /reset
+Disallow: /api/
+
+# The question packs are public government material and legitimately readable, but they
+# are data rather than pages - indexing them would put raw JSON in search results.
+Disallow: /content/
+
+Sitemap: https://prepareforcitizenship.com/sitemap.xml

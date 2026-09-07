@@ -17,6 +17,7 @@ import {
   PRO_HINT_MS, SESSION_TTL,
 } from '../lib/store.js';
 import { SESSION_COOKIE, publicUser } from './auth.js';
+import { countryOf, isNonCustomer, recordEvent } from '../lib/analytics.js';
 
 /* ---------------------------------------------------------------- checkout */
 
@@ -32,6 +33,17 @@ export async function startCheckout(request, env, ctx) {
   if (!env.PADDLE_CLIENT_TOKEN || !env.PADDLE_PRICE_ID) {
     return fail(503, 'not_configured', 'Payment is not switched on yet.');
   }
+  // Refused here as well as hidden in the UI. A paused sale has to be enforced on the
+  // server, or a stale page keeps opening checkouts Paddle rejects.
+  if (env.PADDLE_SALES_PAUSED === 'true') {
+    return fail(503, 'sales_paused', 'Full access is not on sale just yet.');
+  }
+  // Counted here and not in the browser, and counted only on the path that actually
+  // returns a price - the 503s above are refusals, not checkouts. What this measures is
+  // "the paywall's button was pressed and we handed Paddle.js a price to charge", which
+  // is as close to "reached the checkout" as a server can honestly get: whether Paddle's
+  // own overlay then rendered happens cross-origin, where we have no view.
+  if (!isNonCustomer(env, ctx.user)) recordEvent(env, ctx && ctx.ctx, 'checkout_opened', countryOf(request));
   return json({
     environment: env.PADDLE_ENVIRONMENT === 'production' ? 'production' : 'sandbox',
     token: env.PADDLE_CLIENT_TOKEN,
@@ -146,7 +158,7 @@ async function verify(request, rawBody, secret) {
   return { ok: true };
 }
 
-export async function webhook(request, env) {
+export async function webhook(request, env, ctx) {
   if (!env.PADDLE_WEBHOOK_SECRET) return fail(503, 'not_configured', 'Webhook is not configured.');
 
   const rawBody = await request.text();
@@ -176,12 +188,30 @@ export async function webhook(request, env) {
   // when we simply do not care about it only earns retries.
   if (!handled) return json({ ok: true, ignored: event.event_type });
 
+  let outcome;
   try {
-    await handled(env, event);
+    outcome = await handled(env, event);
   } catch (err) {
     // A 500 makes Paddle retry, which is what we want if KV was briefly unavailable.
     return fail(500, 'handler_failed', err.message);
   }
+
+  /* The paid count comes from here and nowhere else.
+   *
+   * WHY NOT ALSO FROM confirmCheckout. Both routes grant access for the same purchase -
+   * that is deliberate, because Paddle returns the browser and calls the webhook with no
+   * ordering between them. But they would then count the same payment twice, and telling
+   * the two apart needs a per-transaction record, which is exactly the kind of row this
+   * schema does not keep. The webhook is the better of the two to count from anyway: it
+   * is already exactly-once (the `pevt:` guard above), it is Paddle's own assertion rather
+   * than our reading of an API call, and it is the only one that fires for a payment
+   * completed hours later or reversed next week.
+   *
+   * Country is '' on purpose. The request carrying this fact came from Paddle's servers,
+   * so request.cf.country is Paddle's location, not the buyer's - a plausible number that
+   * would mean nothing. See migrations/0001_analytics.sql. */
+  if (outcome === 'granted') recordEvent(env, ctx && ctx.ctx, 'payment_completed', '');
+  if (outcome === 'revoked') recordEvent(env, ctx && ctx.ctx, 'payment_refunded', '');
   return json({ ok: true });
 }
 
@@ -204,6 +234,8 @@ async function resolveUser(env, data) {
   return null;
 }
 
+/** Returns 'granted' when this event actually unlocked an account, so the caller knows
+ *  whether there is a payment to count. An ignored event returns nothing. */
 async function grant(env, event) {
   const data = event.data || {};
   if (data.status !== 'completed') return; // paid is the only status that unlocks anything
@@ -228,9 +260,12 @@ async function grant(env, event) {
     await putUser(env, { ...user, paddleCustomerId: data.customer_id });
     await env.PFC.put(`pcust:${data.customer_id}`, user.id);
   }
+  return 'granted';
 }
 
-/** A refund or a chargeback takes access away again. Paddle sends adjustments for both. */
+/** A refund or a chargeback takes access away again. Paddle sends adjustments for both.
+ *  Returns 'revoked' when access was actually taken away, for the same reason grant()
+ *  reports itself. */
 async function maybeRevoke(env, event) {
   const data = event.data || {};
   if (!['refund', 'chargeback', 'chargeback_warning'].includes(data.action)) return;
@@ -247,4 +282,5 @@ async function maybeRevoke(env, event) {
     adjustmentId: data.id || null,
     at: Date.now(),
   });
+  return 'revoked';
 }

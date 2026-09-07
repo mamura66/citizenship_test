@@ -37,6 +37,9 @@
     "eas-cli": "^23.2.0",
     "typescript": "~6.0.3"
   },
+  "overrides": {
+    "nanoid": "^3.3.18"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

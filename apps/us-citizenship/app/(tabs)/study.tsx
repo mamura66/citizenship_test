@@ -27,7 +27,7 @@ function shuffle<T>(arr: T[]): T[] {
 // faces hide their backface, so only one is ever visible. "Read aloud" speaks only
 // the visible face, so it can't leak the answer before the flip.
 //
-// Topic browsing is the point of the Topics control: the official test is organised
+// Topic browsing is the point of the Topics control: the official test is organized
 // into sections, and studying one section at a time is how people actually learn it.
 // Practice results deep-link straight into a topic via /study?category=<id>.
 export default function StudyScreen() {
@@ -66,22 +66,40 @@ export default function StudyScreen() {
 
   const topic = useMemo(() => categories.find((c) => c.id === topicId), [categories, topicId]);
 
+  // The deck is rebuilt ONLY when the user changes something that defines it: test
+  // version, topic, order, or the starred filter.
+  //
+  // `starredIds` is deliberately NOT a dependency. It used to be, and starring the
+  // card in front of you rebuilt the deck: in Random mode that reshuffled it, and
+  // because the reset effect below did not depend on the deck either, `index` then
+  // pointed at a different question - sometimes with the answer face still turned
+  // up. Leaving it out gives exactly the semantics we want: because the memo
+  // callback is recreated on every render, whenever one of the listed dependencies
+  // does change the filter is applied to the CURRENT starred set, so switching the
+  // Starred pill on always builds a fresh deck. Between rebuilds the set is a
+  // snapshot, so a star toggle cannot reorder or remove the card being viewed.
+  // In Starred mode that also means unstarring the card you are looking at marks
+  // it done without pulling it out from under you; it leaves the deck the next
+  // time the deck is built.
   const pool = useMemo(() => {
     let base = topic ? topic.questions : allQuestions;
     if (starredOnly) base = base.filter((q) => starredIds.has(q.id));
     return order === 'random' ? shuffle(base) : base;
-  }, [allQuestions, topic, order, starredOnly, starredIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- starredIds: see above
+  }, [allQuestions, topic, order, starredOnly]);
 
   const resetFace = () => {
     setRevealed(false);
     flip.setValue(0);
   };
 
-  // Any change to the deck starts from its first card, face up.
+  // A new deck starts from its first card, face up. Keyed on the deck itself rather
+  // than on its length: two different topics can hold the same number of cards, and
+  // a length-only check left the old index and the old revealed face in place.
   useEffect(() => {
     setIndex(0);
     resetFace();
-  }, [pool.length, topicId, starredOnly, order]);
+  }, [pool]);
 
   const current = pool[index % Math.max(pool.length, 1)];
 
@@ -280,7 +298,18 @@ export default function StudyScreen() {
             >
               <View style={styles.cardTopRow}>
                 <Text style={[type.monoLabel, { color: colors.textSecondary }]}>QUESTION {current.id}</Text>
-                <Pressable onPress={() => toggleStar(current.id)} hitSlop={10}>
+                <Pressable
+                  onPress={() => toggleStar(current.id)}
+                  hitSlop={10}
+                  // Deliberately no accessibilityRole: this sits INSIDE the
+                  // card-wide flip Pressable, and giving it the button role too
+                  // makes react-native-web emit a <button> inside a <button>,
+                  // which is invalid HTML and logs a hydration error. Pressable
+                  // already carries the button trait on iOS and Android.
+                  accessibilityLabel={isStarred ? 'Remove star' : 'Star this question for review'}
+                  accessibilityState={{ selected: isStarred }}
+                  aria-selected={isStarred}
+                >
                   <AppIcon name={isStarred ? 'starFill' : 'starOutline'} size={22} color={colors.warning} />
                 </Pressable>
               </View>
@@ -307,7 +336,18 @@ export default function StudyScreen() {
                 <Text style={[type.monoLabel, { color: colors.accent }]}>
                   {answers.length > 1 ? `ACCEPTED ANSWERS · ${answers.length}` : 'ANSWER'}
                 </Text>
-                <Pressable onPress={() => toggleStar(current.id)} hitSlop={10}>
+                <Pressable
+                  onPress={() => toggleStar(current.id)}
+                  hitSlop={10}
+                  // Deliberately no accessibilityRole: this sits INSIDE the
+                  // card-wide flip Pressable, and giving it the button role too
+                  // makes react-native-web emit a <button> inside a <button>,
+                  // which is invalid HTML and logs a hydration error. Pressable
+                  // already carries the button trait on iOS and Android.
+                  accessibilityLabel={isStarred ? 'Remove star' : 'Star this question for review'}
+                  accessibilityState={{ selected: isStarred }}
+                  aria-selected={isStarred}
+                >
                   <AppIcon name={isStarred ? 'starFill' : 'starOutline'} size={22} color={colors.warning} />
                 </Pressable>
               </View>

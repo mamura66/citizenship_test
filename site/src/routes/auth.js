@@ -12,6 +12,7 @@ import {
   normalizeEmail, SESSION_TTL,
 } from '../lib/store.js';
 import { isReadyCountry } from '../lib/countries.js';
+import { countryOf, isNonCustomer, recordEvent } from '../lib/analytics.js';
 
 export const SESSION_COOKIE = 'pfc_session';
 
@@ -44,7 +45,7 @@ const publicUser = (user, pro) => ({
   signInMethod: user.passwordHash ? 'password' : 'google',
 });
 
-export async function register(request, env) {
+export async function register(request, env, ctx) {
   if (!sameOrigin(request)) return fail(403, 'bad_origin', 'Request blocked.');
   const ip = request.headers.get('cf-connecting-ip') || 'unknown';
   // Generous on purpose: a whole household or an office behind one carrier NAT shares an
@@ -73,6 +74,9 @@ export async function register(request, env) {
     country: String(body.country).toLowerCase(),
   });
   const token = await createSession(env, user);
+  // Counted after the account is actually written, and off the response path, so a failing
+  // analytics database can neither invent a signup nor slow one down.
+  if (!isNonCustomer(env, user)) recordEvent(env, ctx && ctx.ctx, 'account_created', countryOf(request));
   return json({ user: publicUser(user, false) }, { headers: sessionHeaders(token) });
 }
 

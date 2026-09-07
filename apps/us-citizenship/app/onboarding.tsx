@@ -153,12 +153,12 @@ export default function OnboardingScreen() {
                   style={[
                     styles.checkBox,
                     {
-                      borderColor: noDateYet ? colors.accent : colors.separator,
-                      backgroundColor: noDateYet ? colors.accent : 'transparent',
+                      borderColor: noDateYet ? colors.accentFill : colors.separator,
+                      backgroundColor: noDateYet ? colors.accentFill : 'transparent',
                     },
                   ]}
                 >
-                  {noDateYet && <AppIcon name="check" size={12} color="#FFFFFF" />}
+                  {noDateYet && <AppIcon name="check" size={12} color={colors.onFill} />}
                 </View>
                 <Text style={[type.callout, { color: colors.textSecondary }]}>I don't have an interview date yet</Text>
               </Pressable>

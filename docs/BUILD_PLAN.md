@@ -1621,3 +1621,96 @@ and removed from production KV; Sandeep's own account kept.
 
 Paddle live account and business verification — the live catalogue needs `external` tax and
 its own default payment link, and the domain must be approved. Email verification at signup.
+
+## v31 — Owner-only insights, counted without identifying anybody (2026-09-07)
+
+Sandeep: *"give me analytics ... so I can see from which country people are coming ... it
+will only be for me. I should be able to check in that how many converted and how many did
+go till checkout page etc."*
+
+Modelled on PastClimate's `/analytics` dashboard, with one deliberate difference that
+shapes everything else.
+
+### The privacy constraint came first
+
+`/privacy-web` had been rewritten the same day to describe Google Analytics with a consent
+banner for the EEA, the UK and Switzerland. A second mechanism that identified a visitor —
+a cookie, a localStorage id, or a hashed IP, which is still personal data under UK/EU law —
+would have needed its own lawful basis and probably its own banner. So this counter has no
+identifier at all:
+
+- no cookie, nothing in localStorage or sessionStorage, no IP stored or hashed
+- country from `request.cf.country`, which is as fine-grained as it gets
+- the tables **are** the aggregate: `(day, path, country) -> views` and
+  `(day, event, country) -> count`, incremented with an UPSERT. There is no row about a
+  person to store, so there is nothing to roll up nightly and nothing to prune
+
+PastClimate stores one raw row per pageview with a daily-rotating visitor hash and a
+session id, so it can report unique visitors, bounce rate and a per-person funnel. This
+cannot, and the page says so instead of implying otherwise: the top of the funnel is page
+views, and the percentages are labelled as ratios between independent counters rather than
+a conversion rate. A new section in `/privacy-web` ("Our own visit counter") describes
+exactly this; the Google Analytics and cookie sections were left alone.
+
+### What was built
+
+- **D1 `pfc-analytics`** (`b13e5695-89e7-4d5a-8285-a38c0ff66688`), bound as `ANALYTICS_DB`.
+  KV cannot group or sum, so counting was the one job it was wrong for.
+  `migrations/0001_analytics.sql`.
+- **`/insights`** — rendered by the Worker, not a file in `./public`: a static
+  `insights.html` would sit on the CDN for anyone who guessed the name. Countries, the
+  five-step funnel, page views by day, and pages. Range 7/28/90 days.
+- **`/api/analytics`** — the same figures as JSON, from the same `getOverview()`, so the
+  page and the API cannot drift.
+- **Owner-only, by 404.** `ANALYTICS_OWNER_EMAIL` in `wrangler.jsonc`, never in source.
+  Signed out, signed in as somebody else, or the wrong HTTP verb all get the site's own 404
+  page — a 403 would confirm the page exists and invite someone to go looking for its API.
+  Proved by running the Worker with the var pointing at a different address: the same
+  session that sees the dashboard then gets a 404 while `/api/me` still returns 200.
+- **`/api/pulse`** — the page-view beacon in `public/analytics.js`, outside the consent
+  logic because there is nothing to consent to. Named `pulse` because content blockers
+  match "analytics" and "collect" by name even first-party. Screens: same-origin only, a
+  bot user-agent list, an in-isolate ceiling of 600 writes a minute. Always 204, so the
+  screens cannot be probed.
+- **The funnel is counted on the server**, never claimed by a browser: the account write in
+  `auth.js` and `google.js` (new accounts only — linking Google to an existing account is
+  not a signup), `/api/checkout` answering with a price, and Paddle's signed webhook for a
+  payment. Not the API-confirm path as well: both grant access for the same purchase, and
+  telling them apart would need the per-transaction row this schema deliberately does not
+  keep. The webhook is already exactly-once via the `pevt:` guard.
+- Every write goes through `ctx.waitUntil` and swallows its own errors. Verified by
+  renaming the tables out from under a running Worker: the home page, the beacon and
+  registration all carried on, and `/insights` showed the "apply the migration" card
+  naming D1's own error instead of a 500.
+
+### Two things measurement caught
+
+1. **Axis labels inside a scaling SVG are illegible on a phone.** Everything in a viewBox
+   scales, so 10px text in a 720-unit chart renders under 4px at 320px wide. The dates and
+   the scale are now HTML around the chart, at a real font size, with exact values in the
+   table underneath — the same silhouette-plus-caption pattern as the app's own activity
+   chart.
+2. **`nav.js` never read `/api/me`'s response body when it was a 401**, so on every
+   signed-out page load the request stayed open and the page never reached "network idle".
+   Harmless to a reader; it hung `scratchpad/pw/newpages.js`, which is how it surfaced.
+   Fixed by draining the body either way. Confirmed by blocking each request in turn: with
+   `/api/me` blocked the page went idle, with the beacon blocked it did not.
+
+My own contrast harness was also wrong: it dropped the alpha on `rgba()` text and reported
+17.2:1 where the true figure is 6.9:1. Both pass, but the number it printed was fiction.
+
+### Verified
+
+**141 checks green** — 58 API, 25 reset, 57 insights (`scratchpad/insights-test.sh`) — plus
+the browser suites: 26 auth-flow, 30 pages, 34 ui-fixes, 8 dynamic, and a new
+`scratchpad/pw/insights.js` covering the beacon end to end in a real browser, WCAG AA
+contrast for all 20 text styles on the page (worst 5.75:1 against a 4.5 requirement), no
+sideways scroll at 1280/768/390/360/320px, and the gate from three sides.
+
+**Not deployed.** Before the first deploy the remote schema has to exist:
+
+```
+cd site && npx wrangler d1 migrations apply pfc-analytics --remote
+```
+
+Until then `/insights` shows the setup card rather than failing.

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid, type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { AppIcon } from './AppIcon';
@@ -11,7 +11,12 @@ import { radii, spacing, type } from '../theme/theme';
 //   Android -> tapping the field opens the system date dialog
 //   web     -> MM/DD/YYYY text fallback (web is our design-preview target only;
 //              the native picker has no web implementation)
-// Range is today .. +2 years; an interview can't be in the past.
+//
+// Range is today .. +2 years inclusive; an interview can't be in the past. The web
+// fallback enforces the SAME range as the native pickers' minimumDate/maximumDate.
+// It used to check only that the text parsed as a real calendar date, so on web you
+// could save 01/01/1990 or a date ten years out - values the countdown on Home then
+// rendered as a negative or absurd number of days.
 
 export const toIsoDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -54,8 +59,62 @@ export function InterviewDateField({ value, onChange, disabled = false }: Props)
   const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
   const initial = value ?? new Date(minDate.getTime() + 30 * 86400000);
 
+  // Compared as an ISO string, not as a Date: callers build the prop inline
+  // (`value={interviewDate ? fromIsoDate(interviewDate) : null}`) so the object
+  // identity changes on every render even when the date has not.
+  const valueIso = value ? toIsoDate(value) : '';
+
+  /** The last value this field pushed upward. */
+  const reportedIso = useRef(valueIso);
+  const report = (d: Date | null) => {
+    reportedIso.current = d ? toIsoDate(d) : '';
+    onChange(d);
+  };
+
+  // Keep the web text box in step with the parent. `webText` was initialised once
+  // and never resynchronized, so tapping "Remove date" in Settings cleared the
+  // stored date and left the old text sitting in the field, looking saved.
+  //
+  // Only a change the parent made is copied down. Typing a half-finished date
+  // reports null upward, and reacting to that would erase the characters as they
+  // were being typed.
+  useEffect(() => {
+    if (valueIso === reportedIso.current) return;
+    reportedIso.current = valueIso;
+    setWebText(valueIso ? toUsText(fromIsoDate(valueIso)) : '');
+    setWebError(null);
+  }, [valueIso]);
+
+  /** Validates typed web input against the same bounds the native pickers enforce. */
+  const commitWebText = (t: string) => {
+    setWebText(t);
+    if (!t.trim()) {
+      setWebError(null);
+      report(null);
+      return;
+    }
+    const parsed = parseUsDate(t);
+    if (!parsed) {
+      setWebError('Use MM/DD/YYYY');
+      report(null);
+      return;
+    }
+    if (parsed < minDate) {
+      setWebError('An interview date cannot be in the past.');
+      report(null);
+      return;
+    }
+    if (parsed > maxDate) {
+      setWebError('Choose a date within the next two years.');
+      report(null);
+      return;
+    }
+    setWebError(null);
+    report(parsed);
+  };
+
   const onNativeChange = (event: DateTimePickerEvent, selected?: Date) => {
-    if (event.type === 'set' && selected) onChange(selected);
+    if (event.type === 'set' && selected) report(selected);
     // iOS inline calendar collapses once a day is tapped; Android's dialog has already closed.
     setOpen(false);
   };
@@ -74,17 +133,8 @@ export function InterviewDateField({ value, onChange, disabled = false }: Props)
         <TextInput
           value={webText}
           editable={!disabled}
-          onChangeText={(t) => {
-            setWebText(t);
-            if (!t.trim()) {
-              setWebError(null);
-              onChange(null);
-              return;
-            }
-            const parsed = parseUsDate(t);
-            setWebError(parsed ? null : 'Use MM/DD/YYYY');
-            onChange(parsed);
-          }}
+          onChangeText={commitWebText}
+          accessibilityLabel="Interview date, month slash day slash year"
           placeholder="MM/DD/YYYY"
           placeholderTextColor={colors.textTertiary}
           style={[
@@ -98,7 +148,14 @@ export function InterviewDateField({ value, onChange, disabled = false }: Props)
             },
           ]}
         />
-        {webError ? <Text style={[type.caption, { color: colors.danger, marginTop: 6 }]}>{webError}</Text> : null}
+        {webError ? (
+          <Text
+            accessibilityLiveRegion="polite"
+            style={[type.caption, { color: colors.danger, marginTop: 6 }]}
+          >
+            {webError}
+          </Text>
+        ) : null}
       </View>
     );
   }

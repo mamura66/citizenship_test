@@ -14,6 +14,7 @@
 import { fail, json, redirect, setCookie, clearCookie, cookie } from '../lib/http.js';
 import { token as randomToken, unb64u } from '../lib/crypto.js';
 import { createSession, createUser, getUserByEmail, getUserByGoogleSub, putUser, SESSION_TTL } from '../lib/store.js';
+import { countryOf, isNonCustomer, recordEvent } from '../lib/analytics.js';
 import { SESSION_COOKIE } from './auth.js';
 import { publicOrigin } from '../lib/origin.js';
 
@@ -68,7 +69,7 @@ function decodeIdToken(idToken) {
   return JSON.parse(new TextDecoder().decode(unb64u(parts[1])));
 }
 
-export async function callback(request, env) {
+export async function callback(request, env, ctx) {
   if (!googleConfigured(env)) return fail(503, 'google_off', 'Google sign-in is not configured.');
 
   const url = new URL(request.url);
@@ -111,7 +112,10 @@ export async function callback(request, env) {
     return bounce('Your Google account needs a verified email address.');
   }
 
-  const user = await findOrCreate(env, claims);
+  const { user, created } = await findOrCreate(env, claims);
+  // Only a brand-new account counts. Linking Google to an account that already existed,
+  // or simply signing back in, is not a signup and counting it would inflate the funnel.
+  if (created && !isNonCustomer(env, user)) recordEvent(env, ctx && ctx.ctx, 'account_created', countryOf(request));
   const token = await createSession(env, user);
 
   // A brand-new Google user has no country yet - the app's picker collects it and locks
@@ -128,10 +132,13 @@ export async function callback(request, env) {
 
 /** Matched on Google's subject first: it is stable, whereas an email address on a Google
  *  Workspace account can be renamed. Falling back to email links a Google login to an
- *  account that was originally created with a password, so nobody ends up with two. */
+ *  account that was originally created with a password, so nobody ends up with two.
+ *
+ *  Returns `created` as well as the user, because the caller has to be able to tell a new
+ *  account from a returning one - three of the four paths through here are not signups. */
 async function findOrCreate(env, claims) {
   const bySub = await getUserByGoogleSub(env, claims.sub);
-  if (bySub) return bySub;
+  if (bySub) return { user: bySub, created: false };
 
   const byEmail = await getUserByEmail(env, claims.email);
   if (byEmail) {
@@ -150,15 +157,21 @@ async function findOrCreate(env, claims) {
      * email verification would let both live side by side, and needs an email provider we
      * have not chosen yet.
      */
-    return putUser(env, {
-      ...byEmail,
-      googleSub: claims.sub,
-      passwordHash: null,
-      passwordRetiredAt: byEmail.passwordHash ? Date.now() : (byEmail.passwordRetiredAt || null),
-      name: byEmail.name || claims.name || '',
-    });
+    return {
+      user: await putUser(env, {
+        ...byEmail,
+        googleSub: claims.sub,
+        passwordHash: null,
+        passwordRetiredAt: byEmail.passwordHash ? Date.now() : (byEmail.passwordRetiredAt || null),
+        name: byEmail.name || claims.name || '',
+      }),
+      created: false,
+    };
   }
-  return createUser(env, { email: claims.email, name: claims.name, googleSub: claims.sub, country: null });
+  return {
+    user: await createUser(env, { email: claims.email, name: claims.name, googleSub: claims.sub, country: null }),
+    created: true,
+  };
 }
 
 /** Used by the sign-in pages to decide whether to draw the Google button at all, rather

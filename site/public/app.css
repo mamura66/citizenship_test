@@ -4,24 +4,36 @@
    on a green-biased neutral. Country-agnostic by construction - every label that names
    a country comes from the loaded country pack, never from the CSS or markup. */
 
+/* Two greens, on purpose.
+   --accent is the brand green and is used for everything that is a shape: bars, the dial
+   arc, the map cells, borders. --accent-ink is the same hue darkened until white text on
+   it clears 4.5:1, and it is the only one allowed under or as text. The brand green at
+   #0FA968 measures 3.05:1 against white, so a filled button using it fails for anyone
+   reading it in sunlight or with low vision. Ratios are recorded in scratchpad/pw. */
 :root {
   --page: #ffffff;
   --rail: #f4f7f5;
   --card: #ffffff;
   --line: rgba(11, 31, 23, 0.11);
   --ink: #0b1f17;
-  --ink-2: rgba(11, 31, 23, 0.62);
-  --ink-3: rgba(11, 31, 23, 0.4);
+  --ink-2: rgba(11, 31, 23, 0.76);
+  --ink-3: rgba(11, 31, 23, 0.62);
   --accent: #0fa968;
+  --accent-ink: #0b7a4c;
+  --on-accent: #ffffff;
   --accent-soft: rgba(15, 169, 104, 0.11);
   --good: #0a7d4f;
   --good-soft: rgba(10, 125, 79, 0.1);
   --bad: #c0392b;
   --bad-soft: rgba(192, 57, 43, 0.09);
-  --warn: #ce7a1b;
+  --warn: #a35f12;
+  --on-warn: #ffffff;
   --shadow: 0 10px 30px rgba(11, 31, 23, 0.07);
   --rail-w: 236px;
 }
+/* Dark theme: the bright green is already light enough to be the fill, so the flip is in
+   the text on top of it - white on #35E28C is 1.69:1, near-invisible, while the page ink
+   on it is 11.2:1. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --page: #05130d;
@@ -29,26 +41,30 @@
     --card: #0f2c20;
     --line: rgba(230, 251, 240, 0.14);
     --ink: #e6fbf0;
-    --ink-2: rgba(230, 251, 240, 0.64);
-    --ink-3: rgba(230, 251, 240, 0.42);
+    --ink-2: rgba(230, 251, 240, 0.78);
+    --ink-3: rgba(230, 251, 240, 0.55);
     --accent: #35e28c;
+    --accent-ink: #35e28c;
+    --on-accent: #05130d;
     --accent-soft: rgba(53, 226, 140, 0.15);
     --good: #35e28c;
     --good-soft: rgba(53, 226, 140, 0.14);
     --bad: #ff6b5e;
     --bad-soft: rgba(255, 107, 94, 0.14);
     --warn: #f2a93b;
+    --on-warn: #05130d;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   }
 }
 :root[data-theme="dark"] {
   --page: #05130d; --rail: #0b2118; --card: #0f2c20;
   --line: rgba(230, 251, 240, 0.14);
-  --ink: #e6fbf0; --ink-2: rgba(230, 251, 240, 0.64); --ink-3: rgba(230, 251, 240, 0.42);
-  --accent: #35e28c; --accent-soft: rgba(53, 226, 140, 0.15);
+  --ink: #e6fbf0; --ink-2: rgba(230, 251, 240, 0.78); --ink-3: rgba(230, 251, 240, 0.55);
+  --accent: #35e28c; --accent-ink: #35e28c; --on-accent: #05130d;
+  --accent-soft: rgba(53, 226, 140, 0.15);
   --good: #35e28c; --good-soft: rgba(53, 226, 140, 0.14);
   --bad: #ff6b5e; --bad-soft: rgba(255, 107, 94, 0.14);
-  --warn: #f2a93b; --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --warn: #f2a93b; --on-warn: #05130d; --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 * { box-sizing: border-box; }
@@ -69,7 +85,13 @@ button { font: inherit; cursor: pointer; }
   font-size: 10px; font-weight: 600; letter-spacing: 0.11em;
   text-transform: uppercase; color: var(--ink-3);
 }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; border-radius: 4px; }
+/* Read by a screen reader, never drawn. Not display:none, which would take it out of the
+   accessibility tree along with the announcement it is carrying. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
 
 /* ============ country gate ============ */
 .gate { min-height: 100vh; display: grid; place-items: center; padding: 40px 24px; }
@@ -109,10 +131,22 @@ button { font: inherit; cursor: pointer; }
 .picked b { font-size: 13.5px; font-weight: 600; }
 .picked small { display: block; font-size: 11px; color: var(--ink-3); }
 
+/* Version picker. Segmented, directly under the country, because the version decides which
+   question pool every other screen draws from - it is not a settings-screen detail. */
+.vers {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 3px;
+}
+.ver { background: transparent; border: 0; border-radius: 7px; padding: 6px 8px; color: var(--ink-2); font-size: 12.5px; text-align: center; }
+.ver:hover:not(:disabled) { background: var(--accent-soft); color: var(--ink); }
+.ver[aria-pressed="true"] { background: var(--accent-ink); color: var(--on-accent); font-weight: 500; }
+.ver:disabled { cursor: progress; }
+.ver-note { font-size: 11.5px; color: var(--ink-3); margin: 7px 0 0 10px; line-height: 1.35; }
+
 .modes { display: grid; gap: 3px; }
 .mode { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; background: transparent; border: 0; border-radius: 8px; padding: 8px 10px; color: var(--ink-2); font-size: 14px; }
 .mode:hover { background: var(--accent-soft); color: var(--ink); }
-.mode[aria-current="true"] { background: var(--accent); color: #fff; font-weight: 500; }
+.mode[aria-current="true"] { background: var(--accent-ink); color: var(--on-accent); font-weight: 500; }
 .mode .lock { margin-left: auto; font-size: 10.5px; opacity: 0.75; }
 
 .topics { display: grid; gap: 1px; }
@@ -125,36 +159,58 @@ button { font: inherit; cursor: pointer; }
 
 /* ============ pane ============ */
 .pane { padding: 26px 34px 60px; max-width: 900px; }
+/* The dashboards are laid out in columns and want the whole window; the reading modes keep
+   a comfortable measure. Without this the deck sat in 900px with the rest of a wide screen
+   empty, which is exactly how it was reported. */
+.pane.is-wide { max-width: 1500px; }
 .crumb { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
 .pane h2 { font-size: 24px; letter-spacing: -0.02em; margin: 0 0 6px; }
 .pane .sub { color: var(--ink-2); margin: 0 0 22px; max-width: 62ch; }
+/* The browser default link blue measures 1.59:1 on the dark card. */
+.pane a { color: var(--accent-ink); }
 
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow); }
 .q { font-size: 22px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.3; margin: 8px 0 0; text-wrap: balance; }
 
 .opts { display: grid; gap: 8px; margin-top: 18px; }
 .opt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--page); border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; color: var(--ink); font-size: 15px; }
-.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:hover:not(:disabled):not([aria-disabled="true"]) { border-color: var(--accent); }
+.opt[aria-disabled="true"] { cursor: default; }
 .opt:disabled { cursor: default; }
 .opt .k { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--rail); color: var(--ink-3); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; }
 .opt[data-state="right"] { background: var(--good-soft); border-color: var(--good); }
-.opt[data-state="right"] .k { background: var(--good); color: #fff; }
+.opt[data-state="right"] .k { background: var(--good); color: var(--on-accent); }
 .opt[data-state="wrong"] { background: var(--bad-soft); border-color: var(--bad); }
-.opt[data-state="wrong"] .k { background: var(--bad); color: #fff; }
-.opt[data-state="dim"] { opacity: 0.45; }
+.opt[data-state="wrong"] .k { background: var(--bad); color: var(--on-accent); }
+.opt[data-state="dim"] { opacity: 0.72; }
+/* Color cannot be the only channel: red and green are the two hues most people with
+   color blindness cannot separate. Every graded option also carries a word. */
+.opt .mark { margin-left: auto; font-size: 12px; font-weight: 600; flex: none; padding-left: 10px; }
+/* Mid-question on a "name two", the first pick has to be visible somewhere. */
+.opt[data-state="picked"] { border-color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent-ink); }
+.opt[data-state="picked"] .mark { color: var(--accent-ink); font-weight: 500; }
+.opt[data-state="right"] .mark { color: var(--good); }
+.opt[data-state="wrong"] .mark { color: var(--bad); }
+.verdict { display: flex; gap: 8px; align-items: baseline; margin: 16px 0 0; font-size: 14.5px; }
+.verdict b { flex: none; }
+.verdict.right b { color: var(--good); }
+.verdict.wrong b { color: var(--bad); }
 
 .answers { display: grid; gap: 7px; margin-top: 14px; }
 .answers li { list-style: none; display: flex; gap: 9px; align-items: flex-start; color: var(--ink); font-size: 15px; }
-.answers .tick { color: var(--accent); flex: none; }
+.answers .tick { color: var(--accent-ink); flex: none; }
 .note { font-size: 13px; color: var(--ink-2); font-style: italic; }
 
-.btn { background: var(--accent); color: #fff; border: 0; border-radius: 11px; padding: 12px 22px; font-weight: 600; font-size: 15px; }
+.btn { background: var(--accent-ink); color: var(--on-accent); border: 0; border-radius: 11px; padding: 12px 22px; font-weight: 600; font-size: 15px; }
 .btn:hover { filter: brightness(1.06); }
-.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn.ghost { background: var(--accent-soft); color: var(--accent-ink); }
 .btn.quiet { background: transparent; color: var(--ink-2); }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
 
-.flip { border: 0; background: transparent; padding: 0; width: 100%; text-align: left; }
+/* color: inherit matters. A button does not inherit color from the page - the UA sheet
+   gives it buttontext, which is black - so the flashcard question was painted black on the
+   dark card, 1.4:1, effectively invisible in dark mode. */
+.flip { border: 0; background: transparent; padding: 0; width: 100%; text-align: left; color: inherit; }
 .progress { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; margin: 0 0 20px; }
 .progress i { display: block; height: 3px; background: var(--accent); border-radius: 2px; }
 
@@ -185,6 +241,20 @@ button { font: inherit; cursor: pointer; }
    half. Two rows of two fits the words instead. */
 @media (max-width: 560px) {
   .modes { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
+  /* On a phone there is no room for the answer and its verdict on one line: the answer
+     was squeezed to one word per line and the verdict ran off the edge of the option. */
+  .opt { flex-wrap: wrap; }
+  /* The indent is padding, not margin: with box-sizing: border-box a 100% flex basis plus
+     a left margin is 36px wider than the line it sits on, which overflows the option. */
+  .opt .mark { flex: 0 0 100%; margin: 2px 0 0; padding-left: 36px; }
+  /* Keeps the answer beside its number, wrapping within itself. Wrapping is decided on an
+     item's max-content size, so a long answer otherwise drops to a line of its own and
+     leaves the number sitting alone above it. */
+  .opt .k + span { flex: 1 1 0; min-width: 0; }
+  /* The detail goes under the lead, not beside it. Direct children only - the glyph inside
+     the lead is a span too, and blocking that puts the tick on a line of its own. */
+  .verdict { display: block; }
+  .verdict > span { display: block; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
@@ -212,10 +282,44 @@ button { font: inherit; cursor: pointer; }
 /* Sandbox banner. Deliberately loud: nobody should be able to mistake a test payment for
    a real one, and nobody should see this in production. */
 .sandbox {
-  background: var(--warn); color: #fff; text-align: center;
+  background: var(--warn); color: var(--on-warn); text-align: center;
   font-size: 12.5px; font-weight: 600; padding: 7px 14px;
 }
-.sandbox a { color: #fff; }
+.sandbox a { color: var(--on-warn); }
+
+/* Shown until boot() has finished. See the note in app.html: the shell must not be
+   interactive while progress is still loading. */
+.booting { min-height: 100vh; display: grid; place-items: center; }
+.booting p { color: var(--ink-3); font-size: 14px; }
+
+/* ============ account, in the rail foot ============ */
+.who { border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 2px; }
+.who b { display: block; font-size: 12.5px; font-weight: 600; overflow-wrap: anywhere; }
+.who small { display: block; font-size: 11px; color: var(--ink-3); }
+.signout {
+  background: transparent; border: 0; padding: 0; text-align: left;
+  color: var(--ink-3); font-size: 12.5px; text-decoration: underline;
+}
+.signout:hover { color: var(--ink); }
+
+/* ============ checkout ============ */
+/* The paywall's own message line: a failed or abandoned checkout has to say so on the
+   screen the person is looking at, not in the console. */
+.pay-msg { font-size: 13.5px; margin: 14px 0 0; }
+/* Sentence case, not the uppercase .label treatment - it is a reassurance to be read, not
+   an eyebrow to be scanned. */
+.pay-note { font-size: 12.5px; color: var(--ink-3); margin: 14px 0 0; }
+.pay-msg.bad { color: var(--bad); }
+.pay-msg.good { color: var(--good); }
+.btn:disabled { opacity: 0.6; cursor: progress; }
+
+/* Sandbox banner. Deliberately loud: nobody should be able to mistake a test payment for
+   a real one, and nobody should see this in production. */
+.sandbox {
+  background: var(--warn); color: var(--on-warn); text-align: center;
+  font-size: 12.5px; font-weight: 600; padding: 7px 14px;
+}
+.sandbox a { color: var(--on-warn); }
 
 /* Shown until boot() has finished. See the note in app.html: the shell must not be
    interactive while progress is still loading. */
@@ -226,21 +330,6 @@ button { font: inherit; cursor: pointer; }
    The screen people are meant to want to show somebody. Every figure comes from answers
    actually given, so the design's job is to make real data legible rather than to make
    thin data look impressive. */
-
-.perf-help { color: var(--ink-3); font-size: 13px; margin: 7px 0 0; }
-
-.perf-top { display: grid; grid-template-columns: auto 1fr; gap: 26px; align-items: center; }
-.perf-dial { text-align: center; }
-.dial { width: 128px; height: 128px; display: block; }
-.perf-dial-note {
-  font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.09em;
-  text-transform: uppercase; color: var(--ink-3); margin: 6px 0 0;
-}
-.perf-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 16px 12px; }
-.perf-figures b {
-  display: block; font-size: 25px; font-weight: 600; letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums; line-height: 1.1;
-}
 
 /* The map. One cell per question, grouped by section - the shape of the whole test at a
    glance, and the thing that makes progress feel like territory rather than a number. */
@@ -269,20 +358,206 @@ button { font: inherit; cursor: pointer; }
 
 .trend { width: 100%; height: auto; display: block; margin-top: 10px; }
 
-.sec-list { display: grid; gap: 15px; margin-top: 14px; }
-.sec-head { display: flex; gap: 10px; align-items: baseline; font-size: 14.5px; }
-.sec-name { flex: 1; }
-.sec-pct { font-variant-numeric: tabular-nums; }
-.sec-bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 6px; }
-.sec-bar i { display: block; height: 6px; border-radius: 3px; }
-.sec-go {
-  background: transparent; border: 0; padding: 5px 0 0; margin: 0;
-  color: var(--accent); font-size: 13px; text-align: left;
+@media (max-width: 620px) {
+      .map-row { grid-template-columns: 1fr; gap: 4px; }
 }
-.sec-go:hover { text-decoration: underline; }
+
+/* ============ pane wrapper, theme toggle ============
+   The toggle sits outside #pane because render() replaces that element wholesale. */
+.pane-wrap { position: relative; min-width: 0; }
+.theme-toggle {
+  position: absolute; top: 22px; right: 26px; z-index: 5;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--card); color: var(--ink-2);
+  border: 1px solid var(--line); border-radius: 100px;
+  padding: 7px 13px 7px 10px; font-size: 12.5px; font-weight: 500;
+}
+.theme-toggle:hover { color: var(--ink); border-color: var(--accent); }
+.theme-toggle svg { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.theme-toggle .i-sun { display: none; }
+.theme-toggle .i-moon { display: block; }
+/* Dark mode offers the light option, so the icons swap with the label. */
+:root[data-theme="dark"] .theme-toggle .i-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .i-moon { display: none; }
+.theme-toggle .i-sun circle { fill: currentColor; stroke: none; }
+.theme-toggle .i-moon path { fill: currentColor; stroke: none; }
+
+/* The Insights link is an <a> among buttons, so it needs the same box. */
+a.mode { text-decoration: none; }
+a.mode .lock { margin-left: auto; }
+
+@media (max-width: 800px) {
+  .theme-toggle { top: 12px; right: 16px; padding: 6px 11px 6px 9px; }
+  .theme-toggle .theme-label { display: none; }
+}
+
+/* ============ performance: the command deck ============
+   Chosen from five prototypes. The ring and a sentence, a strip of figures, then the map
+   of the test beside the charts.
+
+   Every colour comes from the theme tokens, so the same layout is a luminous dark deck or
+   a clean light one depending on the toggle - the design is the arrangement, not the
+   darkness. Nothing here is sized or named per country: section labels come from the pack
+   and the rows simply wrap. */
+
+.deck { display: grid; gap: 16px; }
+
+.deck-head {
+  display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center;
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 22px 26px; box-shadow: var(--shadow);
+}
+.deck-say h2 { font-size: 23px; letter-spacing: -.022em; margin: 4px 0 6px; }
+.deck-sub { color: var(--ink-2); margin: 0; font-size: 14.5px; max-width: 60ch; }
+
+.ring { width: 128px; height: 128px; display: block; }
+.ring-bg { stroke: var(--line); }
+.ring-fg { stroke: var(--accent); }
+.ring.is-low .ring-fg { stroke: var(--bad); }
+.ring.is-none .ring-fg { stroke: var(--line); }
+.ring-tick { stroke: var(--ink); }
+.ring-big {
+  font-family: 'IBM Plex Mono', monospace; font-size: 27px; font-weight: 700;
+  fill: var(--ink); letter-spacing: -.02em;
+}
+.ring-cap {
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .14em;
+  fill: var(--ink-3);
+}
+/* The glow is the deck's signature, and only in dark - on white it turns into a smudge. */
+:root[data-theme="dark"] .ring-fg { filter: drop-shadow(0 0 9px rgba(53, 226, 140, .5)); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ring-fg { filter: drop-shadow(0 0 9px rgba(53, 226, 140, .5)); }
+}
+
+/* One hairline grid, so the figures read as one object rather than five cards. */
+.strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(122px, 1fr)); gap: 1px;
+  background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+}
+.strip .cell { background: var(--card); padding: 15px 17px; }
+.strip .cell b {
+  display: block; font-size: 23px; font-weight: 600; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; line-height: 1.15; margin-bottom: 2px;
+}
+
+/* Flowing columns rather than a fixed grid.
+   A grid with three named columns leaves a visible hole whenever a panel is absent - which
+   is precisely what a brand-new account looks like. Multi-column lets the panels fill
+   whatever is there, so three panels or six both look deliberate. */
+.deck-cols { columns: 3; column-gap: 16px; }
+.deck-cols > * { break-inside: avoid; margin: 0 0 16px; }
+@media (max-width: 1240px) { .deck-cols { columns: 2; } }
+@media (max-width: 820px) { .deck-cols { columns: 1; } }
+.panel {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 18px 20px; box-shadow: var(--shadow); min-width: 0;
+}
+.panel-note { color: var(--ink-2); font-size: 14px; margin: 8px 0 0; }
+.panel-note.dim { color: var(--ink-3); font-size: 12.5px; }
+
+/* The map: one cell per question, grouped by section. Progress as territory. */
+.map { display: grid; gap: 9px; margin-top: 12px; }
+.map-row { display: grid; grid-template-columns: minmax(0, 132px) 1fr; gap: 12px; align-items: center; }
+.map-name { font-size: 12px; color: var(--ink-2); line-height: 1.25; overflow-wrap: anywhere; }
+.map-cells { display: flex; flex-wrap: wrap; gap: 3px; }
+.c { display: block; width: 11px; height: 11px; border-radius: 2.5px; background: var(--line); flex: none; }
+.c.r { background: var(--accent); }
+.c.w { background: var(--bad); }
+.c.u { background: var(--line); }
+.map-key { display: flex; gap: 16px; margin: 13px 0 0; font-size: 12px; color: var(--ink-3); }
+.map-key span { display: flex; align-items: center; gap: 6px; }
+
+.trend { width: 100%; height: auto; display: block; margin-top: 8px; }
+.t-area { fill: var(--accent-soft); }
+.t-line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }
+.t-pass { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; }
+.t-dot { fill: var(--accent); }
+.t-cap { font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: var(--ink-3); }
+.t-now { font-family: 'IBM Plex Mono', monospace; font-size: 11px; fill: var(--ink); }
+
+.spark { display: flex; align-items: flex-end; gap: 3px; height: 54px; margin-top: 12px; }
+.spark i { flex: 1; background: var(--line); border-radius: 2px 2px 0 0; min-height: 4px; }
+.spark i.on { background: var(--accent); }
+
+.sec-list { display: grid; gap: 3px; margin-top: 10px; }
+/* The whole row is the control. A separate "Study <section>" line underneath each one
+   wrapped on the longer section names, which doubled this panel's height and left the
+   column badly out of balance. */
+.sec {
+  display: block; width: 100%; text-align: left; background: transparent;
+  border: 0; border-radius: 9px; padding: 9px 10px; margin: 0 -10px;
+}
+.sec:hover { background: var(--accent-soft); }
+.sec:hover .sec-arrow { opacity: 1; transform: translateX(2px); }
+.sec-head { display: flex; gap: 10px; align-items: baseline; font-size: 14.5px; color: var(--ink); }
+.sec-name { flex: 1; min-width: 0; }
+.sec-pct { font-variant-numeric: tabular-nums; }
+.sec-pct.is-ok { color: var(--accent-ink); }
+.sec-pct.is-low { color: var(--bad); }
+.sec-arrow { color: var(--accent-ink); opacity: .45; transition: opacity .15s, transform .15s; }
+.sec-bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 7px; }
+.sec-bar i { display: block; height: 6px; border-radius: 3px; background: var(--accent); }
+.sec-bar i.is-low { background: var(--bad); }
+@media (prefers-reduced-motion: reduce) { .sec-arrow { transition: none; } }
 
 @media (max-width: 620px) {
-  .perf-top { grid-template-columns: 1fr; gap: 18px; justify-items: center; }
-  .perf-figures { width: 100%; }
+  .deck-head { grid-template-columns: 1fr; gap: 16px; justify-items: center; text-align: center; }
+  .deck-sub { text-align: left; }
   .map-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* ============ insights ============
+   The owner's own analytics, in the pane rather than on a page of its own. Reuses the
+   deck's panels and figure strip, so there is one visual language and not two. */
+.ins-head { display: flex; gap: 18px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; margin-bottom: 18px; }
+.ins-head h2 { font-size: 24px; letter-spacing: -.02em; margin: 0 0 6px; }
+.ins-head .sub { margin: 0; max-width: 60ch; }
+.ins-ranges { display: flex; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; flex: none; }
+.ins-range { background: var(--card); border: 0; padding: 8px 14px; font-size: 13px; color: var(--ink-2); }
+.ins-range[aria-pressed="true"] { background: var(--accent-ink); color: var(--on-accent, #fff); font-weight: 600; }
+.ins-range:hover[aria-pressed="false"] { color: var(--ink); }
+.ins-body { display: grid; gap: 16px; }
+
+.ins-table { display: grid; gap: 9px; margin-top: 12px; }
+.ins-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px auto; gap: 10px; align-items: center; font-size: 13.5px; }
+.ins-row.three { grid-template-columns: minmax(0, 1fr) auto auto; gap: 16px; }
+.ins-k { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+.ins-row b { font-variant-numeric: tabular-nums; }
+.ins-row b.dim { color: var(--ink-3); }
+.ins-bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.ins-bar i { display: block; height: 6px; border-radius: 3px; background: var(--accent); }
+
+.fun { display: grid; gap: 13px; margin-top: 12px; }
+.fun-top { display: flex; gap: 10px; align-items: baseline; font-size: 14px; }
+.fun-top span { flex: 1; }
+.fun-top b { font-variant-numeric: tabular-nums; }
+.fun-bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; margin-top: 5px; }
+.fun-bar i { display: block; height: 8px; border-radius: 4px; background: var(--accent); }
+
+@media (max-width: 620px) {
+  .ins-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .ins-row .ins-bar { display: none; }
+}
+
+/* The exclude-me switch on the Insights screen. A real switch rather than a checkbox, so
+   its state reads at a glance from across the room. */
+.opt-row { margin-top: 12px; }
+.opt-toggle {
+  display: inline-flex; align-items: center; gap: 11px;
+  background: transparent; border: 0; padding: 0; color: var(--ink); font-size: 14.5px;
+}
+.opt-track {
+  width: 40px; height: 23px; border-radius: 100px; background: var(--line);
+  position: relative; flex: none; transition: background .16s;
+}
+.opt-knob {
+  position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; border-radius: 50%;
+  background: var(--card); box-shadow: 0 1px 3px rgba(0, 0, 0, .28); transition: transform .16s;
+}
+.opt-toggle[aria-checked="true"] .opt-track { background: var(--accent-ink); }
+.opt-toggle[aria-checked="true"] .opt-knob { transform: translateX(17px); }
+.opt-toggle:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  .opt-track, .opt-knob { transition: none; }
 }

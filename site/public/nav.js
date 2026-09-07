@@ -11,7 +11,13 @@
   let user = null;
   try {
     const res = await fetch('/api/me', { credentials: 'same-origin' });
-    if (res.ok) user = (await res.json()).user;
+    // The body is read whether or not the call succeeded. A response whose body is never
+    // consumed stays an open request as far as the browser is concerned - so on every
+    // signed-out page load this left /api/me's 401 hanging, and the page never reached
+    // "network idle". Harmless to a reader, but it hung every test that waits for the
+    // page to go quiet (scratchpad/pw/newpages.js), which is how it was found.
+    const data = await res.json().catch(() => null);
+    if (res.ok && data) user = data.user;
   } catch {
     return;
   }

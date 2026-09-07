@@ -13,11 +13,14 @@
  */
 
 import { clearCookie, cookie, fail } from './lib/http.js';
+import { isOwner, notFound } from './lib/owner.js';
 import { getSession, getUserById } from './lib/store.js';
 import { SESSION_COOKIE, login, logout, register } from './routes/auth.js';
 import * as google from './routes/google.js';
+import { insightsData, insightsPage } from './routes/insights.js';
 import { config, me, readProgress, setCountry, writeProgress } from './routes/me.js';
 import { confirmCheckout, startCheckout, webhook } from './routes/paddle.js';
+import { pulse } from './routes/pulse.js';
 import { checkToken, forgot, reset } from './routes/reset.js';
 
 /* method + path -> handler. `auth: true` means the handler is only reached with a valid
@@ -33,6 +36,9 @@ const ROUTES = [
   ['GET', '/api/auth/google/callback', google.callback],
   ['GET', '/api/config', config],
   ['POST', '/api/paddle/webhook', webhook],
+  // The page-view beacon. Open by design - it is how an anonymous visitor is counted -
+  // and it stores no more than a date, a page and a country. See src/routes/pulse.js.
+  ['POST', '/api/pulse', pulse],
 
   ['GET', '/api/me', me, { auth: true }],
   ['POST', '/api/me/country', setCountry, { auth: true }],
@@ -93,7 +99,38 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
+    // Search-engine site verification. Each console wants a file at a path it chooses;
+    // serving it from configuration means no HTML to edit and nothing left behind when a
+    // token is rotated. Empty config means the file does not exist, which is the honest
+    // answer rather than an empty 200.
+    if (url.pathname.startsWith('/google') && url.pathname.endsWith('.html')) {
+      const token = env.GOOGLE_SITE_VERIFICATION;
+      if (token && url.pathname === `/google${token}.html`) {
+        return new Response(`google-site-verification: google${token}.html`, {
+          headers: { 'content-type': 'text/plain; charset=utf-8' },
+        });
+      }
+    }
+    if (url.pathname === '/BingSiteAuth.xml' && env.BING_SITE_VERIFICATION) {
+      return new Response(
+        `<?xml version="1.0"?>\n<users><user>${env.BING_SITE_VERIFICATION}</user></users>\n`,
+        { headers: { 'content-type': 'application/xml; charset=utf-8' } }
+      );
+    }
+
     if (url.pathname === '/app' || url.pathname === '/app.html') return appPage(request, env);
+
+    /* The owner's analytics, handled here rather than in the ROUTES table below so that
+     * ONE branch answers for every case. The table's own fallback returns 405 for a known
+     * path with the wrong verb, which would confirm the page exists to anyone who sent a
+     * POST - so a wrong method has to 404 here too, exactly like a wrong account and like
+     * being signed out. See src/lib/owner.js. */
+    if (url.pathname === '/insights' || url.pathname === '/api/analytics') {
+      if (request.method !== 'GET') return notFound(request, env);
+      const signedIn = await currentUser(request, env);
+      if (!signedIn || !isOwner(env, signedIn.user)) return notFound(request, env);
+      return url.pathname === '/insights' ? insightsPage(request, env) : insightsData(request, env);
+    }
 
     // The sign-in pages are static; the Worker sees them only to canonicalise the
     // hostname above, so hand them straight back to the asset router.

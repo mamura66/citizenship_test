@@ -27,7 +27,15 @@
     "run_worker_first": [
       "/api/*", "/app", "/app.html",
       "/login", "/login.html", "/signup", "/signup.html",
-      "/forgot", "/forgot.html", "/reset", "/reset.html"
+      "/forgot", "/forgot.html", "/reset", "/reset.html",
+      // Search-engine verification files. They do not exist on disk - the Worker builds
+      // them from configuration - so without this the asset router answers with the 404
+      // page and the Worker never runs. That is not a hypothetical: it happened.
+      "/google*", "/BingSiteAuth.xml",
+      // The owner-only analytics page. There is no /insights file in ./public - the Worker
+      // builds the page - so without this line the asset router answers it with the 404
+      // page and the gate never runs. Same trap as the verification files above.
+      "/insights"
     ]
   },
   // Cloudflare Email Service. Used for one thing: the password reset link. No API key and
@@ -38,19 +46,52 @@
   "kv_namespaces": [
     { "binding": "PFC", "id": "7dc1d7e034fe45c99f257b0766dfc0db" }
   ],
+  // First-party analytics counters. D1 rather than KV because this is counting and
+  // grouping, which KV cannot do - it would mean listing every key to answer "top
+  // countries". Nothing personal is in here: no visitor id, no IP, no account id. See
+  // migrations/0001_analytics.sql and src/lib/analytics.js.
+  "d1_databases": [
+    {
+      "binding": "ANALYTICS_DB",
+      "database_name": "pfc-analytics",
+      "database_id": "b13e5695-89e7-4d5a-8285-a38c0ff66688",
+      "migrations_dir": "migrations"
+    }
+  ],
   "vars": {
     // Non-secret configuration only. The secrets - GOOGLE_CLIENT_ID/SECRET,
     // PADDLE_API_KEY and PADDLE_WEBHOOK_SECRET - are set with `wrangler secret put` and
     // never live in this file.
     //
-    // Sandbox until Sandeep says otherwise. Going live means: a Paddle live account (its
-    // own product, price, keys and webhook), swapping the three values below, and
-    // flipping this to "production". While it says sandbox the app shows a banner saying
-    // payments are tests.
+    // LIVE. Real cards are charged. Set this back to "sandbox" with the sandbox token and
+    // price id to stop taking money - the orange test banner is driven by this value, so
+    // it cannot be left on or off by accident.
     // The canonical origin. Password reset links and the Google redirect URI are built
     // from this and never from the request's Host header - see src/lib/origin.js.
     "PUBLIC_ORIGIN": "https://prepareforcitizenship.com",
-    "PADDLE_ENVIRONMENT": "sandbox",
+    // Search engine site verification. Set to the token each console gives you and the
+    // Worker serves the file it looks for - no HTML editing, and nothing to forget to
+    // remove later.
+    "GOOGLE_SITE_VERIFICATION": "",
+    "BING_SITE_VERIFICATION": "",
+    // Google Analytics 4, at Sandeep's instruction. GA4 sets cookies, so two things had to
+    // ship with it: the privacy policy no longer claims we run no analytics, and visitors
+    // in the EEA, the UK and Switzerland are asked before anything is stored. Google
+    // Consent Mode is set to denied by default everywhere. See docs/SEO-AND-ANALYTICS.md.
+    "ANALYTICS": "ga4",
+    "GA4_MEASUREMENT_ID": "G-H00CSNW239",
+    "CF_ANALYTICS_TOKEN": "",
+    // Who may see /insights and /api/analytics. Everybody else gets a 404, signed in or
+    // not. Here rather than in source because an email address hardcoded in a route is a
+    // personal address published in the repo, and because a second person should be
+    // addable without a code change - a comma-separated list is accepted. Empty means
+    // nobody, which is the right way for a misconfigured deploy to fail.
+    "ANALYTICS_OWNER_EMAIL": "sandeep.sandha@gmail.com",
+    "PADDLE_ENVIRONMENT": "production",
+    // "true" while Paddle has not finished approving the account, so the paywall says so
+    // plainly instead of opening a checkout Paddle will refuse. Set to "false" the day
+    // website approval lands - that is the only change needed to start selling.
+    "PADDLE_SALES_PAUSED": "true",
     // The address password-reset mail is sent from. Must be on a domain on this
     // Cloudflare account, or Email Service refuses the send as an unverified sender.
     //
@@ -59,9 +100,10 @@
     // person. Cloudflare Email Routing forwards hello@ to a real inbox, so it does.
     "MAIL_FROM": "Prepare for Citizenship <hello@prepareforcitizenship.com>",
     // Designed to be public - Paddle.js needs it in the page. Safe in the repo.
-    "PADDLE_CLIENT_TOKEN": "test_5ad1b7afa445e5a65e4dc1fd1ac",
-    // The one-time $9.99 "Full access" price on pro_01m1xkf5ck788ze3fdcb6b9qc1.
-    "PADDLE_PRICE_ID": "pri_01m1xkw4z2dpkvhqvgn3zp22mh"
+    "PADDLE_CLIENT_TOKEN": "live_43ed8dda0eebbd89b61c9f67fe2",
+    // The one-time $9.99 "Full access" price on pro_01m1y1mgwpz2ym81wvs1ep5b3f,
+    // tax_mode external and max quantity 1.
+    "PADDLE_PRICE_ID": "pri_01m1y1nq68tgc2arc41myd697b"
   },
   // Custom domain. Cloudflare creates the DNS record and certificate for this
   // subdomain on deploy; nothing else on pastclimate.com is touched.

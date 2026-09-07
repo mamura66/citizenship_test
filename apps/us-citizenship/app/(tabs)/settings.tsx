@@ -9,7 +9,7 @@ import { Paywall } from '../../src/components/Paywall';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { radii, spacing, type } from '../../src/theme/theme';
 import { useAppState } from '../../src/lib/appState';
-import { usePurchase } from '../../src/lib/purchase';
+import { restoreMessage, usePurchase } from '../../src/lib/purchase';
 
 // Structured as a conventional grouped settings list - a labelled section, then a
 // card of hairline-separated rows - instead of the earlier stack of cards full of
@@ -51,7 +51,9 @@ export default function SettingsScreen() {
     setRestoreMsg(null);
     const result = await restorePurchases();
     setRestoring(false);
-    setRestoreMsg(result.restored ? 'Purchase restored.' : 'No previous purchase found for this account.');
+    // One wording for every restore outcome, shared with the paywall. A store we
+    // could not reach must never be reported as "no purchase found".
+    setRestoreMsg(restoreMessage(result));
   };
 
   return (
@@ -127,12 +129,12 @@ export default function SettingsScreen() {
                     onPress={() => setPreference(opt.key)}
                     style={({ pressed }) => [
                       styles.segment,
-                      { backgroundColor: active ? colors.accent : 'transparent' },
+                      { backgroundColor: active ? colors.accentFill : 'transparent' },
                       pressed && !active && { opacity: 0.6 },
                     ]}
                   >
-                    <AppIcon name={opt.icon} size={17} color={active ? '#fff' : colors.textSecondary} />
-                    <Text style={[type.subheadline, { color: active ? '#fff' : colors.textPrimary }]}>{opt.label}</Text>
+                    <AppIcon name={opt.icon} size={17} color={active ? colors.onFill : colors.textSecondary} />
+                    <Text style={[type.subheadline, { color: active ? colors.onFill : colors.textPrimary }]}>{opt.label}</Text>
                   </Pressable>
                 );
               })}
@@ -153,11 +155,11 @@ export default function SettingsScreen() {
                     onPress={() => setCivicsVersion(v)}
                     style={({ pressed }) => [
                       styles.segment,
-                      { backgroundColor: active ? colors.accent : 'transparent' },
+                      { backgroundColor: active ? colors.accentFill : 'transparent' },
                       pressed && !active && { opacity: 0.6 },
                     ]}
                   >
-                    <Text style={[type.subheadline, { color: active ? '#fff' : colors.textPrimary }]}>{v} test</Text>
+                    <Text style={[type.subheadline, { color: active ? colors.onFill : colors.textPrimary }]}>{v} test</Text>
                   </Pressable>
                 );
               })}

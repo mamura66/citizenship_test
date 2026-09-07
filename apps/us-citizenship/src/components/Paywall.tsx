@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { radii, spacing, type } from '../theme/theme';
-import { usePurchase } from '../lib/purchase';
+import { restoreMessage, usePurchase } from '../lib/purchase';
 import { AppIcon } from './AppIcon';
 import { RadialGauge } from './RadialGauge';
 
@@ -39,7 +39,11 @@ export function Paywall({
   onPurchased: () => void;
 }) {
   const { colors } = useTheme();
-  const { priceDisplay, purchaseLifetime, restorePurchases } = usePurchase();
+  const { priceDisplay, purchaseLifetime, restorePurchases, usingMockBackend, usingRealBackend } = usePurchase();
+  // Neither a real store nor the opt-in mock: there is no way to take payment in
+  // this build, so say that up front rather than letting someone tap Unlock and
+  // find out. Restore stays reachable either way - Apple requires it.
+  const purchasesUnavailable = !usingRealBackend && !usingMockBackend;
   const [busy, setBusy] = useState<'buy' | 'restore' | null>(null);
   const [restoreMsg, setRestoreMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -62,12 +66,10 @@ export function Paywall({
     setRestoreMsg(null);
     const result = await restorePurchases();
     setBusy(null);
-    if (result.restored) {
-      setRestoreMsg('Purchase restored — you have full access.');
-      onPurchased();
-    } else {
-      setRestoreMsg('No previous purchase found for this account.');
-    }
+    // "Nothing to restore" and "we couldn't ask" are different facts and get
+    // different words - see RestoreResult in src/lib/purchase.tsx.
+    setRestoreMsg(restoreMessage(result));
+    if (result.outcome === 'restored') onPurchased();
   };
 
   return (
@@ -114,12 +116,37 @@ export function Paywall({
             </View>
 
             <View style={{ paddingHorizontal: spacing.lg, marginTop: spacing.lg, gap: spacing.sm }}>
+              {/* A stub has to say it is a stub, on screen - see CLAUDE.md. */}
+              {usingMockBackend ? (
+                <View style={[styles.errorBox, { backgroundColor: colors.warningSoft }]}>
+                  <AppIcon name="warningTriangleFill" size={16} color={colors.warning} />
+                  <Text style={[type.caption, { color: colors.textPrimary, flex: 1, lineHeight: 17 }]}>
+                    Development stub. This is a local mock of the store: nothing is charged and the
+                    unlock exists only in this browser.
+                  </Text>
+                </View>
+              ) : null}
+              {purchasesUnavailable ? (
+                <View style={[styles.errorBox, { backgroundColor: colors.dangerSoft }]}>
+                  <AppIcon name="warningTriangleFill" size={16} color={colors.danger} />
+                  <Text style={[type.caption, { color: colors.textPrimary, flex: 1, lineHeight: 17 }]}>
+                    In-app purchases aren't available in this build, so nothing can be unlocked here.
+                    If you have already bought it, Restore Purchases still works.
+                  </Text>
+                </View>
+              ) : null}
               <Pressable
-                style={[styles.buyBtn, { backgroundColor: colors.accent }, busy === 'buy' && { opacity: 0.7 }]}
+                style={[
+                  styles.buyBtn,
+                  { backgroundColor: colors.accentFill },
+                  (busy === 'buy' || purchasesUnavailable) && { opacity: 0.7 },
+                ]}
                 onPress={handleBuy}
-                disabled={busy !== null}
+                disabled={busy !== null || purchasesUnavailable}
               >
-                <Text style={styles.buyBtnText}>{busy === 'buy' ? 'Processing…' : `Unlock for ${priceDisplay}`}</Text>
+                <Text style={[styles.buyBtnText, { color: colors.onFill }]}>
+                  {busy === 'buy' ? 'Processing…' : `Unlock for ${priceDisplay}`}
+                </Text>
               </Pressable>
 
               {errorMsg ? (
@@ -174,7 +201,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buyBtn: { borderRadius: radii.md, paddingVertical: 16, alignItems: 'center' },
-  buyBtnText: { color: '#fff', ...type.headline, fontSize: 17 },
+  buyBtnText: { ...type.headline, fontSize: 17 }, // color comes from colors.onFill at the call site
   restoreBtn: { alignItems: 'center', paddingVertical: spacing.xs },
   errorBox: {
     flexDirection: 'row',

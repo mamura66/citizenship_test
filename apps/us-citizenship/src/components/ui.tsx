@@ -123,9 +123,11 @@ export function PrimaryButton({
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         disabled={disabled}
-        style={[styles.primaryButton, { backgroundColor: colors.accent }, disabled && { opacity: 0.4 }]}
+        style={[styles.primaryButton, { backgroundColor: colors.accentFill }, disabled && { opacity: 0.4 }]}
       >
-        <Text style={styles.primaryButtonText} numberOfLines={1}>
+        {/* onFill, not '#fff': in dark mode the fill is the bright phosphor green
+            and white on it measures 1.69:1. See the contrast note in theme.ts. */}
+        <Text style={[styles.primaryButtonText, { color: colors.onFill }]} numberOfLines={1}>
           {title}
         </Text>
       </Pressable>
@@ -159,11 +161,11 @@ export function Pill({ label, active, onPress }: { label: string; active: boolea
       onPress={onPress}
       style={[
         styles.pill,
-        { backgroundColor: active ? colors.accent : colors.surface, borderColor: colors.separator },
+        { backgroundColor: active ? colors.accentFill : colors.surface, borderColor: colors.separator },
         !active && { borderWidth: StyleSheet.hairlineWidth },
       ]}
     >
-      <Text style={[type.subheadline, { color: active ? '#fff' : colors.textPrimary }]}>{label}</Text>
+      <Text style={[type.subheadline, { color: active ? colors.onFill : colors.textPrimary }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
 
   buttonWrap: { alignSelf: 'stretch' },
   primaryButton: { paddingVertical: 15, paddingHorizontal: spacing.lg, borderRadius: radii.md, alignItems: 'center' },
-  primaryButtonText: { color: '#fff', ...type.headline },
+  primaryButtonText: { ...type.headline }, // color comes from colors.onFill at the call site
   secondaryButton: { paddingVertical: 15, paddingHorizontal: spacing.lg, borderRadius: radii.md, alignItems: 'center' },
   secondaryButtonText: { ...type.headline },
 

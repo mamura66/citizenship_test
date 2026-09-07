@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { AccessibilityInfo, StyleSheet, Text, View, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { ScreenHeader, GlassCard, PrimaryButton, SecondaryButton, Pill, TabScrollView } from '../../src/components/ui';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
@@ -65,6 +65,52 @@ interface PreparedQuestion {
   options: string[]; // expected + DISTRACTOR_COUNT choices, in display order
   correctSet: Set<string>;
   expected: number; // how many the user must pick
+}
+
+/**
+ * Speak a grading result to the screen reader.
+ *
+ * Grading is communicated visually by color plus a check/cross icon (v15 removed
+ * the post-answer card to keep a question scroll-free), and neither of those
+ * reaches VoiceOver or TalkBack. iOS gets the queued variant so the verdict is not
+ * cut off by VoiceOver still reading the option the user just tapped; Android
+ * ignores the options object, and react-native-web's announceForAccessibility is
+ * an empty function - which is why the verdict is ALSO rendered as text inside an
+ * accessibilityLiveRegion, and is not left to this call alone.
+ */
+function announceResult(message: string) {
+  const info = AccessibilityInfo as typeof AccessibilityInfo & {
+    announceForAccessibilityWithOptions?: (m: string, o: { queue?: boolean }) => void;
+  };
+  if (typeof info.announceForAccessibilityWithOptions === 'function') {
+    info.announceForAccessibilityWithOptions(message, { queue: true });
+  } else {
+    AccessibilityInfo.announceForAccessibility(message);
+  }
+}
+
+/** "The correct answer is X." / "The correct answers are X and Y." */
+function correctAnswerSentence(q: PreparedQuestion): string {
+  const answers = [...q.correctSet];
+  if (answers.length === 1) return `The correct answer is ${answers[0]}.`;
+  return `The correct answers are ${answers.slice(0, -1).join(', ')} and ${answers[answers.length - 1]}.`;
+}
+
+/** How one option should read to a screen reader, before and after grading. */
+function optionAccessibilityLabel(
+  opt: string,
+  position: number,
+  total: number,
+  picked: boolean,
+  isRight: boolean,
+  graded: boolean
+): string {
+  const base = `Option ${position} of ${total}. ${opt}`;
+  if (!graded) return picked ? `${base}. Chosen.` : base;
+  if (picked && isRight) return `${base}. You chose this. Correct.`;
+  if (picked && !isRight) return `${base}. You chose this. Incorrect.`;
+  if (isRight) return `${base}. Correct answer. You did not choose it.`;
+  return `${base}. Not chosen.`;
 }
 
 export default function PracticeScreen() {
@@ -188,6 +234,9 @@ export default function PracticeScreen() {
     setGraded(isCorrect);
     if (isCorrect) setCorrectCount((c) => c + 1);
     else setMissed((m) => [...m, current]);
+    // Say the verdict, and on a miss say what the answer was - the same thing the
+    // green outline tells a sighted user.
+    announceResult(isCorrect ? 'Correct.' : `Incorrect. ${correctAnswerSentence(current)}`);
   };
 
   const nextQuestion = () => {
@@ -294,12 +343,26 @@ export default function PracticeScreen() {
           <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md }}>
             <GlassCard>
               <View style={styles.qHead}>
-                <View style={styles.modeRow}>
-                  <AppIcon name={current.expected > 1 ? 'stack' : 'check'} size={13} color={colors.textSecondary} />
-                  <Text style={[type.caption, { color: colors.textSecondary }]}>
-                    {current.expected > 1
-                      ? `Select ${current.expected} answers${graded === null ? ` · ${selected.length} chosen` : ''}`
-                      : 'Select one answer'}
+                {/* Same row, no extra height (a question must stay scroll-free - v15),
+                    but after grading it states the verdict in words as well as in
+                    color, and is a live region so TalkBack and the web screen
+                    reader pick the change up without depending on the announcement. */}
+                <View style={styles.modeRow} accessibilityLiveRegion="polite">
+                  <AppIcon
+                    name={graded === null ? (current.expected > 1 ? 'stack' : 'check') : graded ? 'checkCircleFill' : 'xCircleFill'}
+                    size={13}
+                    color={graded === null ? colors.textSecondary : graded ? colors.success : colors.danger}
+                  />
+                  <Text
+                    style={[type.caption, { color: graded === null ? colors.textSecondary : graded ? colors.success : colors.danger }]}
+                  >
+                    {graded !== null
+                      ? graded
+                        ? 'Correct'
+                        : 'Incorrect'
+                      : current.expected > 1
+                        ? `Select ${current.expected} answers · ${selected.length} chosen`
+                        : 'Select one answer'}
                   </Text>
                 </View>
                 <Pressable
@@ -324,17 +387,30 @@ export default function PracticeScreen() {
                 // and correct answers you missed are outlined green so you learn them.
                 const bg = show && picked && isRight ? colors.successSoft : show && picked && !isRight ? colors.dangerSoft : colors.surface;
                 const border = show && isRight ? colors.success : picked ? colors.accent : colors.separator;
-                const numBg = show && picked && isRight ? colors.success : show && picked && !isRight ? colors.danger : picked ? colors.accent : colors.background;
-                const numColor = picked || (show && isRight) ? '#FFFFFF' : colors.textSecondary;
+                const numBg = show && picked && isRight ? colors.successFill : show && picked && !isRight ? colors.dangerFill : picked ? colors.accentFill : colors.background;
+                const numColor = picked || (show && isRight) ? colors.onFill : colors.textSecondary;
                 return (
                   <Pressable
                     key={i}
                     onPress={() => choose(opt)}
                     disabled={show}
+                    // The color and the icon are invisible to a screen reader, and
+                    // the option going `disabled` is the only other signal, so the
+                    // whole state is spelled out in the label.
+                    accessibilityRole={current.expected > 1 ? 'checkbox' : 'radio'}
+                    accessibilityLabel={optionAccessibilityLabel(opt, i + 1, current.options.length, picked, isRight, show)}
+                    accessibilityHint={show ? undefined : current.expected > 1 ? `Select ${current.expected} answers` : 'Selects this answer'}
+                    accessibilityState={{ checked: picked, selected: picked, disabled: show }}
+                    // Same value again as an aria alias, because react-native-web
+                    // reads `aria-checked` and ignores `accessibilityState` entirely.
+                    // React Native merges the two on iOS and Android
+                    // (`ariaChecked ?? accessibilityState?.checked`), so there is no
+                    // conflict - and it makes the state assertable in a browser.
+                    aria-checked={picked}
                     style={[styles.option, { backgroundColor: bg, borderColor: border }, show && !picked && !isRight && { opacity: 0.45 }]}
                   >
-                    <View style={[styles.optionNum, { backgroundColor: show && isRight && !picked ? colors.success : numBg }]}>
-                      <Text style={[type.numSm, { color: show && isRight && !picked ? '#FFFFFF' : numColor }]}>{i + 1}</Text>
+                    <View style={[styles.optionNum, { backgroundColor: show && isRight && !picked ? colors.successFill : numBg }]}>
+                      <Text style={[type.numSm, { color: show && isRight && !picked ? colors.onFill : numColor }]}>{i + 1}</Text>
                     </View>
                     <Text style={[type.body, { color: colors.textPrimary, flex: 1, lineHeight: 22 }]}>{opt}</Text>
                     {show && isRight ? <AppIcon name="checkCircleFill" size={20} color={colors.success} /> : null}
@@ -370,7 +446,7 @@ export default function PracticeScreen() {
           </GlassCard>
 
           {/* All the review detail lives here rather than after each question: during
-              the test the option colours say everything, and anything more forced the
+              the test the option colors say everything, and anything more forced the
               user to scroll mid-question. Here, scrolling is expected. */}
           {missed.length > 0 ? (
             <>

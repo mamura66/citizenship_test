@@ -10,7 +10,8 @@
   --ink: #0b1f17;         /* the app's textPrimary */
   --ink-2: rgba(11, 31, 23, 0.62);
   --ink-3: rgba(11, 31, 23, 0.4);
-  --accent: #0fa968;
+  --accent: #0fa968;      /* fills, borders, bars - never text */
+  --accent-ink: #0a7548;  /* accent as TEXT: 5.7:1 on white, 5.3:1 on the tint */
   --accent-soft: rgba(15, 169, 104, 0.1);
   --flag-red: #b31942;
   --flag-blue: #0a3161;
@@ -85,10 +86,10 @@ p { margin: 0 0 16px; color: var(--ink-2); }
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-ink);
   margin: 0 0 14px;
 }
-a { color: var(--accent); }
+a { color: var(--accent-ink); }
 
 /* ---------- sections ---------- */
 section { padding: 92px 0; }
@@ -140,7 +141,7 @@ section.hero { padding: 76px 0 92px; }
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  background: var(--accent);
+  background: var(--accent-ink);
   color: #fff;
   text-decoration: none;
   font-weight: 600;
@@ -150,7 +151,7 @@ section.hero { padding: 76px 0 92px; }
   transition: transform 0.12s ease, filter 0.12s ease;
 }
 .btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
-.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn.ghost { background: var(--accent-soft); color: var(--accent-ink); }
 .note { font-size: 14px; color: var(--ink-3); margin: 0; }
 
 /* start, not end: `end` anchored the phone's BOTTOM to the copy's bottom, which
@@ -205,7 +206,7 @@ section.hero { padding: 76px 0 92px; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
 .cards > div { background: var(--ground); padding: 26px 24px; }
 .cards p { margin: 0; font-size: 15.5px; }
-.cards .ico { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+.cards .ico { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--accent-ink); text-transform: uppercase; margin-bottom: 10px; }
 
 /* ---------- pricing ---------- */
 .tiers { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 34px; }
@@ -231,7 +232,7 @@ details { border-bottom: 1px solid var(--line); padding: 20px 0; }
 details:first-of-type { border-top: 1px solid var(--line); }
 summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; display: flex; align-items: center; gap: 12px; }
 summary::-webkit-details-marker { display: none; }
-summary::before { content: "+"; color: var(--accent); font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+summary::before { content: "+"; color: var(--accent-ink); font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
 details[open] summary::before { content: "–"; }
 details p { margin: 14px 0 0 24px; font-size: 16px; }
 
@@ -308,7 +309,7 @@ footer a:hover { color: var(--ink); }
 }
 .ctry.live { border-color: var(--accent); }
 .ctry-head { margin-bottom: 10px; }
-.live-tag { color: var(--accent); }
+.live-tag { color: var(--accent-ink); }
 .ctry h3 { font-size: 19px; margin: 0 0 8px; letter-spacing: -0.015em; }
 .ctry p { font-size: 14.5px; }
 .ctry img {
@@ -333,3 +334,136 @@ footer a:hover { color: var(--ink); }
   white-space: nowrap;
 }
 @media (max-width: 640px) { .nav-who { display: none; } }
+
+/* ============ home page, rewritten ============
+   The page used to redraw the app's own screens, which showed what the product looks like
+   without saying what it is. These are the pieces the new copy needs. */
+
+/* The country strip in the hero. Chips, not a table: this is orientation, not data - and
+   "Coming soon" has to read as a plan rather than an apology. */
+.ctry-strip { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 4px; }
+.ctry-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line); border-radius: 100px;
+  padding: 7px 14px 7px 9px; font-size: 13.5px; color: var(--ink-2);
+}
+.ctry-chip .f {
+  width: 22px; height: 15px; border-radius: 2px; overflow: hidden; flex: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+.ctry-chip .f svg { width: 100%; height: 100%; display: block; }
+.ctry-chip b { color: var(--accent-ink); font-weight: 600; }
+.ctry-chip span:not(.f) { color: var(--ink-3); }
+.ctry-chip.is-live { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+
+/* Four short beats about what is free. Even edges, one recurring shape. */
+.feat-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(248px, 1fr));
+  gap: 26px 32px; margin: 40px 0 0;
+}
+.feat h3 { font-size: 16.5px; margin: 0 0 7px; letter-spacing: -.01em; }
+.feat p { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+
+/* Copy beside a screenshot. Tighter than the hero, and it alternates side down the page
+   so the eye has somewhere to go. */
+.split-tight {
+  display: grid; grid-template-columns: 250px 1fr; gap: 44px;
+  align-items: center; margin-top: 48px; padding: 0;
+}
+.split-tight.reverse { grid-template-columns: 1fr 250px; }
+.split-tight h2 { margin-top: 0; }
+.split-tight h3 { font-size: 17px; margin: 0 0 8px; letter-spacing: -.01em; }
+.split-tight p { color: var(--ink-2); margin: 0 0 12px; }
+.split-tight .phone { width: 100%; }
+
+/* One question, one answer. Ruled rather than boxed - a FAQ is a list, not a set of
+   cards, and boxing each one makes eight of them look like a form. */
+.qa { border-top: 1px solid var(--line); padding: 20px 0 2px; }
+.qa:first-of-type { border-top: 0; }
+.qa h3 { font-size: 16.5px; margin: 0 0 7px; letter-spacing: -.012em; }
+.qa p { margin: 0; color: var(--ink-2); max-width: 68ch; }
+
+@media (max-width: 780px) {
+  .split-tight, .split-tight.reverse { grid-template-columns: 1fr; gap: 26px; margin-top: 34px; }
+  .split-tight .phone { max-width: 230px; margin: 0 auto; }
+  /* The screenshot follows the words on a phone, whichever side it takes on a desktop. */
+  .split-tight.reverse .phone { order: 2; }
+}
+
+/* ============ document pages ============
+   Support, terms, refunds and the privacy policies. They used to load a separate 69-line
+   stylesheet with their own miniature header and a system font, so arriving at one felt
+   like leaving the site - which is exactly how it was reported. Same nav, same footer,
+   same typeface, same tokens; only the measure is narrower, because these are read rather
+   than scanned. */
+
+.doc { max-width: 44rem; margin: 0 auto; padding: 54px 24px 90px; }
+.doc h1 { font-size: clamp(30px, 4.6vw, 40px); letter-spacing: -.028em; line-height: 1.1; margin: 0 0 10px; }
+.doc .updated {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 34px;
+}
+.doc h2 { font-size: 20px; letter-spacing: -.018em; margin: 46px 0 10px; }
+/* The support page carries two products under one roof, so h2 names the product and h3 the
+   question. Without this the browser default makes the question larger than the section
+   it sits in. */
+.doc h3 { font-size: 16.5px; letter-spacing: -.008em; margin: 30px 0 7px; }
+.doc p, .doc li { color: var(--ink-2); }
+.doc p { margin: 0 0 14px; }
+.doc strong { color: var(--ink); font-weight: 600; }
+.doc ul { padding-left: 20px; margin: 0 0 16px; }
+.doc li { margin-bottom: 7px; }
+.doc a { color: var(--accent-ink); }
+.doc .callout {
+  background: var(--tint); border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px 22px; margin: 26px 0 30px;
+}
+.doc .callout p:last-child { margin-bottom: 0; }
+.doc .mono {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .92em;
+}
+.doc table { width: 100%; border-collapse: collapse; margin: 0 0 20px; font-size: 14.5px; }
+.doc th, .doc td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line); }
+.doc th { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.doc-scroll { overflow-x: auto; }
+
+/* The logo is a link home on document pages; on the marketing page it is decoration
+   beside a heading, so the class carries no layout of its own. */
+.mark-link { display: inline-flex; line-height: 0; }
+
+/* Which product a policy covers, said on the page. The app and the website have separate
+   policies, and a reader landing on one from an App Store listing needs to know which. */
+.doc-product { font-size: 15px; color: var(--ink-2); margin: 0 0 4px; }
+
+/* ============ cookie consent ============
+   Shown only to visitors in the EEA, the UK and Switzerland, where an analytics cookie
+   needs asking first. A bar rather than a full-screen overlay: the page is readable behind
+   it, and nothing about the product is withheld pending an answer. Decline is the focused
+   button, because the safe option should also be the easy one. */
+
+.consent {
+  position: fixed; inset: auto 12px 12px 12px; z-index: 60;
+  max-width: 560px; margin: 0 auto;
+  background: var(--ground); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(11, 31, 23, .18);
+  padding: 16px 18px;
+  display: grid; gap: 12px;
+}
+.consent p { margin: 0; font-size: 14px; color: var(--ink-2); }
+.consent a { color: var(--accent-ink); }
+.consent-btns { display: flex; gap: 9px; flex-wrap: wrap; }
+.consent button {
+  font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  border-radius: 9px; padding: 9px 16px; border: 1px solid var(--line);
+  background: var(--ground); color: var(--ink);
+}
+.consent .consent-yes { background: var(--accent-ink); border-color: var(--accent-ink); color: #fff; }
+.consent button:hover { filter: brightness(1.04); }
+.consent button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .consent { animation: consent-in .22s ease-out; }
+  @keyframes consent-in { from { transform: translateY(8px); opacity: 0; } }
+}

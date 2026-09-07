@@ -32,6 +32,10 @@ header span { display: block; font-size: 0.8rem; color: var(--text-2); font-weig
 h1 { font-size: 1.9rem; line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 0.4rem; }
 .updated { color: var(--text-2); font-size: 0.85rem; margin: 0 0 2.5rem; }
 h2 { font-size: 1.1rem; margin: 2.5rem 0 0.6rem; letter-spacing: -0.01em; }
+/* The support page carries two products under one roof, so h2 names the product and h3 the
+   question. Without a rule the browser default makes the question larger than the section
+   it sits inside. */
+h3 { font-size: 1rem; margin: 1.7rem 0 0.35rem; letter-spacing: -0.005em; }
 p, li { color: var(--text-2); }
 strong { color: var(--text); font-weight: 600; }
 ul { padding-left: 1.1rem; }
@@ -53,7 +57,9 @@ footer {
   font-size: 0.85rem;
   color: var(--text-2);
 }
-nav { display: flex; gap: 1.25rem; font-size: 0.9rem; }
+/* Wrapping, because the footer nav is five items on some pages and a 320px phone cannot
+   fit them on one line - the last one hung 30px off the right edge and scrolled the page. */
+nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font-size: 0.9rem; }
 
 /* Cookie and scope names read as identifiers, not prose - the website privacy policy has
    to name them exactly, so they are set in the mono face like the code they are. */

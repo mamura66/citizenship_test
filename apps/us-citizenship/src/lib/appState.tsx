@@ -36,37 +36,104 @@ const KEYS = {
   hasOnboarded: 'hasOnboarded',
 };
 
+type PracticeEntry = { date: string; scorePct: number; passed: boolean };
+
+/**
+ * Read one persisted key and apply it, containing every failure to that key.
+ *
+ * The loader used to read all seven keys through a single Promise.all and then
+ * parse them in one try block. A malformed `starredIds` or `practiceHistory` threw
+ * at JSON.parse, so the setters that came after it - first name, interview date,
+ * hasOnboarded - never ran, `finally` marked the app hydrated anyway, and the
+ * rejection escaped as an unhandled promise rejection. One corrupt value therefore
+ * presented as the app having wiped the user's name and interview date and
+ * forgotten they had onboarded, which onboarding would then replay from scratch.
+ *
+ * A value we managed to read but could not use is deleted, so it cannot fail again
+ * on every launch. A read that failed outright is left alone: that can be a
+ * transient storage error, and deleting on it would turn a glitch into real data
+ * loss.
+ */
+async function loadKey(key: string, apply: (raw: string) => void): Promise<void> {
+  let raw: string | null = null;
+  try {
+    raw = await AsyncStorage.getItem(key);
+  } catch (e) {
+    if (__DEV__) console.warn(`[appState] could not read "${key}"`, e);
+    return;
+  }
+  if (raw === null) return;
+  try {
+    apply(raw);
+  } catch (e) {
+    if (__DEV__) console.warn(`[appState] discarding unusable "${key}": ${raw}`, e);
+    AsyncStorage.removeItem(key).catch(() => {});
+  }
+}
+
+/** Throws if the JSON is not an array, so loadKey can discard the key. */
+function parseArray(raw: string): unknown[] {
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) throw new Error('expected an array');
+  return parsed;
+}
+
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [civicsVersion, setCivicsVersionState] = useState<CivicsVersion>('2025');
   const [homeState, setHomeStateState] = useState<string | null>(null);
   const [starredIds, setStarredIds] = useState<Set<number>>(new Set());
-  const [practiceHistory, setPracticeHistory] = useState<
-    { date: string; scorePct: number; passed: boolean }[]
-  >([]);
+  const [practiceHistory, setPracticeHistory] = useState<PracticeEntry[]>([]);
   const [firstName, setFirstNameState] = useState<string | null>(null);
   const [interviewDate, setInterviewDateState] = useState<string | null>(null);
   const [hasOnboarded, setHasOnboardedState] = useState(false);
 
   useEffect(() => {
     (async () => {
+      // One key's bad data must never cost another key's good data, so each is
+      // read and validated on its own (see loadKey above). loadKey does not
+      // throw, so this Promise.all cannot reject; `hydrated` is still set in
+      // `finally` because a loader that somehow failed must not leave the app
+      // stuck behind the splash forever.
       try {
-        const [v, s, star, hist, name, date, onboarded] = await Promise.all([
-          AsyncStorage.getItem(KEYS.civicsVersion),
-          AsyncStorage.getItem(KEYS.homeState),
-          AsyncStorage.getItem(KEYS.starredIds),
-          AsyncStorage.getItem(KEYS.practiceHistory),
-          AsyncStorage.getItem(KEYS.firstName),
-          AsyncStorage.getItem(KEYS.interviewDate),
-          AsyncStorage.getItem(KEYS.hasOnboarded),
+        await Promise.all([
+          loadKey(KEYS.civicsVersion, (raw) => {
+            if (raw === '2008' || raw === '2025') setCivicsVersionState(raw);
+          }),
+          loadKey(KEYS.homeState, (raw) => {
+            if (raw) setHomeStateState(raw);
+          }),
+          loadKey(KEYS.starredIds, (raw) => {
+            // Keep the ids that are usable rather than dropping the whole review
+            // deck because one entry is not a number.
+            const ids = parseArray(raw).filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
+            setStarredIds(new Set(ids));
+          }),
+          loadKey(KEYS.practiceHistory, (raw) => {
+            // Same rule, and it matters more here: the performance screen must
+            // only ever show scores actually recorded, so a malformed row is
+            // dropped instead of being coerced into a number.
+            const entries = parseArray(raw).filter(
+              (e): e is PracticeEntry =>
+                !!e &&
+                typeof e === 'object' &&
+                typeof (e as PracticeEntry).date === 'string' &&
+                typeof (e as PracticeEntry).scorePct === 'number' &&
+                Number.isFinite((e as PracticeEntry).scorePct) &&
+                typeof (e as PracticeEntry).passed === 'boolean'
+            );
+            setPracticeHistory(entries);
+          }),
+          loadKey(KEYS.firstName, (raw) => {
+            if (raw) setFirstNameState(raw);
+          }),
+          loadKey(KEYS.interviewDate, (raw) => {
+            if (raw) setInterviewDateState(raw);
+          }),
+          loadKey(KEYS.hasOnboarded, (raw) => {
+            if (raw === 'true') setHasOnboardedState(true);
+          }),
         ]);
-        if (v === '2008' || v === '2025') setCivicsVersionState(v);
-        if (s) setHomeStateState(s);
-        if (star) setStarredIds(new Set(JSON.parse(star)));
-        if (hist) setPracticeHistory(JSON.parse(hist));
-        if (name) setFirstNameState(name);
-        if (date) setInterviewDateState(date);
-        if (onboarded === 'true') setHasOnboardedState(true);
       } finally {
         setHydrated(true);
       }

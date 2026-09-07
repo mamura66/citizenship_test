@@ -128,6 +128,14 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
  *  The region itself lives in app.html and is never replaced - see the note there. Writing
  *  the same string twice in a row is not announced a second time, so it is cleared first,
  *  which is also what makes "Correct." on two questions running read as two answers. */
+/** render() replaces the pane wholesale, so anything that re-renders in response to a
+ *  click has to put focus back deliberately - otherwise focus falls to the body and the
+ *  next Tab starts again from the top of the page. */
+function refocus(sel) {
+  const n = document.querySelector(sel);
+  if (n) n.focus();
+}
+
 function announce(message) {
   const region = $('#live');
   if (!region) return;
@@ -179,13 +187,14 @@ function sectionAccuracy() {
   const byCat = new Map();
   log.forEach((r) => {
     if (!r.c) return;
-    const cur = byCat.get(r.c) || { seen: 0, ok: 0 };
+    const key = String(r.c);
+    const cur = byCat.get(key) || { seen: 0, ok: 0 };
     cur.seen += 1;
     if (r.ok) cur.ok += 1;
-    byCat.set(r.c, cur);
+    byCat.set(key, cur);
   });
   return (state.pack.categories || []).map((cat) => {
-    const d = byCat.get(cat.id);
+    const d = byCat.get(String(cat.id));
     return {
       id: cat.id,
       label: subsection(cat.subsection),
@@ -232,12 +241,106 @@ async function pickCountry(code) {
   }
 }
 
+/* ---------- theme ----------
+ *
+ * Three states, not two: the default is to follow the operating system, and a choice
+ * overrides it. Stamping data-theme on <html> is what the CSS already keys off - see the
+ * three-block pattern at the top of app.css - so nothing else has to know about this.
+ *
+ * Applied before the shell is revealed, so a dark-mode visitor never sees a white flash.
+ */
+const THEME_KEY = 'pfc.theme';
+
+function readTheme() {
+  try { return localStorage.getItem(THEME_KEY); } catch { return null; }
+}
+function systemPrefersDark() {
+  return matchMedia('(prefers-color-scheme: dark)').matches;
+}
+/** What is actually on screen right now, whether chosen or inherited. */
+function effectiveTheme() {
+  return readTheme() || (systemPrefersDark() ? 'dark' : 'light');
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = $('#themeToggle');
+  if (!btn) return;
+  const dark = theme === 'dark';
+  // The button offers the other one, so it is labelled with what it will do.
+  btn.setAttribute('aria-pressed', String(dark));
+  btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+  btn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  const label = btn.querySelector('.theme-label');
+  if (label) label.textContent = dark ? 'Light' : 'Dark';
+}
+function initTheme() {
+  applyTheme(effectiveTheme());
+  const btn = $('#themeToggle');
+  if (btn) {
+    btn.onclick = () => {
+      const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem(THEME_KEY, next); } catch {}
+      applyTheme(next);
+      // Redraw: the charts are SVG built with the token values resolved at render time.
+      if (state.pack) render();
+    };
+  }
+  // Follow the system until somebody chooses otherwise.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!readTheme()) { applyTheme(effectiveTheme()); if (state.pack) render(); }
+  });
+}
+
 /* ------------------------------------------------------------------ boot */
+
+/* Answers that change with an election or an appointment are stored as `DYNAMIC:field`
+ * tokens rather than as names, and resolved against the country's officials file at load.
+ *
+ * They are resolved once, in place, the moment the pack is loaded - not at each render.
+ * Every screen reads `q.answers`, and the practice test even draws its wrong options from
+ * other questions' answers, so resolving in one place is the only way to be sure a token
+ * cannot reach a screen. Before this, the website showed the literal string
+ * "DYNAMIC:president" to people as the correct answer.
+ *
+ * A token with no matching value is dropped rather than shown. An answer we cannot source
+ * is worse than a question with one fewer accepted answer, and the officials file records
+ * what it was verified against and when.
+ */
+async function resolveDynamicAnswers(pack, countryCode) {
+  const tokens = new Set();
+  const questions = (pack.categories || []).flatMap((c) => c.questions || []);
+  questions.forEach((q) => (q.answers || []).forEach((a) => {
+    if (typeof a === 'string' && a.startsWith('DYNAMIC:')) tokens.add(a);
+  }));
+  if (!tokens.size) return pack;
+
+  const res = await fetch(`/content/${countryCode}/officials/national-dynamic.json`).catch(() => null);
+  const officials = res && res.ok ? await res.json().catch(() => null) : null;
+
+  questions.forEach((q) => {
+    if (!q.answers) return;
+    q.answers = q.answers
+      .map((a) => {
+        if (typeof a !== 'string' || !a.startsWith('DYNAMIC:')) return a;
+        const value = officials ? officials[a.slice('DYNAMIC:'.length)] : undefined;
+        return value === undefined || value === null || value === '' ? null : String(value);
+      })
+      .filter((a) => a !== null);
+  });
+
+  if (!officials) {
+    // Left for the console rather than the screen: the questions have simply lost an
+    // answer, which the UI handles, and there is nothing a visitor could do about it.
+    console.error(`officials data unavailable for ${countryCode}; ${tokens.size} answer(s) dropped`);
+  }
+  return pack;
+}
+
 async function loadPack(country, versionId) {
   const version = (country.versions || []).find((v) => v.id === versionId) || country.versions[0];
   const res = await fetch(`/content/${country.code}/${version.file}`);
   if (!res.ok) throw new Error(`content pack missing for ${country.code}`);
-  const pack = await res.json();
+  const pack = await resolveDynamicAnswers(await res.json(), country.code);
   return { pack, versionId: version.id };
 }
 
@@ -252,6 +355,10 @@ async function boot() {
     ]);
     state.me = user;
     state.config = config;
+    initTheme();
+    // Only the owner can open /insights; everyone else gets a 404 from it.
+    const insights = $('#insightsLink');
+    if (insights) insights.hidden = !user.isOwner;
     if (config.paddle && config.paddle.environment === 'sandbox' && config.paddle.configured) {
       showSandboxBanner();
     }
@@ -280,6 +387,7 @@ async function boot() {
   state.pack = pack;
   state.versionId = versionId;
   state.mode = saved.mode || 'study';
+  if (state.mode === 'insights' && !state.me.isOwner) state.mode = 'study';
   state.topicId = null;
 
   renderRail();
@@ -312,7 +420,16 @@ function renderRail() {
 
   document.querySelectorAll('.mode[data-mode]').forEach((b) => {
     b.setAttribute('aria-current', String(b.dataset.mode === state.mode));
-    b.onclick = () => { state.mode = b.dataset.mode; state.test = null; store.write({ mode: state.mode }); renderRail(); render(); };
+    b.onclick = () => {
+      // A test in progress is paused, not thrown away. Answering a question and then
+      // looking at Performance used to discard the whole attempt with nothing said; the
+      // practice screen now offers it back.
+      if (state.test && b.dataset.mode !== 'practice') state.test.paused = true;
+      state.mode = b.dataset.mode;
+      store.write({ mode: state.mode });
+      renderRail();
+      render();
+    };
   });
   const lock = document.querySelector('[data-lockicon]');
   if (lock) lock.hidden = isPro();
@@ -393,6 +510,10 @@ async function switchVersion(versionId) {
     state.revealed = false;
     state.test = null;
     store.write({ versionId: loaded.versionId });
+    // Sent now rather than on the usual debounce. Answers can wait 1.2 seconds; a version
+    // change cannot, because a reload in that window would come back on the old pool - and
+    // boot() hydrates from the server, so the local copy would be overwritten, not kept.
+    flushSync();
     renderRail();
     render();
     const v = (state.country.versions || []).find((x) => x.id === state.versionId);
@@ -405,10 +526,20 @@ async function switchVersion(versionId) {
 }
 
 /* ------------------------------------------------------------------ render */
+const WIDE_MODES = ['performance', 'insights'];
+
 function render() {
   const pane = $('#pane');
   pane.innerHTML = '';
-  ({ study: renderStudy, practice: renderPractice, interview: renderInterview, performance: renderPerformance }[state.mode] || renderStudy)(pane);
+  // The dashboards use the whole width; reading modes keep a comfortable measure.
+  pane.classList.toggle('is-wide', WIDE_MODES.includes(state.mode));
+  ({
+    study: renderStudy,
+    practice: renderPractice,
+    interview: renderInterview,
+    performance: renderPerformance,
+    insights: renderInsights,
+  }[state.mode] || renderStudy)(pane);
 }
 
 function crumb(pane, text) {
@@ -432,6 +563,9 @@ function renderStudy(pane) {
   pane.appendChild(prog);
 
   const wrap = el('button', 'flip');
+  // A toggle, and it has to say so: without aria-expanded the card is a button whose label
+  // silently changes from a question to a list of answers.
+  wrap.setAttribute('aria-expanded', String(state.revealed));
   const card = el('div', 'card');
   if (!state.revealed) {
     card.innerHTML = `<span class="label">Question ${q.id}</span>
@@ -439,21 +573,29 @@ function renderStudy(pane) {
       <p class="label" style="margin-top:18px">Click to reveal</p>`;
   } else {
     const many = answers.length > 1;
-    card.innerHTML = `<span class="label">${many ? `Accepted answers · ${answers.length}` : 'Answer'}</span>
-      ${acceptsAnyOne(q.question, answers.length) ? '<p style="color:var(--accent);font-size:13.5px;margin:6px 0 0">Any one of these is accepted.</p>' : ''}
-      <ul class="answers">${answers.map((a) => `<li><span class="tick">✓</span><span>${esc(a)}</span></li>`).join('')}</ul>
+    card.innerHTML = `<span class="label">${many ? `Accepted answers \u00b7 ${answers.length}` : 'Answer'}</span>
+      ${acceptsAnyOne(q.question, answers.length) ? '<p style="color:var(--accent-ink);font-size:13.5px;margin:6px 0 0">Any one of these is accepted.</p>' : ''}
+      <ul class="answers">${answers.map((a) => `<li><span class="tick" aria-hidden="true">\u2713</span><span>${esc(a)}</span></li>`).join('')}</ul>
       ${q.note ? `<p class="note">${esc(q.note)}</p>` : ''}
       <p class="label" style="margin-top:16px">Click to go back</p>`;
   }
   wrap.appendChild(card);
-  wrap.onclick = () => { state.revealed = !state.revealed; render(); };
+  wrap.onclick = () => {
+    state.revealed = !state.revealed;
+    render();
+    // render() replaced the card, so focus would otherwise fall to the body and the next
+    // Tab would start again from the top of the page. Focus goes back on the card, which
+    // is also what makes a screen reader read the side that has just been turned up - so
+    // there is deliberately no live-region copy here, which would only double-speak.
+    refocus('.flip');
+  };
   pane.appendChild(wrap);
 
   const row = el('div', 'row');
   const prev = el('button', 'btn ghost', 'Previous');
-  prev.onclick = () => { state.cardIndex = (i - 1 + pool.length) % pool.length; state.revealed = false; render(); };
+  prev.onclick = () => { state.cardIndex = (i - 1 + pool.length) % pool.length; state.revealed = false; render(); refocus('.btn.ghost'); };
   const next = el('button', 'btn', 'Next question');
-  next.onclick = () => { state.cardIndex = (i + 1) % pool.length; state.revealed = false; render(); };
+  next.onclick = () => { state.cardIndex = (i + 1) % pool.length; state.revealed = false; render(); refocus('.row .btn:not(.ghost)'); };
   row.append(prev, next);
   // Position without a total: enough to know where you are, without publishing how
   // many questions the pool holds.
@@ -482,9 +624,69 @@ function buildTest(count) {
   });
 }
 
+/** A test is finished once every question has been walked past. That is also the moment it
+ *  counts against the free allowance, because the history row is written on the results
+ *  screen - see the note on renderPausedTest. */
+const testFinished = (t) => t.at >= t.items.length;
+
+/** The outcome of a graded question, in words. Built in one place so the sentence drawn on
+ *  the card and the sentence announced to a screen reader cannot drift apart. */
+function verdictFor(item) {
+  const answers = [...item.correct];
+  const lead = item.graded ? 'Correct.' : 'Not correct.';
+  // A right answer to a one-answer question needs no restatement; anything else does.
+  const rest = item.graded && answers.length === 1
+    ? ''
+    : `The answer${answers.length > 1 ? 's are' : ' is'} ${answers.join('; ')}.`;
+  return { cls: item.graded ? 'right' : 'wrong', glyph: item.graded ? '\u2713' : '\u2715', lead, rest, text: `${lead} ${rest}`.trim() };
+}
+
+/** The resume screen.
+ *
+ *  state.test used to be dropped the instant the mode changed, so answering one question
+ *  and glancing at Performance threw the attempt away with nothing said. It is offered back
+ *  rather than resumed on sight: landing straight in the middle of a half-finished test is
+ *  its own kind of surprise.
+ *
+ *  Note what this does not change: the free allowance is still spent by *finishing* a test,
+ *  because that is when the history row is written. Resuming is therefore always free, and
+ *  somebody who abandons a test can still start another - the same as before this screen
+ *  existed. Closing that would mean holding the attempt on the server. */
+function renderPausedTest(pane, t) {
+  crumb(pane, 'Practice test');
+  pane.appendChild(el('h2', null, 'You have a test in progress'));
+  pane.appendChild(el('p', 'sub',
+    `Paused at question ${t.at + 1} of ${t.items.length}. Nothing you have answered is lost.`));
+  pane.appendChild(el('div', 'progress', `<i style="width:${(t.at / t.items.length) * 100}%"></i>`));
+
+  const card = el('div', 'card');
+  card.innerHTML = `<span class="label">Paused</span>
+    <p class="q">Question ${t.at + 1} of ${t.items.length}</p>
+    <p style="color:var(--ink-2);margin:10px 0 0">${t.correct} correct so far \u00b7 ${t.pass} needed to pass.</p>`;
+  pane.appendChild(card);
+
+  const row = el('div', 'row');
+  const go = el('button', 'btn', 'Resume test');
+  go.onclick = () => {
+    t.paused = false;
+    render();
+    refocus('.opt');
+  };
+  const drop = el('button', 'btn ghost', 'Discard and start a new test');
+  drop.onclick = () => { state.test = null; render(); };
+  row.append(go, drop);
+  pane.appendChild(row);
+  if (!isPro() && !usedFreeTest()) {
+    pane.appendChild(el('p', 'pay-note', 'This is your free test. Resuming picks it up where you left off.'));
+  }
+}
+
 function renderPractice(pane) {
   const asked = state.pack.askedPerInterview || 10;
   const pass = state.pack.passRequirement || Math.ceil(asked * 0.6);
+  const version = (state.country.versions || []).find((v) => v.id === state.versionId);
+
+  if (state.test && state.test.paused && !testFinished(state.test)) return renderPausedTest(pane, state.test);
 
   if (!state.test) {
     crumb(pane, 'Practice test');
@@ -495,8 +697,8 @@ function renderPractice(pane) {
     if (usedFreeTest() && !isPro()) { paywall(pane, 'Unlimited practice tests'); return; }
 
     const card = el('div', 'card');
-    card.innerHTML = `<span class="label">${esc(state.country.name)} · ${esc(state.versionId)} test</span>
-      <p class="q">${asked} questions · ${pass} to pass</p>
+    card.innerHTML = `<span class="label">${esc(state.country.name)}${version ? ` \u00b7 ${esc(version.label)}` : ''}</span>
+      <p class="q">${asked} questions \u00b7 ${pass} to pass</p>
       <p style="color:var(--ink-2);margin:10px 0 0">${usedFreeTest() ? 'Unlimited tests are part of your access.' : 'Your first full test is free.'}</p>`;
     pane.appendChild(card);
     const row = el('div', 'row');
@@ -508,24 +710,48 @@ function renderPractice(pane) {
   }
 
   const t = state.test;
-  if (t.at >= t.items.length) return renderResults(pane, t);
+  if (testFinished(t)) return renderResults(pane, t);
 
   const item = t.items[t.at];
   crumb(pane, `Question ${t.at + 1} of ${t.items.length}`);
   pane.appendChild(el('div', 'progress', `<i style="width:${((t.at) / t.items.length) * 100}%"></i>`));
 
+  const instruction = item.expected > 1 ? `Select ${item.expected} answers` : 'Select one answer';
   const card = el('div', 'card');
-  card.innerHTML = `<span class="label">${item.expected > 1 ? `Select ${item.expected} answers` : 'Select one answer'}</span>
+  card.innerHTML = `<span class="label">${instruction}</span>
     <p class="q">${esc(item.q.question)}</p>`;
   const opts = el('div', 'opts');
+  // Named as a group, so the options are announced as the answers to this question rather
+  // than as four loose buttons somewhere on a page.
+  opts.setAttribute('role', 'group');
+  opts.setAttribute('aria-label', `${instruction}: ${item.q.question}`);
   item.options.forEach((o, idx) => {
-    const b = el('button', 'opt', `<span class="k">${idx + 1}</span><span>${esc(o)}</span>`);
+    // The number is a visual anchor, not a shortcut: read out before every option it is
+    // just noise.
+    const b = el('button', 'opt', `<span class="k" aria-hidden="true">${idx + 1}</span><span>${esc(o)}</span>`);
     if (item.graded !== null) {
-      b.disabled = true;
       const right = item.correct.has(o);
       const picked = item.picked.includes(o);
       b.dataset.state = right ? 'right' : picked ? 'wrong' : 'dim';
+      // aria-disabled rather than disabled. A disabled button is skipped by the keyboard
+      // and announced as "unavailable", which is the one thing somebody does not need to
+      // hear after answering - they need to hear which option was right. This keeps the
+      // button reachable and gives it a state to report.
+      b.setAttribute('aria-disabled', 'true');
+      const mark = right
+        ? (picked ? 'Correct, your answer' : 'Correct answer')
+        : (picked ? 'Your answer, incorrect' : '');
+      if (mark) {
+        b.appendChild(el('span', 'mark',
+          `<span aria-hidden="true">${right ? '\u2713' : '\u2715'}</span> ${mark}`));
+      }
+    } else if (item.picked.includes(o)) {
+      // Mid-question on a "name two" - the first pick has to show somewhere.
+      b.dataset.state = 'picked';
+      b.setAttribute('aria-pressed', 'true');
+      b.appendChild(el('span', 'mark', 'Selected'));
     } else {
+      if (item.expected > 1) b.setAttribute('aria-pressed', 'false');
       b.onclick = () => {
         item.picked.push(o);
         if (item.picked.length >= item.expected) {
@@ -534,17 +760,37 @@ function renderPractice(pane) {
           recordAnswer(item.q, item.graded);
         }
         render();
+        // render() rebuilt the pane, which drops focus to the body. Put it on the control
+        // that carries on, and send the outcome to the live region instead - focusing the
+        // feedback itself would have the two talk over each other.
+        if (item.graded !== null) {
+          refocus('.next-q');
+          announce(verdictFor(item).text);
+        } else {
+          const still = document.querySelectorAll('.opt')[idx];
+          if (still) still.focus();
+        }
       };
     }
     opts.appendChild(b);
   });
   card.appendChild(opts);
+
+  if (item.graded !== null) {
+    const v = verdictFor(item);
+    card.appendChild(el('p', `verdict ${v.cls}`,
+      `<b><span aria-hidden="true">${v.glyph}</span> ${esc(v.lead)}</b>${v.rest ? `<span>${esc(v.rest)}</span>` : ''}`));
+  }
   pane.appendChild(card);
 
   if (item.graded !== null) {
     const row = el('div', 'row');
-    const next = el('button', 'btn', t.at + 1 >= t.items.length ? 'See results' : 'Next question');
-    next.onclick = () => { t.at += 1; render(); };
+    const next = el('button', 'btn next-q', t.at + 1 >= t.items.length ? 'See results' : 'Next question');
+    next.onclick = () => {
+      t.at += 1;
+      render();
+      refocus('.opt, .pane .btn');
+    };
     row.appendChild(next);
     pane.appendChild(row);
   }
@@ -570,8 +816,8 @@ function renderResults(pane, t) {
       c.style.marginBottom = '12px';
       c.innerHTML = `<p style="font-weight:600;margin:0 0 8px">${esc(m.q.question)}</p>
         <span class="label">${m.acceptable.length > 1 ? `Accepted answers · ${m.acceptable.length}` : 'Answer'}</span>
-        ${acceptsAnyOne(m.q.question, m.acceptable.length) ? '<p style="color:var(--accent);font-size:13px;margin:5px 0 0">Any one of these is accepted.</p>' : ''}
-        <ul class="answers">${m.acceptable.map((a) => `<li><span class="tick">✓</span><span>${esc(a)}</span></li>`).join('')}</ul>
+        ${acceptsAnyOne(m.q.question, m.acceptable.length) ? '<p style="color:var(--accent-ink);font-size:13px;margin:5px 0 0">Any one of these is accepted.</p>' : ''}
+        <ul class="answers">${m.acceptable.map((a) => `<li><span class="tick" aria-hidden="true">✓</span><span>${esc(a)}</span></li>`).join('')}</ul>
         ${m.q.note ? `<p class="note">${esc(m.q.note)}</p>` : ''}`;
       pane.appendChild(c);
     });
@@ -607,11 +853,11 @@ function renderInterview(pane) {
   reveal.onclick = () => {
     reveal.remove();
     const list = el('ul', 'answers');
-    list.innerHTML = (q.answers || []).map((a) => `<li><span class="tick">✓</span><span>${esc(a)}</span></li>`).join('');
+    list.innerHTML = (q.answers || []).map((a) => `<li><span class="tick" aria-hidden="true">✓</span><span>${esc(a)}</span></li>`).join('');
     card.appendChild(list);
   };
   const next = el('button', 'btn quiet', 'Another question');
-  next.onclick = render;
+  next.onclick = () => { render(); refocus('.btn.quiet'); };
   row.append(say, reveal, next);
   pane.append(card, row);
   pane.appendChild(el('p', 'sub', 'Your browser speaks the question. The microphone is never used and no audio is recorded.'));
@@ -624,7 +870,7 @@ function renderInterview(pane) {
  * numbers once and it will not again (BUILD_PLAN v9).
  *
  * The screen is built so that it looks deliberate before there is any data: the section
- * map is drawn grey rather than hidden, so a new person can see the shape of what they are
+ * map is drawn gray rather than hidden, so a new person can see the shape of what they are
  * about to fill in instead of an empty page that reads as a missing feature.
  */
 
@@ -633,8 +879,16 @@ function renderInterview(pane) {
 function latestByQuestion() {
   const out = new Map();
   (store.read().answers || []).forEach((r) => {
-    const prev = out.get(r.q);
-    if (!prev || r.at >= prev.at) out.set(r.q, r);
+    // Keyed as a string, always.
+    //
+    // Question ids are numbers in the content pack, and putProgress() stores them as
+    // strings. So a Map keyed by whatever came back from the server could never be looked
+    // up with a pack id, and the map of the test rendered entirely grey for anybody whose
+    // progress had been saved and reloaded - which is everybody, after one page load.
+    // Section accuracy escaped it only because category ids are strings on both sides.
+    const key = String(r.q);
+    const prev = out.get(key);
+    if (!prev || r.at >= prev.at) out.set(key, r);
   });
   return out;
 }
@@ -674,40 +928,68 @@ function activity(days = 30) {
   return out;
 }
 
-/** An accuracy dial with the pass line marked on it. One scale, and the only number on it
- *  is one the data actually reaches. */
-function accuracyDial(pct, passPct) {
-  const R = 54, C = 64, STROKE = 11;
+/** The accuracy ring. One scale, and the only number on it is one the data reaches.
+ *  The pass mark is a tick on that same scale, so "am I above the line" is a glance. */
+function accuracyRing(pct, passPct) {
+  const R = 52, C = 64, SW = 10;
   const circ = 2 * Math.PI * R;
   const shown = pct === null ? 0 : pct;
-  const color = pct === null ? 'var(--line)' : pct >= passPct ? 'var(--good)' : 'var(--bad)';
-  // The pass mark, as a tick on the same scale the arc is drawn on.
-  const passAngle = (passPct / 100) * 2 * Math.PI - Math.PI / 2;
+  const state = pct === null ? 'none' : pct >= passPct ? 'ok' : 'low';
+  const a = (passPct / 100) * 2 * Math.PI - Math.PI / 2;
   const tick = [
-    C + Math.cos(passAngle) * (R - STROKE / 2 - 3),
-    C + Math.sin(passAngle) * (R - STROKE / 2 - 3),
-    C + Math.cos(passAngle) * (R + STROKE / 2 + 3),
-    C + Math.sin(passAngle) * (R + STROKE / 2 + 3),
+    C + Math.cos(a) * (R - SW / 2 - 3), C + Math.sin(a) * (R - SW / 2 - 3),
+    C + Math.cos(a) * (R + SW / 2 + 3), C + Math.sin(a) * (R + SW / 2 + 3),
   ];
-  return `<svg viewBox="0 0 ${C * 2} ${C * 2}" class="dial" role="img"
-       aria-label="${pct === null ? 'No answers recorded yet' : `Accuracy ${pct} percent, pass line ${passPct} percent`}">
-    <circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="var(--line)" stroke-width="${STROKE}"/>
-    <circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="${color}" stroke-width="${STROKE}"
-            stroke-linecap="round" transform="rotate(-90 ${C} ${C})"
-            stroke-dasharray="${(circ * shown / 100).toFixed(1)} ${circ.toFixed(1)}"/>
-    <line x1="${tick[0].toFixed(1)}" y1="${tick[1].toFixed(1)}" x2="${tick[2].toFixed(1)}" y2="${tick[3].toFixed(1)}"
-          stroke="var(--ink)" stroke-width="2"/>
-    <text x="${C}" y="${C + 2}" text-anchor="middle" dominant-baseline="middle"
-          font-family="IBM Plex Mono, monospace" font-size="26" font-weight="600" fill="var(--ink)">${pct === null ? '—' : pct + '%'}</text>
-    <text x="${C}" y="${C + 24}" text-anchor="middle" font-family="IBM Plex Mono, monospace"
-          font-size="9" letter-spacing="0.1em" fill="var(--ink-3)">ACCURACY</text>
+  return `<svg class="ring is-${state}" viewBox="0 0 ${C * 2} ${C * 2}" role="img"
+       aria-label="${pct === null ? 'No answers recorded yet' : `Accuracy ${pct} percent, pass mark ${passPct} percent`}">
+    <circle class="ring-bg" cx="${C}" cy="${C}" r="${R}" fill="none" stroke-width="${SW}"/>
+    <circle class="ring-fg" cx="${C}" cy="${C}" r="${R}" fill="none" stroke-width="${SW}" stroke-linecap="round"
+            transform="rotate(-90 ${C} ${C})" stroke-dasharray="${(circ * shown / 100).toFixed(1)} ${circ.toFixed(1)}"/>
+    <line class="ring-tick" x1="${tick[0].toFixed(1)}" y1="${tick[1].toFixed(1)}" x2="${tick[2].toFixed(1)}" y2="${tick[3].toFixed(1)}" stroke-width="2"/>
+    <text class="ring-big" x="${C}" y="${C + 1}" text-anchor="middle" dominant-baseline="middle">${pct === null ? '—' : pct + '%'}</text>
+    <text class="ring-cap" x="${C}" y="${C + 24}" text-anchor="middle">ACCURACY</text>
   </svg>`;
 }
 
+/** The score trend. Drawn after the fill, so the pass line stays visible on top of it. */
+function trendChart(recent, passPct) {
+  const W = 520, H = 150, PAD = 24;
+  const pts = recent.map((h, i) => [
+    PAD + (i / (recent.length - 1)) * (W - PAD * 2),
+    H - PAD - (h.pct / 100) * (H - PAD * 2),
+  ]);
+  const line = pts.map((pt, i) => `${i ? 'L' : 'M'}${pt[0].toFixed(1)} ${pt[1].toFixed(1)}`).join(' ');
+  const area = `${line} L${pts[pts.length - 1][0].toFixed(1)} ${H - PAD} L${pts[0][0].toFixed(1)} ${H - PAD} Z`;
+  const passY = H - PAD - (passPct / 100) * (H - PAD * 2);
+  const last = pts[pts.length - 1];
+  return `<svg class="trend" viewBox="0 0 ${W} ${H}" role="img"
+       aria-label="Your last ${recent.length} scores, oldest first, most recent ${recent[recent.length - 1].pct} percent">
+    <path class="t-area" d="${area}"/>
+    <path class="t-line" d="${line}"/>
+    <line class="t-pass" x1="${PAD}" x2="${W - PAD}" y1="${passY.toFixed(1)}" y2="${passY.toFixed(1)}"/>
+    <text class="t-cap" x="${PAD}" y="${(passY - 7).toFixed(1)}">${passPct}% pass mark</text>
+    ${pts.map((pt, i) => `<circle class="t-dot" cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="${i === pts.length - 1 ? 4.5 : 2.6}"/>`).join('')}
+    <text class="t-now" x="${last[0].toFixed(1)}" y="${(last[1] - 11).toFixed(1)}" text-anchor="end">${recent[recent.length - 1].pct}%</text>
+  </svg>`;
+}
+
+/* ---------- performance: the command deck ----------
+ *
+ * One screen: the ring and a sentence, a strip of figures, then the map of the test beside
+ * the two charts. Chosen from five prototypes.
+ *
+ * Country-agnostic by construction. Section names, the pass mark and how many questions a
+ * test asks all come from the loaded pack, so a country with four sections or twelve lays
+ * out the same way and nothing here says "USCIS".
+ *
+ * Every figure comes from answers actually given. No projected score, no invented
+ * readiness number, and a section never attempted is shown as never attempted rather than
+ * as zero - see BUILD_PLAN v9 for why that rule exists.
+ */
 function renderPerformance(pane) {
   const hist = store.read().history || [];
   const log = store.read().answers || [];
-  const recent = hist.slice(-7);
+  const recent = hist.slice(-9);
   const pass = state.pack.passRequirement || 12;
   const asked = state.pack.askedPerInterview || 20;
   const passPct = Math.round((pass / asked) * 100);
@@ -719,136 +1001,104 @@ function renderPerformance(pane) {
   const all = allQuestions();
   const seenPct = all.length ? Math.round((latest.size / all.length) * 100) : 0;
   const streak = studyStreak();
-
-  crumb(pane, 'Performance');
-  pane.appendChild(el('h2', null, 'Where you stand'));
-  pane.appendChild(el('p', 'sub', answered
-    ? (overall >= passPct
-        ? `You are answering above the ${passPct}% pass line. The map below shows what is left.`
-        : `You are below the ${passPct}% pass line. The weakest sections are listed underneath.`)
-    : 'Nothing here is estimated. Answer a question in a practice test and this fills in with your own results.'));
-
-  /* ---- the dial and the numbers beside it ---- */
-  const top = el('div', 'card perf-top');
-  top.innerHTML = `
-    <div class="perf-dial">${accuracyDial(overall, passPct)}
-      <p class="perf-dial-note">Pass line ${passPct}%</p>
-    </div>
-    <div class="perf-figures">
-      <div><b class="mono">${seenPct}%</b><span class="label">Of the pool seen</span></div>
-      <div><b class="mono">${hist.length || '—'}</b><span class="label">Tests finished</span></div>
-      <div><b class="mono">${streak || '—'}</b><span class="label">Day streak</span></div>
-      <div><b class="mono">${answered || '—'}</b><span class="label">Answers recorded</span></div>
-    </div>`;
-  pane.appendChild(top);
-
-  /* ---- the map: one cell per question, grouped by section ---- */
-  const map = el('div', 'card');
-  map.style.marginTop = '14px';
-  const rows = (state.pack.categories || []).map((cat) => {
-    const cells = cat.questions.map((q) => {
-      const r = latest.get(q.id);
-      const cls = !r ? 'u' : r.ok ? 'r' : 'w';
-      const title = `${q.question}\n${!r ? 'Not asked yet' : r.ok ? 'Answered correctly' : 'Answered wrongly'}`;
-      return `<i class="c ${cls}" title="${esc(title)}"></i>`;
-    }).join('');
-    return `<div class="map-row">
-      <span class="map-name">${esc(subsection(cat.subsection))}</span>
-      <span class="map-cells">${cells}</span>
-    </div>`;
-  }).join('');
-  map.innerHTML = `<span class="label">Your map of the official test</span>
-    <p class="perf-help">Every question you could be asked, grouped by section. It fills in as you answer.</p>
-    <div class="map">${rows}</div>
-    <p class="map-key">
-      <span><i class="c r"></i> right</span>
-      <span><i class="c w"></i> wrong</span>
-      <span><i class="c u"></i> not asked yet</span>
-    </p>`;
-  pane.appendChild(map);
-
-  /* ---- last 30 days ---- */
-  const act = activity(30);
-  if (act.some((d) => d.n)) {
-    const peak = Math.max(...act.map((d) => d.n));
-    const bars = act.map((d) => {
-      const h = d.n ? Math.max(12, Math.round((d.n / peak) * 100)) : 3;
-      const label = d.n
-        ? `${d.n} answer${d.n === 1 ? '' : 's'} on ${d.date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`
-        : `Nothing on ${d.date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`;
-      return `<i style="height:${h}%" class="${d.n ? 'on' : ''}" title="${esc(label)}"></i>`;
-    }).join('');
-    const card = el('div', 'card');
-    card.style.marginTop = '14px';
-    card.innerHTML = `<span class="label">Last 30 days</span>
-      <p class="perf-help">Answers per day. Short, regular sessions beat one long one.</p>
-      <div class="spark">${bars}</div>`;
-    pane.appendChild(card);
-  }
-
-  /* ---- score trend: one scale, every label a value the data reaches ---- */
-  if (recent.length >= 2) {
-    const W = 640, H = 160, PAD = 28;
-    const pts = recent.map((h, i) => [
-      PAD + (i / (recent.length - 1)) * (W - PAD * 2),
-      H - PAD - (h.pct / 100) * (H - PAD * 2),
-    ]);
-    const line = pts.map((pt, i) => `${i ? 'L' : 'M'}${pt[0].toFixed(1)} ${pt[1].toFixed(1)}`).join(' ');
-    const area = `${line} L${pts[pts.length - 1][0].toFixed(1)} ${H - PAD} L${pts[0][0].toFixed(1)} ${H - PAD} Z`;
-    const passY = H - PAD - (passPct / 100) * (H - PAD * 2);
-    const last = pts[pts.length - 1];
-    const card = el('div', 'card');
-    card.style.marginTop = '14px';
-    card.innerHTML = `<span class="label">Your last ${recent.length} test scores</span>
-      <svg viewBox="0 0 ${W} ${H}" class="trend" role="img"
-           aria-label="Your last ${recent.length} test scores, oldest on the left, most recent ${recent[recent.length - 1].pct} percent.">
-        <line x1="${PAD}" x2="${W - PAD}" y1="${passY}" y2="${passY}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="4 4"/>
-        <text x="${PAD}" y="${passY - 6}" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace" font-size="10">${passPct}% pass line</text>
-        <path d="${area}" fill="var(--accent-soft)"/>
-        <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
-        ${pts.map((pt, i) => `<circle cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="${i === pts.length - 1 ? 5 : 3}" fill="var(--accent)"/>`).join('')}
-        <text x="${last[0].toFixed(1)}" y="${(last[1] - 12).toFixed(1)}" text-anchor="end" fill="var(--ink)"
-              font-family="IBM Plex Mono, monospace" font-size="11">${recent[recent.length - 1].pct}%</text>
-      </svg>`;
-    pane.appendChild(card);
-  }
-
-  /* ---- sections, weakest first, each one a way in ---- */
   const acc = sectionAccuracy();
   const attempted = acc.filter((a) => a.pct !== null).sort((a, b) => a.pct - b.pct);
   const untouched = acc.filter((a) => a.pct === null);
 
+  const deck = el('div', 'deck');
+
+  /* ---- the ring, and one sentence that says what it means ---- */
+  const headline = !answered
+    ? 'Nothing here is estimated. Answer a question and this fills in with your own results.'
+    : overall >= passPct
+      ? `You are answering above the ${passPct}% pass mark.${attempted.length ? ` Weakest: ${attempted[0].label} at ${attempted[0].pct}%.` : ''}`
+      : `You are below the ${passPct}% pass mark.${attempted.length ? ` Start with ${attempted[0].label}, at ${attempted[0].pct}%.` : ''}`;
+
+  const head = el('div', 'deck-head');
+  head.innerHTML = `<div class="deck-ring">${accuracyRing(overall, passPct)}</div>
+    <div class="deck-say">
+      <p class="label">Performance</p>
+      <h2>${answered ? (overall >= passPct ? 'On track' : 'Not there yet') : 'Where you stand'}</h2>
+      <p class="deck-sub">${esc(headline)}</p>
+    </div>`;
+  deck.appendChild(head);
+
+  /* ---- the figures strip ---- */
+  const strip = el('div', 'strip');
+  strip.innerHTML = [
+    [`${seenPct}%`, 'Of the pool seen'],
+    [hist.length || '—', 'Tests finished'],
+    [streak || '—', 'Day streak'],
+    [recent.length ? `${recent[recent.length - 1].pct}%` : '—', 'Latest score'],
+    [answered || '—', 'Answers recorded'],
+  ].map(([v, l]) => `<div class="cell"><b class="mono">${v}</b><span class="label">${l}</span></div>`).join('');
+  deck.appendChild(strip);
+
+  /* ---- three columns: the map, the charts, the sections ---- */
+  const cols = el('div', 'deck-cols');
+
+  const mapPanel = el('div', 'panel');
+  mapPanel.innerHTML = `<p class="label">Your map of the test</p>
+    <div class="map">${(state.pack.categories || []).map((cat) => {
+      const cells = cat.questions.map((q) => {
+        const r = latest.get(String(q.id));
+        const cls = !r ? 'u' : r.ok ? 'r' : 'w';
+        return `<i class="c ${cls}" title="${esc(`${q.question}\n${!r ? 'Not asked yet' : r.ok ? 'Answered correctly' : 'Answered wrongly'}`)}"></i>`;
+      }).join('');
+      return `<div class="map-row"><span class="map-name">${esc(subsection(cat.subsection))}</span><span class="map-cells">${cells}</span></div>`;
+    }).join('')}</div>
+    <p class="map-key"><span><i class="c r"></i> right</span><span><i class="c w"></i> wrong</span><span><i class="c u"></i> not asked yet</span></p>`;
+  cols.appendChild(mapPanel);
+
+  if (recent.length >= 2) {
+    const c = el('div', 'panel');
+    c.innerHTML = `<p class="label">Scores · last ${recent.length}</p>${trendChart(recent, passPct)}`;
+    cols.appendChild(c);
+  }
+  const act = activity(30);
+  if (act.some((d) => d.n)) {
+    const peak = Math.max(...act.map((d) => d.n));
+    const c = el('div', 'panel');
+    c.innerHTML = `<p class="label">Answers per day · 30</p>
+      <div class="spark">${act.map((d) => {
+        const h = d.n ? Math.max(10, Math.round((d.n / peak) * 100)) : 4;
+        const when = d.date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        return `<i style="height:${h}%" class="${d.n ? 'on' : ''}" title="${esc(d.n ? `${d.n} answer${d.n === 1 ? '' : 's'} on ${when}` : `Nothing on ${when}`)}"></i>`;
+      }).join('')}</div>`;
+    cols.appendChild(c);
+  }
   if (attempted.length) {
-    const card = el('div', 'card');
-    card.style.marginTop = '14px';
-    card.innerHTML = `<span class="label">Accuracy by section · weakest first</span>`;
+    const c = el('div', 'panel');
+    c.innerHTML = `<p class="label">Accuracy by section · weakest first</p>`;
     const list = el('div', 'sec-list');
     attempted.forEach((a) => {
       const weak = a.pct < passPct;
-      const row = el('div', 'sec');
-      row.innerHTML = `
-        <div class="sec-head">
+      // The whole row is the control, rather than a separate "Study X" line underneath it.
+      // Long section names made that line wrap, which doubled the panel's height and left
+      // the column badly out of balance.
+      const row = el('button', 'sec');
+      row.setAttribute('aria-label', `Study ${a.label}, currently ${a.pct}% correct`);
+      row.innerHTML = `<div class="sec-head">
           <span class="sec-name">${esc(a.label)}</span>
-          <span class="mono sec-pct" style="color:${weak ? 'var(--bad)' : 'var(--good)'}">${a.pct}%</span>
+          <span class="mono sec-pct ${weak ? 'is-low' : 'is-ok'}">${a.pct}%</span>
+          <span class="sec-arrow" aria-hidden="true">→</span>
         </div>
-        <div class="sec-bar"><i style="width:${a.pct}%;background:${weak ? 'var(--bad)' : 'var(--accent)'}"></i></div>`;
-      const go = el('button', 'sec-go', `Study ${a.label} →`);
-      go.onclick = () => { state.mode = 'study'; state.topicId = a.id; state.cardIndex = 0; state.revealed = false; renderRail(); render(); };
-      row.appendChild(go);
+        <div class="sec-bar"><i style="width:${a.pct}%" class="${weak ? 'is-low' : ''}"></i></div>`;
+      row.onclick = () => { state.mode = 'study'; state.topicId = a.id; state.cardIndex = 0; state.revealed = false; renderRail(); render(); };
       list.appendChild(row);
     });
-    card.appendChild(list);
-    pane.appendChild(card);
+    c.appendChild(list);
+    cols.appendChild(c);
   }
-
   if (untouched.length) {
-    const card = el('div', 'card');
-    card.style.marginTop = '14px';
-    card.innerHTML = `<span class="label">Not tested yet · ${untouched.length} section${untouched.length === 1 ? '' : 's'}</span>
-      <p style="color:var(--ink-2);margin:8px 0 0;font-size:14.5px">${untouched.map((u) => esc(u.label)).join(' · ')}</p>
-      <p class="perf-help" style="margin-top:8px">Shown separately on purpose: never having been asked is not the same as getting it wrong.</p>`;
-    pane.appendChild(card);
+    const c = el('div', 'panel');
+    c.innerHTML = `<p class="label">Not tested yet · ${untouched.length} section${untouched.length === 1 ? '' : 's'}</p>
+      <p class="panel-note">${untouched.map((u) => esc(u.label)).join(' · ')}</p>
+      <p class="panel-note dim">Shown separately on purpose: never having been asked is not the same as getting it wrong.</p>`;
+    cols.appendChild(c);
   }
+  deck.appendChild(cols);
+  pane.appendChild(deck);
 
   if (!answered) {
     const row = el('div', 'row');
@@ -859,45 +1109,211 @@ function renderPerformance(pane) {
   }
 }
 
-/* ---------- paywall: real Paddle checkout ---------- */
+/* ---------- insights: site analytics, owner only ----------
+ *
+ * Rendered in the pane like every other mode, rather than sending the owner off to a
+ * separate page. The figures come from /api/analytics, which is the same getOverview()
+ * the standalone /insights page uses - so the two cannot disagree.
+ *
+ * What it deliberately cannot show: there is no visitor identifier anywhere in this
+ * product, so these are independent counts rather than one person's journey. "8 checkouts
+ * opened" and "59 accounts" are both true; which of those accounts opened a checkout is
+ * not knowable, on purpose. See privacy-web.html.
+ */
+let insightsRange = 28;
 
-/** Paddle.js is initialised once, lazily, with whatever the server says the environment
- *  is. Sandbox and live are separate Paddle accounts with separate tokens, so this is the
- *  only thing that has to change to go live - no code edit. */
-let paddleReady = false;
-function initPaddle(cfg) {
-  if (paddleReady) return true;
-  // Checks the fields it actually needs, not a `configured` flag. This is called with the
-  // /api/checkout response, which has no such flag - /api/config does, and reading for it
-  // here meant the overlay silently refused to open every time.
-  if (!window.Paddle || !cfg || !cfg.token || !cfg.priceId) return false;
-  if (cfg.environment === 'sandbox') Paddle.Environment.set('sandbox');
-  Paddle.Initialize({
-    token: cfg.token,
-    eventCallback: (e) => {
-      if (!e) return;
-      // Every event, named, because the interesting failure was an event that never
-      // arrived and there was no way to tell that from one that arrived unhandled.
-      console.log(`Paddle event: ${e.name}`);
-      if (e.name === 'checkout.completed') {
-        // Paddle tells us the transaction id the moment the payment completes, which is
-        // what lets the server confirm it directly instead of waiting on the webhook.
-        const id = e.data && (e.data.transaction_id || e.data.id);
-        if (id) confirmPurchase(id);
-        return;
-      }
-      if (e.name === 'checkout.error' || e.name === 'checkout.warning') {
-        // Paddle's own overlay shows a generic "something went wrong". Without this the
-        // reason is thrown away, leaving both the customer and us with nothing to act on.
-        const detail = (e.data && (e.data.message || e.data.error || JSON.stringify(e.data))) || 'no detail';
-        console.error(`Paddle ${e.name}: ${detail}`);
-        showCheckoutError(detail);
-      }
-    },
+function renderInsights(pane) {
+  if (!state.me || !state.me.isOwner) {
+    // Nothing to show, and no reason to have arrived here.
+    state.mode = 'study';
+    renderRail();
+    render();
+    return;
+  }
+
+  crumb(pane, 'Insights');
+  const head = el('div', 'ins-head');
+  head.innerHTML = `<div><h2>Site insights</h2>
+      <p class="sub">Where visitors come from, and how many got as far as an account, a checkout and a payment.</p></div>`;
+  const ranges = el('div', 'ins-ranges');
+  [7, 28, 90].forEach((d) => {
+    const b = el('button', 'ins-range', `${d} days`);
+    b.setAttribute('aria-pressed', String(d === insightsRange));
+    b.onclick = () => { insightsRange = d; render(); };
+    ranges.appendChild(b);
   });
-  paddleReady = true;
-  return true;
+  head.appendChild(ranges);
+  pane.appendChild(head);
+
+  const body = el('div', 'ins-body');
+  body.innerHTML = '<p class="sub">Loading…</p>';
+  pane.appendChild(body);
+
+  api(`/api/analytics?days=${insightsRange}`)
+    .then((d) => drawInsights(body, d))
+    .catch((err) => {
+      body.innerHTML = '';
+      const c = el('div', 'panel');
+      c.innerHTML = `<p class="label">Not available</p>
+        <p class="panel-note">${esc(err.message)}</p>
+        <p class="panel-note dim">If this says the tables are missing, the migration has not been applied to the live database yet.</p>`;
+      body.appendChild(c);
+    });
 }
+
+function drawInsights(body, d) {
+  body.innerHTML = '';
+  const t = d.totals || {};
+
+  const strip = el('div', 'strip');
+  strip.innerHTML = [
+    [t.views ?? 0, 'Page views'],
+    [t.accounts ?? 0, 'Accounts created'],
+    [t.checkouts ?? 0, 'Checkouts opened'],
+    [t.payments ?? 0, 'Payments completed'],
+    [t.refunds ?? 0, 'Refunds'],
+  ].map(([v, l]) => `<div class="cell"><b class="mono">${v}</b><span class="label">${l}</span></div>`).join('');
+  body.appendChild(strip);
+
+  const cols = el('div', 'deck-cols');
+  const series = d.series || [];
+  if (series.length) {
+    const peak = Math.max(...series.map((r) => r.views)) || 1;
+    const c = el('div', 'panel');
+    c.innerHTML = `<p class="label">Page views per day · ${d.days}</p>
+      <div class="spark">${series.map((r) => {
+        const h = r.views ? Math.max(10, Math.round((r.views / peak) * 100)) : 4;
+        return `<i style="height:${h}%" class="${r.views ? 'on' : ''}" title="${esc(`${r.views} view${r.views === 1 ? '' : 's'} on ${r.day}`)}"></i>`;
+      }).join('')}</div>
+      <p class="panel-note dim">${esc(d.from)} to ${esc(d.to)} · peak ${peak} in a day</p>`;
+    cols.appendChild(c);
+  }
+
+  const steps = [
+    ['Page views', t.views ?? 0],
+    ['Accounts created', t.accounts ?? 0],
+    ['Checkouts opened', t.checkouts ?? 0],
+    ['Payments completed', t.payments ?? 0],
+  ];
+  const top = Math.max(...steps.map(([, v]) => v)) || 1;
+  const funnel = el('div', 'panel');
+  funnel.innerHTML = `<p class="label">How far people got</p>
+    <div class="fun">${steps.map(([l, v]) => `
+      <div class="fun-row">
+        <div class="fun-top"><span>${l}</span><b class="mono">${v}</b></div>
+        <div class="fun-bar"><i style="width:${Math.round((v / top) * 100)}%"></i></div>
+      </div>`).join('')}</div>
+    <p class="panel-note dim">Four separate counts, not one journey. Nothing here identifies a
+      visitor, so we cannot tell which view became an account.</p>`;
+  cols.appendChild(funnel);
+
+  const countries = (d.countries || []).slice(0, 12);
+  const cc = el('div', 'panel');
+  if (countries.length) {
+    cc.innerHTML = `<p class="label">Where visitors are</p>
+      <div class="ins-table">${countries.map((c) => `
+        <div class="ins-row">
+          <span class="ins-k">${esc(countryName(c.code))}</span>
+          <span class="ins-bar"><i style="width:${Math.round((c.views / (countries[0].views || 1)) * 100)}%"></i></span>
+          <b class="mono">${c.views}</b>
+        </div>`).join('')}</div>`;
+  } else {
+    cc.innerHTML = `<p class="label">Where visitors are</p><p class="panel-note">No views recorded in this range yet.</p>`;
+  }
+  cols.appendChild(cc);
+
+  const pages = (d.pages || []).slice(0, 12);
+  const pc = el('div', 'panel');
+  if (pages.length) {
+    pc.innerHTML = `<p class="label">Most-viewed pages</p>
+      <div class="ins-table">${pages.map((r) => `
+        <div class="ins-row">
+          <span class="ins-k mono">${esc(r.path)}</span>
+          <span class="ins-bar"><i style="width:${Math.round((r.views / (pages[0].views || 1)) * 100)}%"></i></span>
+          <b class="mono">${r.views}</b>
+        </div>`).join('')}</div>`;
+  } else {
+    pc.innerHTML = `<p class="label">Most-viewed pages</p><p class="panel-note">Nothing recorded in this range yet.</p>`;
+  }
+  cols.appendChild(pc);
+
+  const byC = countries.filter((c) => c.accounts || c.checkouts);
+  const ac = el('div', 'panel');
+  if (byC.length) {
+    ac.innerHTML = `<p class="label">Accounts and checkouts by country</p>
+      <div class="ins-table">${byC.map((c) => `
+        <div class="ins-row three">
+          <span class="ins-k">${esc(countryName(c.code))}</span>
+          <b class="mono">${c.accounts}</b><b class="mono dim">${c.checkouts}</b>
+        </div>`).join('')}</div>
+      <p class="panel-note dim">Accounts, then checkouts opened.</p>`;
+  } else {
+    ac.innerHTML = `<p class="label">Accounts and checkouts by country</p>
+      <p class="panel-note">No accounts or checkouts recorded in this range yet.</p>`;
+  }
+  cols.appendChild(ac);
+
+  body.appendChild(cols);
+
+  body.appendChild(excludeMeControl());
+}
+
+const OPT_OUT_KEY = 'pfc.noanalytics';
+const isExcluded = () => {
+  try { return localStorage.getItem(OPT_OUT_KEY) === '1'; } catch { return false; }
+};
+
+/** "Don't count my visits", the way PastClimate does it: a flag in this browser.
+ *
+ *  Per-browser and per-device on purpose. Storing the choice on the account would mean a
+ *  server-side record of somebody asking not to be recorded, and would not work when
+ *  signed out - which is most of the visits worth excluding. */
+function excludeMeControl() {
+  const box = el('div', 'panel');
+  const on = isExcluded();
+  box.innerHTML = `<p class="label">Your own visits</p>`;
+  const row = el('div', 'opt-row');
+  const btn = el('button', 'opt-toggle');
+  btn.setAttribute('role', 'switch');
+  btn.setAttribute('aria-checked', String(on));
+  btn.innerHTML = `<span class="opt-track"><span class="opt-knob"></span></span>
+    <span class="opt-text">Don't count my visits</span>`;
+  const note = el('p', 'panel-note dim');
+  const say = (v) => {
+    note.textContent = v
+      ? 'Your visits in this browser are not counted, and Google Analytics is switched off here too. Other browsers and devices are still counted separately.'
+      : 'Your own visits are being counted, which will flatter the numbers while traffic is low.';
+  };
+  btn.onclick = () => {
+    const next = !isExcluded();
+    try {
+      if (next) localStorage.setItem(OPT_OUT_KEY, '1');
+      else localStorage.removeItem(OPT_OUT_KEY);
+    } catch {}
+    btn.setAttribute('aria-checked', String(next));
+    say(next);
+  };
+  say(on);
+  row.appendChild(btn);
+  box.append(row, note);
+  return box;
+}
+
+/** A readable country name where we know one, the ISO code otherwise. Deliberately partial:
+ *  this is a label on a bar, not a gazetteer, and an unknown code is still useful. */
+const COUNTRY_NAMES = {
+  US: 'United States', IN: 'India', GB: 'United Kingdom', CA: 'Canada', AU: 'Australia',
+  DE: 'Germany', FR: 'France', ES: 'Spain', IT: 'Italy', NL: 'Netherlands', IE: 'Ireland',
+  MX: 'Mexico', BR: 'Brazil', PH: 'Philippines', PK: 'Pakistan', BD: 'Bangladesh',
+  NG: 'Nigeria', ZA: 'South Africa', CN: 'China', JP: 'Japan', KR: 'South Korea',
+  VN: 'Vietnam', TH: 'Thailand', AE: 'United Arab Emirates', SA: 'Saudi Arabia',
+  PL: 'Poland', PT: 'Portugal', SE: 'Sweden', NO: 'Norway', DK: 'Denmark', FI: 'Finland',
+  CH: 'Switzerland', AT: 'Austria', BE: 'Belgium', NZ: 'New Zealand', SG: 'Singapore',
+  CO: 'Colombia', AR: 'Argentina', CL: 'Chile', PE: 'Peru', UA: 'Ukraine', TR: 'Turkey',
+  RU: 'Russia', EG: 'Egypt', KE: 'Kenya', GH: 'Ghana', ET: 'Ethiopia', NP: 'Nepal',
+  LK: 'Sri Lanka', ID: 'Indonesia', MY: 'Malaysia', HK: 'Hong Kong', TW: 'Taiwan',
+};
+const countryName = (code) => COUNTRY_NAMES[code] || code || 'Unknown';
 
 /** Surfaces a checkout failure on our own page. Paddle's overlay says "something went
  *  wrong" and offers to contact Paddle's support, which is not who can help with a problem
@@ -926,13 +1342,16 @@ function paywall(pane, what) {
   msg.hidden = true;
 
   const paddleCfg = state.config && state.config.paddle;
-  if (!paddleCfg || !paddleCfg.configured) {
-    // Honest about it rather than showing a button that does nothing. This is the state
-    // before the Paddle keys are set.
+  if (!paddleCfg || !paddleCfg.configured || paddleCfg.salesPaused) {
+    // Honest about it rather than a button that opens a checkout and fails. Two reasons
+    // land here: the keys are not set yet, or they are set but Paddle has not finished
+    // approving the account, which it refuses checkouts for.
     buy.disabled = true;
-    buy.textContent = 'Checkout opening soon';
+    buy.textContent = 'Not on sale yet';
     msg.hidden = false;
-    msg.textContent = 'Full access is not on sale on the website yet. Everything free is available now.';
+    msg.textContent = paddleCfg && paddleCfg.salesPaused
+      ? 'Full access goes on sale shortly — our payment provider is still finishing our account checks. Everything free is available now, and there is nothing to pay to keep studying.'
+      : 'Full access is not on sale on the website yet. Everything free is available now.';
   }
 
   buy.onclick = async () => {

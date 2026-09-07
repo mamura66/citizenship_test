@@ -89,7 +89,7 @@ export function resolveDynamicAnswer(placeholder: string): string {
 /**
  * True when the question asks for ONE answer but USCIS lists many acceptable ones
  * ("Name one American Indian tribe" has 25). Without saying so, the card reads as
- * 25 things to memorise instead of a menu to pick from.
+ * 25 things to memorize instead of a menu to pick from.
  */
 export function acceptsAnyOne(question: string, answerCount: number): boolean {
   if (answerCount <= 3) return false;
