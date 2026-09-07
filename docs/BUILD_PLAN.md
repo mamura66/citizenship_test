@@ -1965,3 +1965,91 @@ failing.
 - Germany is still **not wired into** `site/public/countries.js` or
   `site/src/lib/countries.js`, so it cannot be chosen yet. Those files belong to the
   website agent, still running.
+
+## v34 — The website speaks German, and readiness stops being a flag (2026-09-07, overnight)
+
+Germany is selectable and fully rendered. The US is untouched and still live.
+
+### Readiness is derived, never declared
+
+`ready: true` was a claim, and a claim can be wrong — a country could be offered with no
+questions behind it, which locks an account to a test we cannot serve. So nothing edits a
+readiness flag any more. The browser reads `content/packs.json`, the manifest
+`sync-content.sh` writes *from the files it actually copied*; the server independently asks
+the asset router whether the pack file exists. The two never consult each other, so the
+worst a stale manifest can do is offer a country the server then refuses.
+
+Australia is the case that proves the difference between the two failure modes. Its pack
+exists and declares `pending-legal-review`, so `sync-content.sh` now **deletes** it from
+`site/public/` rather than merely leaving it out of the manifest. Everything under
+`public/` is a public URL: omitting a pack from the manifest stops it being *chosen*, not
+served. For uncleared material, being published *is* the problem.
+
+That fix was incomplete and I found the gap by testing it rather than reading it. A
+synthetic held-back country carrying one image: the pack JSON was removed and **the image
+was still served**, because `rmdir` quietly fails on a non-empty `img/`. A picture
+question's artwork is the pack's content, so it now goes with it.
+
+### Three languages, and two places where translation was the wrong tool
+
+`site/public/strings.js` — `en`/`de`/`es`, flat dotted keys, chosen from the pack's BCP-47
+`language`. `en` is byte-identical to what the app said before, because the US is live.
+
+Two calls that are corrections rather than translations, and both need a native speaker's
+eye:
+
+- **"Interview" mode is not an interview outside the US.** The Einbürgerungstest and the
+  CCSE are written multiple-choice papers; nobody asks anything aloud. German reads
+  "Laut üben", Spanish "Práctica en voz alta". Calling it an interview would be false.
+- **Register differs by language on purpose:** German uses "Sie", which is BAMF's own
+  register; Spanish uses "tú".
+
+### The hardcoded assumptions were worse than untranslated — they were wrong
+
+Not one of these was a missing string. Each would have shown a German user a fact about
+the American test:
+
+1. `askedPerInterview || 10` and `passRequirement || ceil(asked * 0.6)` — a ten-question
+   test and a 60% pass mark invented for any pack that did not state its own.
+2. `passRequirement || 12` / `askedPerInterview || 20` on the performance screen — the
+   US's numbers, which would have drawn a 60% pass line on a German test whose mark is
+   52%. Both now return `null` when the pack is silent, and the UI says so instead of
+   borrowing.
+3. `titleCase()` on every heading turned "TEIL II" into "Teil Ii".
+4. `subsection(cat.subsection)` printed the literal word **"undefined"** as a section name
+   for any pack without subsections — Germany, Spain and Australia all qualify.
+5. Speech synthesis was pinned to `en-US`, so a German question was read aloud by an
+   English voice — close to unintelligible, and the mode would have been useless.
+6. The English country name was shown to a German account.
+
+Germany's **160 Bundesland questions** were being ignored outright; they are now one
+section per Bundesland, studyable, and excluded from anything graded — the same treatment
+US "answers will vary" questions have always had.
+
+### Verified in a browser, not from a report
+
+Signed up as a German account in Chromium and walked to Aufgabe 21:
+
+- All four option images **decode** — `naturalWidth > 0`, which is the check that
+  distinguishes a working image from an `<img>` that merely exists.
+- The BAMF credit is on screen with the question, per §63 UrhG.
+- In dark mode the artwork carries no `filter` and no `mix-blend-mode`, and option 2's
+  black Chi-Rho is plainly visible on its white tile. That is the precise bug the white
+  backing exists to prevent, and it is now shown working rather than argued.
+
+`licence.name` had been reading "(no copyright, subject to §§ 62 and 63 UrhG)" in the
+middle of an otherwise German sentence on screen. Now German.
+
+Suites: multicountry 80/80 (new), homecountries 21/21 (new), auth-flow 27/27, ui-fixes
+34/34, pages-check 30/30, api 58/58, insights 57/57, notrack 4/4, de-pictures 9/9 (new).
+**Nothing deployed.**
+
+### Needs a person, not another agent
+
+- **A native German and Spanish speaker** should read the translated terms of art. The
+  specific keys are tabled in the agent's report; `perf.startWith` in Spanish still places
+  a pack-supplied section name after a preposition, which was already wrong in German and
+  had to be rephrased.
+- The app's country picker still badges Canada, UK and Australia "Coming". None has a
+  published question pool, so that badge over-promises.
+- Spain remains blocked on its licence and is **named nowhere** on the home page.
