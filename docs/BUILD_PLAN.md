@@ -2474,3 +2474,39 @@ the safe path, and a reminder that a failing check is not always the code.
   Doe shot is a 1206×1900 crop. Two-minute phone recipe in NEXT-RELEASE.
 - **The build.** EAS is logged in here, so `eas build` and `eas submit` can run on request.
   Not run without the say-so: it uploads a build and opens a review.
+
+## v39 — 1.0.1 submitted, and four things the App Store Connect API taught us (2026-09-08)
+
+Build 8 (1.0.1) is with App Review. The path from "build finished" to "submitted" took most
+of an evening, and every delay was something worth writing down.
+
+- **`eas submit` in non-interactive mode needs the ASC key in `eas.json`**
+  (`ascApiKeyPath` / `ascApiKeyId` / `ascApiKeyIssuerId`; the `EXPO_ASC_*` env names I
+  guessed are not read). The key *path* was added to the working tree only and reverted
+  after; it is never committed.
+- **Expo's submission queue can sit for over an hour** with EAS Submit "Operational" on
+  their status page. Nothing was wrong; it just waited. Xcode 26.6 is now installed and
+  active on this Mac (`altool` present), so the next release can build and upload directly
+  and never enter that queue.
+- **Screenshots are version-locked.** Apple returns `INVALID_STATE` for a live version's
+  set. The inherited note saying otherwise was wrong and is corrected.
+- **Apple rejects screenshots with an alpha channel** (`IMAGE_ALPHA_NOT_ALLOWED`), and only
+  says so after the whole upload. iPhone screenshots are saved RGBA; flatten to RGB first.
+  The upload script now refuses an RGBA PNG before uploading.
+- **The reorder endpoint only reorders current members.** Deleting the old slide and adding
+  the new one in a single reorder call fails with `STATE_ERROR`; delete first, then reorder.
+- **`filter[version]` on `/v1/builds` returned nothing** for a build an unfiltered query
+  showed as VALID, so the attach watcher sat saying "not arrived" for ten minutes. It now
+  lists recent builds and matches in code.
+- **Transport failures ("fetch failed", no HTTP status) hit three times.** One landed
+  between a delete and the reorder that depended on it. `asc.js` now retries transport
+  errors three times; HTTP errors are never retried, because those are Apple answering.
+
+Also learned by reading rather than assuming: the old "Nature k" Home shot was **slide 1**
+of the live listing, not slide 3 as its filename suggested — the first thing every visitor
+saw was the app predicting failure under a placeholder name. John Doe now leads.
+
+Fixed live without a release: promotional text "practise" → "practice". Set on 1.0.1 for
+review: the description's `PRACTISE`, the support URL (was the old workers.dev address), the
+marketing URL, What's New. The competitors' 65k–104k ratings against our zero remain the
+real gap; the rating prompt in this build is the lever.

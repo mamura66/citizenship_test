@@ -28,6 +28,23 @@ let JWT = token();
 
 async function api(method, path, body, extraHeaders = {}) {
   const url = path.startsWith('http') ? path : 'https://api.appstoreconnect.apple.com' + path;
+  // Three attempts on a transport failure ("fetch failed" with no HTTP status). Seen three
+  // times in one afternoon from this machine; each one cost a manual retry, and one of them
+  // landed between a delete and the reorder that depended on it. A non-2xx HTTP response is
+  // NOT retried - that is Apple answering, and callers decide what it means.
+  let lastErr;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await once(method, url, body, extraHeaders);
+    } catch (err) {
+      lastErr = err;
+      if (attempt < 3) await new Promise((r) => setTimeout(r, 1500 * attempt));
+    }
+  }
+  throw lastErr;
+}
+
+async function once(method, url, body, extraHeaders) {
   const res = await fetch(url, {
     method,
     headers: {

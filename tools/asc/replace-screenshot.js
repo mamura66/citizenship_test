@@ -13,6 +13,12 @@ const [file, posArg, wantVersion] = process.argv.slice(2);
 if (!file || !posArg) { console.error('usage: replace-screenshot.js <png> <position> [version]'); process.exit(2); }
 const position = Number(posArg);
 const bytes = fs.readFileSync(file);
+// PNG colour type byte 6 = RGBA. Apple rejects any alpha channel (IMAGE_ALPHA_NOT_ALLOWED),
+// and it only says so after the whole upload. iPhone screenshots are saved RGBA.
+if (bytes.slice(1, 4).toString() === 'PNG' && bytes[25] === 6) {
+  console.error('this PNG has an alpha channel; Apple will reject it. Flatten it first (PIL: convert to RGB).');
+  process.exit(2);
+}
 
 (async () => {
   const vs = await get(`/v1/apps/${APP_ID}/appStoreVersions?limit=5`);
@@ -56,12 +62,16 @@ const bytes = fs.readFileSync(file);
     if (st === 'FAILED') throw new Error('Apple rejected the file: ' + JSON.stringify(s.json.data.attributes.assetDeliveryState));
     await new Promise((r) => setTimeout(r, 3000));
   }
-  // 4. put it where the old one was, then delete the old one
-  const order = [...existing]; order.splice(position - 1, 1, shot.id);
+  // 4. delete the old one FIRST, then reorder. Apple's reorder endpoint only reorders the
+  //    set's current members - sending a list that both drops the old id and adds the new
+  //    one fails with STATE_ERROR "Can't Add/Remove Relationship when reorder Set". The new
+  //    upload is already a member (appended at the end) by the time it is COMPLETE.
+  const old = existing[position - 1];
+  const d = await del(`/v1/appScreenshots/${old}`);
+  if (d.status !== 204) throw new Error(`could not delete old screenshot: ${d.status}`);
+  const order = existing.filter((id) => id !== old); order.splice(position - 1, 0, shot.id);
   const re = await patch(`/v1/appScreenshotSets/${set.id}/relationships/appScreenshots`,
     { data: order.map((id) => ({ type: 'appScreenshots', id })) });
   if (!re.ok) throw new Error('reorder failed: ' + re.text.slice(0, 300));
-  const old = existing[position - 1];
-  const d = await del(`/v1/appScreenshots/${old}`);
-  console.log(`replaced: new ${shot.id} at position ${position}, old ${old} deleted (${d.status})`);
+  console.log(`replaced: old ${old} deleted, new ${shot.id} at position ${position}`);
 })().catch((e) => { console.error('failed:', e.message); process.exit(1); });

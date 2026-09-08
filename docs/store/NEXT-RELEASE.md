@@ -1,4 +1,11 @@
-# Release 1.0.1 — what is in it, what is still needed, and why
+# Release 1.0.1 — submitted to App Review on 2026-09-08
+
+**Status:** build 8 attached to version 1.0.1, description/support/marketing/What's New set,
+John Doe Home screenshot in slide 1, review submission `ac410be2` in `WAITING_FOR_REVIEW`.
+Apple emails at each stage; `node tools/asc/listing.js` reads the state on demand. Release
+is set to go live automatically on approval.
+
+What follows is the plan as it stood when the work started, kept for the reasoning.
 
 Last updated 2026-09-08, the day 1.0 was approved. This file used to be a list of deferred
 items; it is now the plan for the next release, because the deferred items *are* the next

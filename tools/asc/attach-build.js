@@ -14,7 +14,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // 1. the build, once VALID
   let build = null;
   for (let i = 0; i < 60; i++) {
-    const b = await get(`/v1/builds?filter[app]=${APP_ID}&filter[version]=${buildNumber}&limit=5`);
+    // No filter[version]: it returned nothing for a build that an unfiltered query showed as
+    // VALID, and this script sat saying "not arrived" for ten minutes while the build was
+    // ready. List recent builds and match the number in code instead.
+    const b = await get(`/v1/builds?filter[app]=${APP_ID}&sort=-uploadedDate&limit=10`);
     build = (b.json.data || []).find((x) => String(x.attributes.version) === String(buildNumber)) || null;
     const st = build ? build.attributes.processingState : 'not arrived';
     console.log(`build ${buildNumber}: ${st}`);
