@@ -1,5 +1,38 @@
 # Four emails that unblock four countries
 
+> **Decision, 8 September 2026 — three of these four are superseded. Send only Spain.**
+>
+> The UK, Canada and Australia emails asked permission to reproduce official question
+> pools. For the UK and Canada there is nothing to ask for: **neither government publishes
+> its question pool**, so no product in the market has the real questions, including the
+> official publisher's own app. TSO's official Life in the UK app says its questions are
+> "based on the style and structure of official questions", and Canadian apps ship
+> hundreds of questions "based on *Discover Canada*" behind an IRCC non-affiliation notice.
+>
+> So the route is the one everybody else already takes, and it is lawful for the reason it
+> is lawful for them: questions we write ourselves, testing **facts** drawn from the free
+> official study guide. Facts are not copyrightable; the guide's wording is. Two rules make
+> that safe, and `tools/validate-content-pack.py` now enforces the first:
+>
+> 1. `contentType: "authored-practice"`, with `basedOn` (the official material, with its
+>    URL) and `nonAffiliation` (in plain words: not official, not the real questions).
+>    A pack of this type may not carry `officialNumber` on any question - that field only
+>    belongs to a real official question, and its presence means either the label or the
+>    content is wrong.
+> 2. We do not copy a competitor's question bank. Following their *approach* is fine;
+>    copying their *questions* infringes a different owner, and several of them sell those
+>    banks.
+>
+> **Australia keeps its 20 official practice questions** - those really are published, under
+> CC BY 3.0 AU, and *Our Common Bond* is CC BY 4.0 with explicit commercial use. Attribution
+> replaces permission there.
+>
+> **Spain is different and the email still stands.** Spain *does* publish its 300 CCSE
+> questions, and the Instituto Cervantes notice expressly forbids reproducing or
+> distributing them. There, permission is the only route - which is why that pack sits in
+> `legal-hold/`.
+
+
 Every country except the United States and Germany is blocked on permission, not on
 engineering. Each blocker below is one email. **Drafts only — nothing has been sent, and
 nothing should be sent without you reading it first.**

@@ -24,7 +24,24 @@ URL_RE = re.compile(r"https?://[^\s]+")
 # Packs whose content is not a full official pool must say so. A pack that
 # claims to be an official pool but is really a practice subset is the exact
 # misrepresentation this project cannot ship.
-CONTENT_TYPES = {"official-full-pool", "official-practice-subset"}
+#
+# `authored-practice` is the third case, and the common one outside the US and Germany:
+# the country does not publish its question pool at all, so nobody has the real questions
+# and every product in the market - including the official publisher's own app - writes
+# questions that test the facts in the official study guide. Facts are not copyrightable;
+# the guide's wording is. So these questions are ours, they are built from official
+# material, and they must never be presented as the official questions. This type is what
+# makes that claim impossible to make by accident.
+CONTENT_TYPES = {"official-full-pool", "official-practice-subset", "authored-practice"}
+
+# `authored-practice` packs carry two extra obligations, both user-facing.
+AUTHORED_REQUIRED = {
+    # The official publication whose facts the questions were written from, with its URL.
+    "basedOn": "the official study material these questions were written from",
+    # In the user's own words: we are not the government and these are not the real
+    # questions. Every competitor states this; it is also simply true.
+    "nonAffiliation": "a plain statement that this is not official and not affiliated",
+}
 
 # Spellings we author ourselves must follow the pack's locale. Official
 # question text is never touched by this check.
@@ -120,6 +137,26 @@ def check_provenance(pack, r):
             r.error(
                 f"contentType {ctype!r} requires officialPoolPublished to be {str(expected).lower()}"
             )
+
+        if ctype == "authored-practice":
+            for key, what in sorted(AUTHORED_REQUIRED.items()):
+                if not str(pack.get(key, "")).strip():
+                    r.error(f"authored-practice packs must set {key!r}: {what}")
+            based = str(pack.get("basedOn", ""))
+            if based and not URL_RE.search(based):
+                r.error("basedOn must include the URL of the official study material")
+            # The giveaway that someone has mislabelled a scraped official pool as ours.
+            if pack.get("officialNumbersPresent") or any(
+                q.get("officialNumber") is not None
+                for key2 in ("categories", "stateCategories")
+                for cat in (pack.get(key2) or [])
+                if isinstance(cat, dict)
+                for q in (cat.get("questions") or [])
+            ):
+                r.error(
+                    "authored-practice questions carry officialNumber, which only an "
+                    "official question has - either these are not ours, or the field is wrong"
+                )
 
     lic = pack.get("licence") or pack.get("license")
     if lic is None:
