@@ -88,9 +88,61 @@ async function appPage(request, env) {
   return new Response(res.body, { status: res.status, headers });
 }
 
+/* A preview build must never be indexed.
+ *
+ * The preview Worker runs the same code on its own workers.dev hostname, with its own KV
+ * and its own database, so nothing it does can reach a real account. What it cannot do by
+ * configuration alone is stay out of a search index: robots.txt is a static asset shared
+ * with production, and a stray link to a preview URL is enough for a crawler to find it.
+ * Two identical sites in an index is the kind of thing that costs the real one its
+ * ranking, so the preview sets the header on every response instead of relying on a file.
+ *
+ * Keyed off an explicit var rather than the hostname: a hostname check would be one typo
+ * away from tagging production noindex, which would be a far worse failure than a preview
+ * being crawled.
+ */
+const isPreview = (env) => String(env.PREVIEW || '') === 'true';
+
+function markNoIndex(response) {
+  const headers = new Headers(response.headers);
+  headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
+    if (isPreview(env)) {
+      // Wrap once, around everything, so no route can forget it.
+      return markNoIndex(await handle(request, env, ctx));
+    }
+    return handle(request, env, ctx);
+  },
+};
+
+async function handle(request, env, ctx) {
     const url = new URL(request.url);
+
+    /* A preview host tells crawlers to stay out of the whole thing.
+     *
+     * The X-Robots-Tag wrapper above only reaches paths that actually run this code, and
+     * `run_worker_first` deliberately keeps the marketing pages on the CDN - which is to
+     * say the header covers the app and misses precisely the pages a crawler would index.
+     * So the preview also answers /robots.txt itself, with a blanket disallow. The static
+     * robots.txt is shared with production and must keep pointing crawlers AT the real
+     * site, so this cannot be done by editing that file.
+     *
+     * `/robots.txt` is the only addition to the preview's run_worker_first list. The rest
+     * stays byte-identical to production, because which paths reach code is exactly the
+     * kind of difference that makes a preview stop predicting production. */
+    if (isPreview(env) && url.pathname === '/robots.txt') {
+      return new Response('User-agent: *\nDisallow: /\n', {
+        headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' },
+      });
+    }
 
     // The apex is canonical: one hostname for cookies, for the Google redirect URI and
     // for Paddle's approved-domain list.
@@ -164,5 +216,4 @@ export default {
       console.error(`${request.method} ${url.pathname} failed:`, err && err.stack ? err.stack : err);
       return fail(500, 'server_error', 'Something went wrong on our side. Try again.');
     }
-  },
-};
+}
