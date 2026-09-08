@@ -4,20 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prepare for Citizenship</title>
-<meta name="description" content="Get ready for your country's official citizenship test. Every official question free, practice tests in the real format, and a map of the whole test that fills in as you go.">
+<meta name="description" content="Get ready for your country's official citizenship test. The whole question set free to study, practice tests in the real format, and a map of the whole test that fills in as you go.">
 <link rel="canonical" href="https://prepareforcitizenship.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Prepare for Citizenship">
 <meta property="og:url" content="https://prepareforcitizenship.com/">
 <meta property="og:title" content="Prepare for Citizenship — official citizenship test practice">
-<meta property="og:description" content="Get ready for your country's official citizenship test. Every official question free, practice tests in the real format, and a map of the whole test that fills in as you go.">
+<meta property="og:description" content="Get ready for your country's official citizenship test. The whole question set free to study, practice tests in the real format, and a map of the whole test that fills in as you go.">
 <meta property="og:image" content="https://prepareforcitizenship.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Prepare for Citizenship: one place to get ready, wherever you're applying.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Prepare for Citizenship — official citizenship test practice">
-<meta name="twitter:description" content="Get ready for your country's official citizenship test. Every official question free, practice tests in the real format, and a map of the whole test that fills in as you go.">
+<meta name="twitter:description" content="Get ready for your country's official citizenship test. The whole question set free to study, practice tests in the real format, and a map of the whole test that fills in as you go.">
 <meta name="twitter:image" content="https://prepareforcitizenship.com/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -63,7 +63,7 @@
           "name": "Free",
           "price": "0",
           "priceCurrency": "USD",
-          "description": "Every official question, flashcards, study by topic, the answers for where you live, and one complete practice test."
+          "description": "Your country's whole question set, flashcards, study by topic, the answers for where you live, and one complete practice test."
         },
         {
           "@type": "Offer",
@@ -83,7 +83,7 @@
           "name": "Is this a government service?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No. It's an independent study aid, not affiliated with, endorsed by, or sponsored by any government or immigration authority. The official questions are public government material; everything around them is ours."
+            "text": "No. It's an independent study aid, not affiliated with, endorsed by, or sponsored by any government or immigration authority. Where a government publishes its question pool, as the United States and Germany do, those are its questions and we name the source. Where a government publishes only a study guide, as Canada and Australia do, the questions are ours, written from that guide, and we say so on the screen."
           }
         },
         {
@@ -92,6 +92,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "No, and we won't pretend otherwise. This teaches the civics test. It doesn't advise on your case, prepare or submit any form, or take part in your interview. For that, speak to an immigration lawyer or an accredited representative."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which countries can I use this for?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The United States today. Germany, Canada and Australia are built and checked and open shortly. A country's set is one of two things, and the screen with the questions always says which: its government's own published question pool, as the United States and Germany publish, or \u2014 where a government publishes only a study guide \u2014 our own practice questions written from that guide, which we never call official. The Life in the UK question bank is confidential Crown copyright and unpublished, so a UK set has to be written from the official handbook."
           }
         },
         {
@@ -139,7 +147,7 @@
           "name": "Do I need the app?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No. Everything runs in your browser, on a phone or a computer. There is also an iPhone app for the US civics test, and Android is planned. A purchase in the app and a purchase here are separate, because Apple handles its own payments — so buy in the place you plan to study."
+            "text": "No. Everything runs in your browser, on a phone or a computer. There is also an iPhone app for the US civics test, and Android is planned; the other countries are on the website only for now. A purchase in the app and a purchase here are separate, because Apple handles its own payments — so buy in the place you plan to study."
           }
         }
       ]
@@ -180,32 +188,43 @@
       <p class="eyebrow">Citizenship test preparation</p>
       <h1>One place to get ready, wherever you're applying.</h1>
       <p class="lede">
-        Tell us which country's test you're taking and the rest follows: the official
-        questions for that country, how many you'll be asked, the pass mark, and the
-        answers that depend on where you live.
+        Tell us which country's test you're taking and the rest follows: that country's
+        questions, how many you'll be asked, the pass mark, and the answers that depend
+        on where you live.
       </p>
-      <p class="clarify">
-        <strong>The United States is ready today.</strong> Canada, the United Kingdom and
-        Australia are on the way — each one a set of official questions, not a different
-        website to learn.
+      <!-- Written cautiously on purpose, and corrected upwards by /country-strip.js once
+           it has checked which content packs actually exist. A marketing page that names a
+           country it cannot serve is the one mistake worth designing out here. -->
+      <p class="clarify" id="countryLine">
+        <strong>The United States is ready today.</strong> Germany is next — the same app
+        with a different set of questions, not a different website to learn.
       </p>
 
+      <!-- Four chips. Canada and Australia were taken off this strip when neither had a
+           pack, because listing them as "coming soon" was a promise nobody could keep.
+           Both now have one - our own practice questions, written from the free official
+           study guide, which the Countries section below explains in words and every
+           study screen repeats. The United Kingdom is still absent, and still for a
+           reason. Every chip is written as "coming" here and upgraded by
+           /country-strip.js only when the manifest proves the pack is really there, so
+           this page cannot promise a country we cannot serve.
+           `data-country` is what /country-strip.js matches on. -->
       <div class="ctry-strip">
-        <span class="ctry-chip is-live">
+        <span class="ctry-chip is-live" data-country="us">
           <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#fff"/><rect y="0" width="19" height="0.77" fill="#B31942"/><rect y="1.54" width="19" height="0.77" fill="#B31942"/><rect y="3.08" width="19" height="0.77" fill="#B31942"/><rect y="4.62" width="19" height="0.77" fill="#B31942"/><rect y="6.15" width="19" height="0.77" fill="#B31942"/><rect y="7.69" width="19" height="0.77" fill="#B31942"/><rect y="9.23" width="19" height="0.77" fill="#B31942"/><rect width="7.6" height="5.38" fill="#0A3161"/></svg></span>
-          United States <b>Ready now</b>
+          United States <b data-chip-state>Ready now</b>
         </span>
-        <span class="ctry-chip">
-          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#fff"/><rect width="4.75" height="10" fill="#D80621"/><rect x="14.25" width="4.75" height="10" fill="#D80621"/><path d="M9.5 2.6l.66 1.5 1.42-.47-.57 1.5 1.33.47-1.33.76.28 1.04-1.42-.28-.37 1.22-.37-1.22-1.42.28.28-1.04L6.66 5.6l1.33-.47-.57-1.5 1.42.47z" fill="#D80621"/></svg></span>
-          Canada <span>Coming soon</span>
+        <span class="ctry-chip" data-country="de">
+          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="3.334" y="0" fill="#000"/><rect width="19" height="3.333" y="3.334" fill="#DD0000"/><rect width="19" height="3.333" y="6.667" fill="#FFCE00"/></svg></span>
+          Germany <span data-chip-state>Coming next</span>
         </span>
-        <span class="ctry-chip">
-          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#012169"/><path d="M0 0l19 10M19 0L0 10" stroke="#fff" stroke-width="2"/><path d="M0 0l19 10M19 0L0 10" stroke="#C8102E" stroke-width="1.1"/><path d="M9.5 0v10M0 5h19" stroke="#fff" stroke-width="3.2"/><path d="M9.5 0v10M0 5h19" stroke="#C8102E" stroke-width="1.9"/></svg></span>
-          United Kingdom <span>Coming soon</span>
+        <span class="ctry-chip" data-country="ca">
+          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#fff"/><rect width="4.75" height="10" fill="#D80621"/><rect x="14.25" width="4.75" height="10" fill="#D80621"/></svg></span>
+          Canada <span data-chip-state>Coming next</span>
         </span>
-        <span class="ctry-chip">
-          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#00008B"/><rect width="9.5" height="5" fill="#012169"/><path d="M0 0l9.5 5M9.5 0L0 5" stroke="#fff" stroke-width=".9"/><path d="M4.75 0v5M0 2.5h9.5" stroke="#fff" stroke-width="1.6"/><path d="M4.75 0v5M0 2.5h9.5" stroke="#C8102E" stroke-width=".9"/><circle cx="14" cy="7" r=".8" fill="#fff"/><circle cx="16.4" cy="4.1" r=".6" fill="#fff"/><circle cx="15.2" cy="8.6" r=".45" fill="#fff"/></svg></span>
-          Australia <span>Coming soon</span>
+        <span class="ctry-chip" data-country="au">
+          <span class="f" aria-hidden="true"><svg viewBox="0 0 19 10" preserveAspectRatio="none"><rect width="19" height="10" fill="#00008B"/><rect width="9.5" height="5" fill="#012169"/><path d="M0 0l9.5 5M9.5 0L0 5" stroke="#fff" stroke-width="1"/></svg></span>
+          Australia <span data-chip-state>Coming next</span>
         </span>
       </div>
 
@@ -249,7 +268,7 @@
       <p class="eyebrow">Free, and not for a trial period</p>
       <h2>Study everything, without paying.</h2>
       <p>
-        The whole official question pool is free to study, with no time limit and no card.
+        Your country's whole question set is free to study, with no time limit and no card.
         That isn't a trial that runs out — it stays free whether you ever pay us or not.
       </p>
     </div>
@@ -379,8 +398,36 @@
       test you aren't taking. If you pick the wrong one, tell us and we'll fix it.
     </p>
     <p>
-      The United States is live. We're building the others in the order people ask for
-      them — if yours isn't here yet, <a href="/support">say so</a> and it moves up.
+      <strong>Right now the United States test is open.</strong> Germany, Canada and
+      Australia are built and checked, and open shortly — their questions are finished,
+      and what is not is the rest of running a country properly: the support pages and the
+      email behind them. We would rather hold them a week than switch them on early.
+    </p>
+    <p>
+      When yours opens, there are two kinds of test it can be, and the screen with the
+      questions always says which.
+    </p>
+    <p>
+      Some governments publish their real question pool. The United States does, and so
+      does Germany, where the full Einbürgerungstest catalogue is public. For those you're
+      studying the actual questions, word for word, and we name the source on every screen.
+    </p>
+    <p>
+      Canada and Australia don't publish theirs. Nobody has those questions — not us, not
+      any other app, not even the official publisher's own. What both governments do
+      publish is a free study guide, and the real test is drawn from it. So for Canada and
+      Australia the sets are our own practice questions written from that guide, each one
+      recording the chapter it came from so you can check it yourself. We never call them
+      official, because they aren't.
+    </p>
+    <p>
+      The Life in the UK question bank is confidential Crown copyright — it isn't published
+      and it isn't going to be. The official handbook is a book you buy, so a UK set is
+      coming the same way Canada's did, from that handbook's facts.
+    </p>
+    <p>
+      If your country publishes its questions and isn't here, <a href="/support">tell
+      us</a> — that's genuinely how this list grows.
     </p>
   </div>
 </section>
@@ -401,7 +448,7 @@
         <p class="price">Free <small>always</small></p>
         <p style="margin:0">A free account, and no expiry.</p>
         <ul>
-          <li>Every official question for your country</li>
+          <li>Every question for your country — the official pool where it's published, ours where it isn't</li>
           <li>Flashcards, by section or all together</li>
           <li>Questions read aloud</li>
           <li>The answers for where you live</li>
@@ -440,8 +487,11 @@
       <h3>Is this a government service?</h3>
       <p>
         No. It's an independent study aid, not affiliated with, endorsed by, or sponsored
-        by any government or immigration authority. The official questions are public
-        government material; everything around them is ours.
+        by any government or immigration authority. Where a government publishes its
+        question pool, as the United States and Germany do, those are its questions and we
+        name the source. Where a government publishes only a study guide, as Canada and
+        Australia do, the questions are ours, written from that guide, and we say so on
+        the screen.
       </p>
     </div>
     <div class="qa">
@@ -450,6 +500,12 @@
         No, and we won't pretend otherwise. This teaches the civics test. It doesn't advise
         on your case, prepare or submit any form, or take part in your interview. For that,
         speak to an immigration lawyer or an accredited representative.
+      </p>
+    </div>
+    <div class="qa">
+      <h3>Which countries can I use this for?</h3>
+      <p>
+        The United States today. Germany, Canada and Australia are built and checked and open shortly. A country's set is one of two things, and the screen with the questions always says which: its government's own published question pool, as the United States and Germany publish, or — where a government publishes only a study guide — our own practice questions written from that guide, which we never call official. The Life in the UK question bank is confidential Crown copyright and unpublished, so a UK set has to be written from the official handbook.
       </p>
     </div>
     <div class="qa">
@@ -499,7 +555,7 @@
       <p>
         No. Everything runs in your browser, on a phone or a computer. There's also an
         <a href="https://apps.apple.com/app/us-citizenship-test-2026-pulse/id6808512010" rel="noopener">iPhone app</a> for the US civics test, and Android
-        is planned. A purchase in the app and a purchase here are
+        is planned; the other countries are on the website only for now. A purchase in the app and a purchase here are
         separate, because Apple handles its own payments — so buy in the place you plan to
         study.
       </p>
@@ -523,6 +579,8 @@
     </p>
   </div>
 </footer>
+<script src="/countries.js"></script>
+<script src="/country-strip.js"></script>
 <script src="/nav.js"></script>
 <script src="/analytics.js"></script>
 </body>

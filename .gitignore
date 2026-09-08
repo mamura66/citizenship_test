@@ -41,3 +41,9 @@ docs/LEGAL_REVIEW.md
 # machine, not in the history.
 **/_backup_*/
 **/.backup_*/
+
+# Content held back pending a licence question - see legal-hold/README.md. The repository
+# is public, and publishing material whose terms forbid redistribution is the same problem
+# whether it is sold or merely pushed.
+legal-hold/*/
+!legal-hold/README.md

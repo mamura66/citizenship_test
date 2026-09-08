@@ -201,6 +201,85 @@ button { font: inherit; cursor: pointer; }
 .answers .tick { color: var(--accent-ink); flex: none; }
 .note { font-size: 13px; color: var(--ink-2); font-style: italic; }
 
+/* Official answer options, for a question that comes with them.
+ *
+ * Drawn as a list rather than as buttons: on a study card these are not controls, they are
+ * part of the question as it is printed. The numbered disc matches the one on a practice
+ * option so the same question looks like the same question in both places. */
+.olist { display: grid; gap: 7px; margin-top: 14px; }
+.olist li { list-style: none; display: flex; gap: 10px; align-items: flex-start; color: var(--ink-2); font-size: 15px; line-height: 1.45; }
+.olist .k { flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; background: var(--rail); color: var(--ink-3); font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+.olist li.is-right { color: var(--ink); font-weight: 500; }
+.olist li.is-right .k { background: var(--good); color: var(--on-accent); }
+.olist li .mark { margin-left: auto; padding-left: 10px; flex: none; font-size: 12px; font-weight: 600; color: var(--good); }
+.olist .otext { display: flex; gap: 10px; align-items: center; min-width: 0; }
+@media (max-width: 560px) {
+  /* Same treatment as .opt at this width: the label wraps under rather than squeezing the
+     option text into a column two words wide. */
+  .olist li { flex-wrap: wrap; }
+  .olist li .mark { flex: 0 0 100%; margin: 2px 0 0; padding-left: 32px; }
+  .olist li .k + span { flex: 1 1 0; min-width: 0; }
+}
+
+/* PICTURES FROM THE CONTENT PACK.
+ *
+ * Three rules, all of them things that would otherwise go wrong:
+ *
+ * 1. A WHITE TILE IN BOTH THEMES. The images arrive already composited onto white. Several
+ *    are black line art, and one option on the federal-coat-of-arms question is a black
+ *    Chi-Rho that disappears completely on a dark ground. So the tile is white in dark mode
+ *    too. No filter, no invert, no mix-blend-mode: that is what the official document looks
+ *    like and it is the only legible version.
+ * 2. `object-fit: contain` in a bounded box. This project has shipped a stretched image
+ *    before (BUILD_PLAN v9); a coat of arms with the wrong aspect ratio is a different
+ *    coat of arms.
+ * 3. A minimum height on the option tiles, so four pictures of different shapes line up in
+ *    a column instead of making four differently sized rows.
+ */
+.oimg,
+.qfig-img {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  object-fit: contain;
+}
+.oimg { flex: none; width: 76px; height: 56px; padding: 3px; }
+.olist.has-pics li { align-items: center; }
+
+.qfig { margin: 16px 0 0; }
+.qfig-img { width: 100%; max-width: 420px; height: auto; padding: 6px; }
+.credit { margin: 6px 0 0; font-size: 11.5px; color: var(--ink-3); line-height: 1.4; }
+
+/* An option button whose answer is a picture. The picture and its number stay on one row;
+   the wrapping rules below at narrow widths already keep the label from being crushed. */
+.opt .otext { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.opt.has-pic { align-items: center; }
+
+/* Where the questions came from, on every screen that shows one. Quiet, but present:
+   section 63 UrhG makes the source attribution an obligation. */
+.pack-credit {
+  margin: 26px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+/* What the pack says about itself: the disclosure a practice subset has to carry, any
+ * extra rule stated in prose, and the licence attribution. Quiet, and above the cards -
+ * this is the small print that has to be readable, not a banner. */
+.pack-note { border-left: 2px solid var(--line); padding: 2px 0 2px 14px; margin: 0 0 22px; }
+.pack-note p { color: var(--ink-2); font-size: 13.5px; line-height: 1.5; margin: 0 0 8px; }
+.pack-note p:last-child { margin-bottom: 0; }
+.pack-note .label { margin-bottom: 4px; }
+/* Whose questions these are. Held at full body colour rather than the muted note colour:
+   for a pack we wrote ourselves this is the line that has to be read, not skimmed. */
+.pack-note .pack-mine { color: var(--ink); }
+.pack-note .pack-lic { color: var(--ink-3); font-size: 12.5px; }
+.pack-note a { color: var(--accent-ink); }
+
 .btn { background: var(--accent-ink); color: var(--on-accent); border: 0; border-radius: 11px; padding: 12px 22px; font-weight: 600; font-size: 15px; }
 .btn:hover { filter: brightness(1.06); }
 .btn.ghost { background: var(--accent-soft); color: var(--accent-ink); }

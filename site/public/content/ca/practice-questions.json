@@ -1,0 +1,1296 @@
+{
+ "version": "2026-09-08",
+ "language": "en-CA",
+ "country": "CA",
+ "officialTestName": "Canadian Citizenship Test",
+ "contentType": "authored-practice",
+ "officialPoolPublished": false,
+ "source": "Discover Canada: The Rights and Responsibilities of Citizenship (Immigration, Refugees and Citizenship Canada) - https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online.html",
+ "sourceRetrieved": "2026-09-08",
+ "basedOn": "Discover Canada: The Rights and Responsibilities of Citizenship, published free of charge by Immigration, Refugees and Citizenship Canada - https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online.html",
+ "nonAffiliation": "These are our own practice questions. They are not the official test questions, and this app is not affiliated with, endorsed by or approved by the Government of Canada or Immigration, Refugees and Citizenship Canada. Canada does not publish the real question pool, so nobody has it.",
+ "disclosure": "Canada does not publish the questions used in the citizenship test, so these are practice questions we wrote ourselves. Every one of them tests a fact stated in Discover Canada: The Rights and Responsibilities of Citizenship, the free official study guide, and records the chapter it came from so you can check it. IRCC's own advice is that the official guide is the only official study guide and should be your primary resource - it is free, and we link to every chapter.",
+ "questionFormat": "single-choice-4",
+ "askedPerTest": 20,
+ "passRequirement": 15,
+ "timeLimitMinutes": 45,
+ "totalQuestions": 76,
+ "licence": {
+  "name": "Our own questions; facts drawn from a Crown-copyright publication",
+  "url": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/notice.html",
+  "attribution": "Facts drawn from Discover Canada: The Rights and Responsibilities of Citizenship, Immigration, Refugees and Citizenship Canada. Questions written by Prepare for Citizenship.",
+  "reviewStatus": "cleared",
+  "reviewedOn": "2026-09-08",
+  "obligations": [
+   "Do not reproduce the guide's wording. These questions restate facts, which are not copyrightable; the guide's expression of them is.",
+   "Never present these as the official test questions.",
+   "Point users to the free official guide as their primary resource, as IRCC asks."
+  ]
+ },
+ "categories": [
+  {
+   "id": "ca-rights",
+   "section": "Rights and Responsibilities of Citizenship",
+   "questions": [
+    {
+     "id": 1,
+     "question": "Canada's tradition of ordered liberty is usually traced back to the signing of which document?",
+     "options": [
+      "The Canadian Charter of Rights and Freedoms",
+      "The Quebec Act of 1774",
+      "Magna Carta, signed in England in 1215",
+      "The Constitution Act, 1867"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Magna Carta, signed in England in 1215"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 2,
+     "question": "Which right lets a person challenge unlawful detention by the state?",
+     "options": [
+      "Due process",
+      "Royal assent",
+      "Habeas corpus",
+      "Mobility rights"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Habeas corpus"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 3,
+     "question": "In which year was the Constitution amended to entrench the Canadian Charter of Rights and Freedoms?",
+     "options": [
+      "1931",
+      "1982",
+      "1867",
+      "1965"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "1982"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 4,
+     "question": "Which of these is a fundamental freedom protected in Canada?",
+     "options": [
+      "The right to carry a weapon",
+      "Freedom of peaceful assembly",
+      "The right to a government job",
+      "Freedom from paying taxes"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Freedom of peaceful assembly"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 5,
+     "question": "What do mobility rights give Canadians?",
+     "options": [
+      "The right to live and work anywhere in Canada, and to enter and leave the country freely",
+      "The right to move to any other country",
+      "The right to change province without telling any government",
+      "The right to free public transport"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The right to live and work anywhere in Canada, and to enter and leave the country freely"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 6,
+     "question": "Which of these is a responsibility of Canadian citizenship?",
+     "options": [
+      "Owning property",
+      "Speaking both official languages",
+      "Serving on a jury when called to do so",
+      "Joining a political party"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Serving on a jury when called to do so"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 7,
+     "question": "What does Canadian law say about military service?",
+     "options": [
+      "There is no compulsory military service in Canada",
+      "Only men must serve",
+      "Every citizen must serve for two years",
+      "Service is compulsory in wartime only"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "There is no compulsory military service in Canada"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 8,
+     "question": "Under Canadian law, what is the status of men and women?",
+     "options": [
+      "It depends on the province",
+      "Men have priority in family matters",
+      "It is decided by each community",
+      "Men and women are equal under the law"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Men and women are equal under the law"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 9,
+     "question": "What does the responsibility of 'obeying the law' rest on?",
+     "options": [
+      "The discretion of the Prime Minister",
+      "The will of the majority in each town",
+      "The decisions of the police",
+      "The rule of law, under which no person or group is above the law"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The rule of law, under which no person or group is above the law"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    },
+    {
+     "id": 10,
+     "question": "Which of these is named in the guide as a citizenship responsibility?",
+     "options": [
+      "Helping others in the community",
+      "Learning a third language",
+      "Flying the flag at home",
+      "Attending church"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Helping others in the community"
+     ],
+     "guideSection": "Rights and Responsibilities of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/rights-resonsibilities-citizenship.html"
+    }
+   ]
+  },
+  {
+   "id": "ca-govern",
+   "section": "How Canadians Govern Themselves",
+   "questions": [
+    {
+     "id": 11,
+     "question": "What are the three key facts about Canada's system of government?",
+     "options": [
+      "It is a republic, a direct democracy and a federation",
+      "It is a unitary state, a presidential democracy and a monarchy",
+      "It is a confederation, a republic and a parliamentary democracy",
+      "It is a federal state, a parliamentary democracy and a constitutional monarchy"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "It is a federal state, a parliamentary democracy and a constitutional monarchy"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 12,
+     "question": "What are the three parts of Parliament?",
+     "options": [
+      "The Sovereign, the Senate and the House of Commons",
+      "The House of Commons, the Supreme Court and the Senate",
+      "The Governor General, the Prime Minister and the House of Commons",
+      "The Prime Minister, the Cabinet and the Senate"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The Sovereign, the Senate and the House of Commons"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 13,
+     "question": "Which Act of 1867 defined the responsibilities of the federal and provincial governments?",
+     "options": [
+      "The Quebec Act",
+      "The Canada Act",
+      "The British North America Act, now known as the Constitution Act, 1867",
+      "The Statute of Westminster"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The British North America Act, now known as the Constitution Act, 1867"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 14,
+     "question": "Which of these is a federal responsibility?",
+     "options": [
+      "Citizenship",
+      "Education",
+      "Highways",
+      "Health"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Citizenship"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 15,
+     "question": "Which of these is a provincial responsibility?",
+     "options": [
+      "Criminal law",
+      "Education",
+      "Currency",
+      "Foreign policy"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Education"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 16,
+     "question": "Which two areas do the federal government and the provinces share jurisdiction over?",
+     "options": [
+      "Defence and currency",
+      "Health and education",
+      "Criminal law and citizenship",
+      "Agriculture and immigration"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Agriculture and immigration"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 17,
+     "question": "How do senators take their seats, and how long do they serve?",
+     "options": [
+      "They are appointed by the Governor General on the advice of the Prime Minister, and serve until age 75",
+      "They are chosen by the provincial legislatures for life",
+      "They are elected at the same time as members of the House of Commons",
+      "They are elected for a fixed term of eight years"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "They are appointed by the Governor General on the advice of the Prime Minister, and serve until age 75"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 18,
+     "question": "Who grants royal assent to a bill, and on whose behalf?",
+     "options": [
+      "The Chief Justice of the Supreme Court",
+      "The Speaker of the House of Commons",
+      "The Prime Minister, on behalf of Parliament",
+      "The Governor General, on behalf of the Sovereign"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The Governor General, on behalf of the Sovereign"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 19,
+     "question": "What must happen before a bill becomes law in Canada?",
+     "options": [
+      "It must be passed by both the House of Commons and the Senate, and receive royal assent",
+      "It must be approved in a national referendum",
+      "It must be passed by the House of Commons alone",
+      "It must be signed by the Prime Minister"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "It must be passed by both the House of Commons and the Senate, and receive royal assent"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 20,
+     "question": "In Canada's constitutional monarchy, what does the Sovereign reign in accordance with?",
+     "options": [
+      "The Constitution, and so the rule of law",
+      "The instructions of the Prime Minister",
+      "The advice of the Supreme Court",
+      "A vote of the House of Commons"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The Constitution, and so the rule of law"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    },
+    {
+     "id": 21,
+     "question": "What happens to Cabinet ministers who are defeated in a non-confidence vote?",
+     "options": [
+      "They are appointed to the Senate",
+      "Nothing; the vote is only advisory",
+      "They have to resign",
+      "They may stay in office for one more year"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "They have to resign"
+     ],
+     "guideSection": "How Canadians Govern Themselves",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/how-canadians-govern-themselves.html"
+    }
+   ]
+  },
+  {
+   "id": "ca-elections",
+   "section": "Federal Elections",
+   "questions": [
+    {
+     "id": 22,
+     "question": "Under legislation passed by Parliament, when must a federal election be held?",
+     "options": [
+      "In the spring of every fifth year",
+      "Whenever the Senate decides",
+      "On the first Tuesday in November every four years",
+      "On the third Monday in October every four years after the most recent general election"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "On the third Monday in October every four years after the most recent general election"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 23,
+     "question": "Who may ask the Governor General to call an earlier election?",
+     "options": [
+      "The Chief Electoral Officer",
+      "The Chief Justice",
+      "The Speaker of the Senate",
+      "The Prime Minister"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The Prime Minister"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 24,
+     "question": "What are the three requirements to vote in a federal election?",
+     "options": [
+      "Being born in Canada, being 18, and having a passport",
+      "Being a resident of Canada, being 21, and owning property",
+      "Being a Canadian citizen, speaking English or French, and paying taxes",
+      "Being a Canadian citizen, being at least 18 on voting day, and being on the voters' list"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Being a Canadian citizen, being at least 18 on voting day, and being on the voters' list"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 25,
+     "question": "What is an electoral district also known as?",
+     "options": [
+      "A riding or constituency",
+      "A ward or precinct",
+      "A canton",
+      "A parish"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "A riding or constituency"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 26,
+     "question": "In each electoral district, which candidate becomes the member of Parliament?",
+     "options": [
+      "The candidate who receives more than half of all votes",
+      "The candidate whose party wins nationally",
+      "The candidate who receives the most votes",
+      "The candidate chosen by the outgoing MP"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The candidate who receives the most votes"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 27,
+     "question": "Which neutral agency of Parliament produces the voters' lists?",
+     "options": [
+      "The Privy Council Office",
+      "Elections Canada",
+      "The Department of Justice",
+      "Statistics Canada"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Elections Canada"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 28,
+     "question": "What is a majority government?",
+     "options": [
+      "One where the party in power won the most votes nationally",
+      "One formed by two or more parties together",
+      "One where the party in power holds at least half of the seats in the House of Commons",
+      "One where the party in power holds fewer than half of the seats"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "One where the party in power holds at least half of the seats in the House of Commons"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 29,
+     "question": "What does the right to a secret ballot mean?",
+     "options": [
+      "Only election officers may know your name",
+      "Ballots are destroyed after counting",
+      "You must not discuss politics on election day",
+      "No one can watch you vote and no one has the right to insist you say how you voted"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "No one can watch you vote and no one has the right to insist you say how you voted"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 30,
+     "question": "After an election, who is ordinarily invited to form the government?",
+     "options": [
+      "The leader of the party with the most votes nationally",
+      "The Speaker of the House of Commons",
+      "The leader of the party with the most seats in the House of Commons",
+      "The longest-serving member of Parliament"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The leader of the party with the most seats in the House of Commons"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    },
+    {
+     "id": 31,
+     "question": "What is the Official Opposition?",
+     "options": [
+      "The second chamber of Parliament",
+      "The opposition party with the most members in the House of Commons",
+      "A committee of senators who review government bills",
+      "Any party that voted against the budget"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The opposition party with the most members in the House of Commons"
+     ],
+     "guideSection": "Federal Elections",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/federal-elections.html"
+    }
+   ]
+  },
+  {
+   "id": "ca-symbols",
+   "section": "Canadian Symbols",
+   "questions": [
+    {
+     "id": 32,
+     "question": "In which year was a new Canadian flag raised for the first time?",
+     "options": [
+      "1921",
+      "1867",
+      "1982",
+      "1965"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "1965"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 33,
+     "question": "Where does the red-white-red pattern of the Canadian flag come from?",
+     "options": [
+      "The flag of the Royal Military College in Kingston",
+      "The flag of the Hudson's Bay Company",
+      "The Union Jack",
+      "The flag of Quebec"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The flag of the Royal Military College in Kingston"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 34,
+     "question": "Since when have red and white been the national colours of Canada?",
+     "options": [
+      "1921",
+      "1867",
+      "1965",
+      "1931"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "1921"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 35,
+     "question": "Which flag is Canada's official Royal Flag?",
+     "options": [
+      "The Royal Standard of Quebec",
+      "The Union Jack",
+      "The Canadian Red Ensign",
+      "The flag of the Royal Military College"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The Union Jack"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 36,
+     "question": "What is Canada's best-known symbol?",
+     "options": [
+      "The fleur-de-lys",
+      "The Crown",
+      "The beaver",
+      "The maple leaf"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The maple leaf"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 37,
+     "question": "What does Canada's national motto, A Mari Usque Ad Mare, mean?",
+     "options": [
+      "Strong and free",
+      "Peace, order and good government",
+      "One land, one people",
+      "From sea to sea"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "From sea to sea"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 38,
+     "question": "When did Canada adopt an official coat of arms and a national motto?",
+     "options": [
+      "When the new flag was raised in 1965",
+      "When the Constitution was amended in 1982",
+      "As an expression of national pride after the First World War",
+      "At Confederation in 1867"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "As an expression of national pride after the First World War"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 39,
+     "question": "In which year did Quebec adopt its own flag, based on the Cross and the fleur-de-lys?",
+     "options": [
+      "1965",
+      "1948",
+      "1912",
+      "1867"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "1948"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 40,
+     "question": "Which institutions is the Crown a symbol of?",
+     "options": [
+      "The Senate and the House of Commons only",
+      "Parliament, the legislatures, the courts, police services and the Canadian Forces",
+      "Only the monarchy and the Governor General",
+      "The federal government alone"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Parliament, the legislatures, the courts, police services and the Canadian Forces"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    },
+    {
+     "id": 41,
+     "question": "During whose reign did Canada become a constitutional monarchy in its own right, at Confederation?",
+     "options": [
+      "Queen Elizabeth II",
+      "King Charles III",
+      "Queen Victoria",
+      "King George V"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Queen Victoria"
+     ],
+     "guideSection": "Canadian Symbols",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadian-symbols.html"
+    }
+   ]
+  },
+  {
+   "id": "ca-history",
+   "section": "Canada's History",
+   "questions": [
+    {
+     "id": 42,
+     "question": "Who was the first to map Canada's Atlantic shore, in 1497?",
+     "options": [
+      "Jacques Cartier",
+      "John Cabot",
+      "Samuel de Champlain",
+      "Henry Hudson"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "John Cabot"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 43,
+     "question": "Who built a fortress in 1608 at what is now Quebec City?",
+     "options": [
+      "Sir Guy Carleton",
+      "John Cabot",
+      "Samuel de Champlain",
+      "Sir Leonard Tilley"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Samuel de Champlain"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 44,
+     "question": "In which year did the French and the Iroquois make peace?",
+     "options": [
+      "1774",
+      "1812",
+      "1608",
+      "1701"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "1701"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 45,
+     "question": "Why did the British Parliament pass the Quebec Act of 1774?",
+     "options": [
+      "To unite Upper and Lower Canada",
+      "To abolish slavery in the colonies",
+      "To better govern the French Roman Catholic majority",
+      "To create the Dominion of Canada"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "To better govern the French Roman Catholic majority"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 46,
+     "question": "Where and when was the first representative assembly in what is now Canada elected?",
+     "options": [
+      "Toronto in 1813",
+      "Quebec City in 1774",
+      "Charlottetown in 1864",
+      "Halifax, Nova Scotia, in 1758"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Halifax, Nova Scotia, in 1758"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 47,
+     "question": "In which year did the British Parliament abolish slavery throughout the Empire?",
+     "options": [
+      "1793",
+      "1807",
+      "1833",
+      "1867"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "1833"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 48,
+     "question": "Which country launched an invasion of Canada in June 1812?",
+     "options": [
+      "France",
+      "The United States",
+      "Russia",
+      "Spain"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The United States"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 49,
+     "question": "What was the outcome of the War of 1812 for Canada?",
+     "options": [
+      "Canada was annexed by the United States",
+      "Upper and Lower Canada were united",
+      "Britain gave up its North American colonies",
+      "The American attempt to conquer Canada failed, and Canada remained independent of the United States"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The American attempt to conquer Canada failed, and Canada remained independent of the United States"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 50,
+     "question": "In 1840, Upper and Lower Canada were united as what?",
+     "options": [
+      "The Province of Canada",
+      "The Confederation of Canada",
+      "The Dominion of Canada",
+      "British North America"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The Province of Canada"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 51,
+     "question": "Which was the first British North American colony to attain full responsible government?",
+     "options": [
+      "Prince Edward Island, in 1773",
+      "New Brunswick, in 1785",
+      "Ontario, in 1867",
+      "Nova Scotia, in 1847-48"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Nova Scotia, in 1847-48"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 52,
+     "question": "On what date was the Dominion of Canada officially born?",
+     "options": [
+      "11 December 1931",
+      "1 April 1867",
+      "17 April 1982",
+      "1 July 1867"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "1 July 1867"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    },
+    {
+     "id": 53,
+     "question": "Who suggested the term 'Dominion of Canada' in 1864?",
+     "options": [
+      "Sir Wilfrid Laurier",
+      "Sir Leonard Tilley",
+      "Sir Guy Carleton",
+      "Sir John A. Macdonald"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Sir Leonard Tilley"
+     ],
+     "guideSection": "Canada's History",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-history.html"
+    }
+   ]
+  },
+  {
+   "id": "ca-regions",
+   "section": "Canada's Regions",
+   "questions": [
+    {
+     "id": 54,
+     "question": "What is the capital city of Ontario?",
+     "options": [
+      "Hamilton",
+      "Ottawa",
+      "Toronto",
+      "Kingston"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Toronto"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 55,
+     "question": "What is the capital city of Quebec?",
+     "options": [
+      "Gatineau",
+      "Montreal",
+      "Laval",
+      "Quebec City"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Quebec City"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 56,
+     "question": "What is the capital city of Nova Scotia?",
+     "options": [
+      "Sydney",
+      "Fredericton",
+      "Halifax",
+      "Charlottetown"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Halifax"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 57,
+     "question": "What is the capital city of British Columbia?",
+     "options": [
+      "Prince George",
+      "Victoria",
+      "Kelowna",
+      "Vancouver"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Victoria"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 58,
+     "question": "What is the capital city of Alberta?",
+     "options": [
+      "Red Deer",
+      "Calgary",
+      "Banff",
+      "Edmonton"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Edmonton"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 59,
+     "question": "What is the capital city of Manitoba?",
+     "options": [
+      "Regina",
+      "Brandon",
+      "Thunder Bay",
+      "Winnipeg"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Winnipeg"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 60,
+     "question": "What is the capital city of Saskatchewan?",
+     "options": [
+      "Regina",
+      "Moose Jaw",
+      "Prince Albert",
+      "Saskatoon"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Regina"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 61,
+     "question": "What is the capital city of Newfoundland and Labrador?",
+     "options": [
+      "Gander",
+      "St. John's",
+      "Halifax",
+      "Corner Brook"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "St. John's"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 62,
+     "question": "What is the capital city of New Brunswick?",
+     "options": [
+      "Saint John",
+      "Moncton",
+      "Bathurst",
+      "Fredericton"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Fredericton"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 63,
+     "question": "What is the capital city of Prince Edward Island?",
+     "options": [
+      "Montague",
+      "Summerside",
+      "Halifax",
+      "Charlottetown"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Charlottetown"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 64,
+     "question": "What is the capital city of Nunavut?",
+     "options": [
+      "Whitehorse",
+      "Iqaluit",
+      "Yellowknife",
+      "Rankin Inlet"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Iqaluit"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 65,
+     "question": "What is the capital city of the Northwest Territories?",
+     "options": [
+      "Whitehorse",
+      "Inuvik",
+      "Yellowknife",
+      "Iqaluit"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Yellowknife"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 66,
+     "question": "What is the capital city of Yukon?",
+     "options": [
+      "Yellowknife",
+      "Whitehorse",
+      "Dawson City",
+      "Skagway"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Whitehorse"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 67,
+     "question": "Which four provinces make up the Atlantic region?",
+     "options": [
+      "Newfoundland and Labrador, Prince Edward Island, Nova Scotia and New Brunswick",
+      "Nova Scotia, New Brunswick, Quebec and Ontario",
+      "Quebec, Ontario, Manitoba and Nova Scotia",
+      "Prince Edward Island, Nova Scotia, New Brunswick and Quebec"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Newfoundland and Labrador, Prince Edward Island, Nova Scotia and New Brunswick"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 68,
+     "question": "Which three provinces are the Prairie Provinces?",
+     "options": [
+      "Manitoba, Ontario and Saskatchewan",
+      "Saskatchewan, Alberta and the Northwest Territories",
+      "Manitoba, Saskatchewan and Alberta",
+      "Alberta, British Columbia and Saskatchewan"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Manitoba, Saskatchewan and Alberta"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    },
+    {
+     "id": 69,
+     "question": "Which two provinces make up Central Canada?",
+     "options": [
+      "Ontario and Manitoba",
+      "Quebec and Ontario",
+      "Quebec and New Brunswick",
+      "Ontario and Alberta"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Quebec and Ontario"
+     ],
+     "guideSection": "Canada's Regions",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/canadas-regions.html"
+    }
+   ]
+  },
+  {
+   "id": "ca-justice",
+   "section": "The Justice System",
+   "questions": [
+    {
+     "id": 70,
+     "question": "What is the Canadian justice system founded on in criminal matters?",
+     "options": [
+      "The presumption of innocence - everyone is innocent until proven guilty",
+      "The decision of the police",
+      "The discretion of the judge",
+      "The balance of probabilities"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The presumption of innocence - everyone is innocent until proven guilty"
+     ],
+     "guideSection": "The Justice System",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/justice-system.html"
+    },
+    {
+     "id": 71,
+     "question": "Which is Canada's highest court?",
+     "options": [
+      "The Ontario Court of Appeal",
+      "The Court of Queen's Bench",
+      "The Supreme Court of Canada",
+      "The Federal Court of Canada"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The Supreme Court of Canada"
+     ],
+     "guideSection": "The Justice System",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/justice-system.html"
+    },
+    {
+     "id": 72,
+     "question": "What does the Federal Court of Canada deal with?",
+     "options": [
+      "Family law in every province",
+      "All criminal trials",
+      "Small claims",
+      "Matters concerning the federal government"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Matters concerning the federal government"
+     ],
+     "guideSection": "The Justice System",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/justice-system.html"
+    },
+    {
+     "id": 73,
+     "question": "What is due process?",
+     "options": [
+      "The principle that government must respect all the legal rights a person is entitled to under the law",
+      "The requirement that laws be published before they take effect",
+      "The rule that trials must finish within a year",
+      "The right to a jury in every case"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The principle that government must respect all the legal rights a person is entitled to under the law"
+     ],
+     "guideSection": "The Justice System",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/justice-system.html"
+    },
+    {
+     "id": 74,
+     "question": "Who does the law in Canada apply to?",
+     "options": [
+      "Everyone except sitting judges",
+      "Everyone except the Sovereign",
+      "Everyone except members of Parliament while in session",
+      "Everyone, including judges, politicians and the police"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Everyone, including judges, politicians and the police"
+     ],
+     "guideSection": "The Justice System",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/justice-system.html"
+    }
+   ]
+  },
+  {
+   "id": "ca-oath",
+   "section": "The Oath of Citizenship",
+   "questions": [
+    {
+     "id": 75,
+     "question": "In the Oath of Citizenship, to whom does a new citizen bear true allegiance?",
+     "options": [
+      "The Constitution of Canada",
+      "The Governor General of Canada",
+      "His Majesty King Charles the Third, King of Canada",
+      "The Prime Minister of Canada"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "His Majesty King Charles the Third, King of Canada"
+     ],
+     "guideSection": "The Oath of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/oath-citizenship.html"
+    },
+    {
+     "id": 76,
+     "question": "As well as allegiance, what does the Oath of Citizenship now refer to?",
+     "options": [
+      "The Canadian Charter of Rights and Freedoms",
+      "Aboriginal and treaty rights of Indigenous peoples in Canada",
+      "The provinces and territories",
+      "The two official languages"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Aboriginal and treaty rights of Indigenous peoples in Canada"
+     ],
+     "guideSection": "The Oath of Citizenship",
+     "guideUrl": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/discover-canada/read-online/oath-citizenship.html"
+    }
+   ]
+  }
+ ]
+}

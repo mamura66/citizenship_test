@@ -22,7 +22,22 @@
  * instead of one per browser.
  */
 
-/* COUNTRIES comes from /countries.js, loaded before this file. */
+/* COUNTRIES and countriesReady() come from /countries.js; t(), tn() and setLanguage()
+ * from /strings.js. Both are loaded before this file.
+ *
+ * TWO QUESTION SHAPES, DETECTED NOT ASSUMED. The United States pool is free text: a
+ * question has several answers, any of which an officer accepts, and the practice test
+ * has to invent plausible wrong options. The German and Spanish pools are printed as
+ * multiple choice: the official material carries the wrong options too, in a fixed order.
+ * Which one a question is comes from what the question actually contains - see
+ * hasFixedOptions() - and never from the country code, because a pack is free to mix them
+ * and a country code tells you nothing about a question.
+ *
+ * NUMBERS COME FROM THE PACK. How many questions a test asks, how many are needed to
+ * pass, how many sections there are: all of it is read from the loaded pack. Nothing here
+ * knows that the US test asks 20, that Germany asks 33, or that a pass mark is 60%. A pack
+ * that does not say gets an honest "we do not know" rather than a borrowed number.
+ */
 
 const KEY = 'pfc.v1';
 const PRICE = '$9.99';
@@ -146,13 +161,126 @@ function announce(message) {
 const subsection = (s) => String(s).replace(/^[A-Z]:\s*/, '');
 const titleCase = (s) => s.toLowerCase().replace(/(^|\s|\/)([a-z])/g, (m, a, b) => a + b.toUpperCase());
 
-/** Questions whose answer depends on where you live can't be graded without that
- *  detail, so they're excluded from tests until local answers are wired up. */
-const isLocal = (q) => (q.answers || []).includes('Answers will vary.');
+/** Section headings, as the pack wrote them.
+ *
+ *  The United States pack SHOUTS its top-level sections ("AMERICAN GOVERNMENT") and needs
+ *  title-casing to be readable. No other pack does, and title-casing a Spanish heading
+ *  turns "Gobierno, legislacion y participacion ciudadana" into
+ *  "Gobierno, Legislacion Y Participacion Ciudadana", which is wrong in Spanish. So the
+ *  transformation is applied only to text that is actually in capitals. */
+const looksShouty = (s) => s === s.toUpperCase() && /[A-Z]/.test(s);
+/* Title casing is an English typographic convention, so it is applied only to an English
+   pack. It is also why the language test is not optional here: the German pack names its
+   sections "TEIL I" and "TEIL II", and title-casing those gives "Teil Ii". */
+const sectionTitle = (s) => (packLanguage() === 'en' && looksShouty(String(s || ''))
+  ? titleCase(String(s))
+  : String(s || ''));
+
+/** What a section is called in the rail, on the map and in the section list.
+ *
+ *  The US pack splits a section from a subsection ("AMERICAN GOVERNMENT" plus
+ *  "B: System of Government"); the German, Spanish and Australian packs carry only
+ *  `section`. Reading `cat.subsection` unguarded printed the word "undefined" as a section
+ *  name for any pack without one. */
+const sectionLabel = (cat) => subsection(cat.state || cat.subsection || cat.section || '');
+/** The breadcrumb above a section: the parent, then the section, when there are two
+ *  levels; just the section when there is one. */
+const sectionCrumb = (cat) => (cat.subsection
+  ? `${sectionTitle(cat.section)} \u203a ${sectionLabel(cat)}`
+  : sectionTitle(cat.section));
+
+/** True when the pack itself says the official pool is not published, so nothing on screen
+ *  may claim to be "every official question". */
+const isSubsetPack = () => !!state.pack && state.pack.officialPoolPublished === false;
+
+/* Questions whose answer depends on where you live.
+ *
+ * The United States pool marks them `stateSpecific` and answers them "Answers will vary."
+ * Germany's Einbürgerungstest is the same idea at a larger scale: ten extra questions per
+ * Bundesland, so 300 questions everybody gets and 160 that belong to one Land.
+ *
+ * Either way they cannot be graded without knowing where the person lives, so they are
+ * kept out of practice tests - exactly as they were for the United States before any of
+ * this. Every signal a pack might use is accepted, because a pack that says so any of
+ * these ways is saying the same thing, and guessing wrong here would silently mark
+ * somebody wrong for their own address. */
+const VARIES = [/^answers will vary\.?$/i, /^antworten variieren\.?$/i, /^(las )?respuestas var[íi]an\.?$/i];
+const PLACE_KEYS = ['state', 'bundesland', 'land', 'region', 'province', 'comunidad'];
+function isLocal(q) {
+  if (q.stateSpecific === true || q.local === true) return true;
+  for (const key of PLACE_KEYS) {
+    const v = q[key];
+    if (typeof v === 'string' && v.trim()) return true;
+  }
+  return (q.answers || []).some((a) => VARIES.some((re) => re.test(String(a).trim())));
+}
+
+/* PICTURES.
+ *
+ * Thirty-eight German questions cannot be answered from words alone. They come in two
+ * shapes, and the pack says which:
+ *
+ *   `optionImages` - four pictures, index-aligned with `options`, for the questions whose
+ *      options literally read "Bild 1" to "Bild 4": coats of arms, the EU flag. The order
+ *      is the order they are printed in and is never changed.
+ *   `image` - one figure above ordinary text or numbered options: the Bundesland locator
+ *      maps, the specimen ballot papers, the 1945 occupation-zones map. The numbers are
+ *      printed inside the picture, so the figure goes above the options.
+ *
+ * A path is relative to the country's content folder. */
+const optionImagesOf = (q) => (Array.isArray(q.optionImages) && q.optionImages.length ? q.optionImages : null);
+const figureOf = (q) => (typeof q.image === 'string' && q.image.trim() ? q.image.trim() : null);
+const imgUrl = (path) => `/content/${state.country.code}/${String(path).replace(/^\/+/, '')}`;
+
+/** A question that needs pictures we do not have.
+ *
+ *  Not "a question with pictures" - those are fine now that the pictures ship. This is the
+ *  narrower case: the options are picture references and no pictures came with them, which
+ *  is four options reading "Bild 1" to "Bild 4" and no way to tell them apart. Asking one
+ *  in a graded test would mark somebody wrong for a guess between four identical labels.
+ *
+ *  The German pack no longer has any (its one unanswerable question is withheld by the
+ *  pack itself - see pruneUnservable). The guard stays because the next pack might. */
+function needsPicture(q) {
+  if (optionImagesOf(q) || figureOf(q)) return false;
+  if (q.requiresImage === true) return true;
+  const labels = q.imageLabels;
+  const options = q.options;
+  return Array.isArray(labels) && Array.isArray(options)
+    && labels.length === options.length
+    && options.every((o, i) => o === labels[i]);
+}
+
+/** Does this question come with its own answer options, printed in the official material?
+ *
+ *  Read off the question, not the country. `options` is the field the German and Spanish
+ *  packs carry; `choices` is accepted as well so a pack that names it differently still
+ *  works rather than silently degrading to free text. Two or more options is the test - a
+ *  single "option" is not a choice, and treating it as one would show somebody a
+ *  multiple-choice question with one answer in it.
+ *
+ *  Note what is deliberately NOT assumed: how many options there are. The
+ *  Einbürgerungstest prints four; the Instituto Cervantes prints three (a, b, c). Both are
+ *  drawn as they come. */
+function fixedOptions(q) {
+  const list = Array.isArray(q.options) ? q.options : Array.isArray(q.choices) ? q.choices : null;
+  if (!list) return null;
+  const clean = list.map((o) => String(o)).filter((o) => o.trim());
+  return clean.length > 1 ? clean : null;
+}
+const hasFixedOptions = (q) => fixedOptions(q) !== null;
+
+/** The interface language, and therefore which of the wording heuristics below can be
+ *  trusted at all. They read English phrasing ("name two", "one of"), so they are only
+ *  ever applied to an English pool. */
+const packLanguage = () => (state.pack && state.pack.language) || (state.country && state.country.language) || 'en';
 
 /** "Name two..." style questions genuinely need more than one pick. The definite article
- *  is the deciding signal: "name THE two parts" is one composite answer. */
+ *  is the deciding signal: "name THE two parts" is one composite answer.
+ *
+ *  A question with official options has exactly one right answer, so it never comes here. */
 function expectedCount(question, acceptableLen) {
+  if (packLanguage() !== 'en') return 1;
   if (/\bone of\b/i.test(question)) return 1;
   if (/\b(?:the|its|their)\s+(?:two|three)\b/i.test(question)) return 1;
   const m = question.match(/(?:^|[.!?]\s+)(?:name|list|give|what are)\s+(two|three)\b/i);
@@ -161,12 +289,50 @@ function expectedCount(question, acceptableLen) {
   return acceptableLen >= n ? n : 1;
 }
 function acceptsAnyOne(question, count) {
+  if (packLanguage() !== 'en') return false;
   if (count <= 3) return false;
   return /\bname one\b|\bone example\b|\bone reason\b|\bone state\b|\bone power\b|\bone thing\b|\bname five\b|\bname three\b/i.test(question);
 }
 
+/* The general pool: what a graded test draws from, what the map of the test shows, and
+   what "% of the pool seen" is measured against. */
 const allQuestions = () => (state.pack.categories || []).flatMap((c) => c.questions);
+
+/** Sections offered for study, which is the general pool plus the state-specific ones.
+ *
+ *  The German pack keeps its Bundesland questions in `stateCategories` - 16 sets of ten,
+ *  and a candidate gets only the ten for the Land they live in. There is nowhere yet to ask
+ *  which Land that is, so they are offered to read and study, one section per Bundesland,
+ *  and kept out of everything that is graded or counted. That is the same treatment the
+ *  United States' "answers will vary" questions have always had: studyable, never marked.
+ *
+ *  A pack with no `stateCategories` is unaffected. */
+const studyCategories = () => [
+  ...(state.pack.categories || []),
+  ...(Array.isArray(state.pack.stateCategories) ? state.pack.stateCategories : []),
+];
 const categoryOf = (id) => (state.pack.categories || []).find((c) => c.questions.some((q) => q.id === id));
+
+/** How the real test is shaped, straight from the pack: how many questions it asks and how
+ *  many of them have to be right.
+ *
+ *  There is no default. The United States asks 20 of 128 and needs 12; Germany asks 33 of
+ *  310 and needs 17; Spain asks 25 of 300 and needs 15. Every one of those was, at some
+ *  point, a number written into a screen - and a screen with a number in it quietly tells a
+ *  German that they need 12 correct. `null` means the pack did not say, and every caller
+ *  says so rather than borrowing somebody else's arithmetic. */
+function packFormat() {
+  const p = state.pack || {};
+  // Two names for the same number, because "interview" is only the right word where an
+  // officer asks the questions out loud. `askedPerTest` is what a written paper is called
+  // in the pack schema; both are read so neither pack shape has to be edited to fit.
+  const askedRaw = p.askedPerTest != null ? p.askedPerTest : p.askedPerInterview;
+  const asked = Number.isFinite(Number(askedRaw)) && Number(askedRaw) > 0
+    ? Number(askedRaw) : null;
+  const pass = Number.isFinite(Number(p.passRequirement)) && Number(p.passRequirement) > 0
+    ? Number(p.passRequirement) : null;
+  return { asked, pass, passPct: asked && pass ? Math.round((pass / asked) * 100) : null };
+}
 /** Paid access, as the server reported it. There is deliberately no way to set this from
  *  the browser - see the header note. */
 const isPro = () => !!(state.me && state.me.pro);
@@ -197,8 +363,8 @@ function sectionAccuracy() {
     const d = byCat.get(String(cat.id));
     return {
       id: cat.id,
-      label: subsection(cat.subsection),
-      section: titleCase(cat.section),
+      label: sectionLabel(cat),
+      section: sectionTitle(cat.section),
       total: cat.questions.length,
       seen: d ? d.seen : 0,
       ok: d ? d.ok : 0,
@@ -209,20 +375,40 @@ function sectionAccuracy() {
 const usedFreeTest = () => (store.read().history || []).length >= 1;
 
 /* ------------------------------------------------------------------ country gate */
+
+/** A country's name in the language on screen, with the English name from the country row
+ *  as the fallback. `prose` is the form that goes inside a sentence - "the United States"
+ *  rather than "United States". */
+function countryLabel(c, prose = false) {
+  const key = `country.${c.code}`;
+  const named = t(key);
+  const label = named === key ? c.name : named;
+  if (!prose) return label;
+  // tOwn, not t: an English fallback here would put "the United States" in the middle of
+  // a Spanish sentence. The country row's own `prose` is the last resort.
+  return tOwn(`${key}.prose`) || (named === key ? (c.prose || c.name) : label);
+}
+
 function renderGate() {
   const box = $('#countries');
   box.innerHTML = '';
   COUNTRIES.forEach((c) => {
     const b = el('button', 'country');
+    // `ready` was decided by looking for the content pack, not by a flag in a list - see
+    // countries.js. A country nobody has written questions for cannot be clicked.
     b.disabled = !c.ready;
     b.innerHTML = `<span class="flag">${c.flag}</span>
-      <span><b>${esc(c.name)}</b><small>${esc(c.test)}</small></span>
-      ${c.ready ? '' : '<span class="label soon">Coming</span>'}`;
+      <span><b>${esc(countryLabel(c))}</b><small>${esc(c.test)}</small></span>
+      ${c.ready ? '' : `<span class="label soon">${esc(t('gate.coming'))}</span>`}`;
     b.addEventListener('click', () => pickCountry(c.code));
     box.appendChild(b);
   });
-  $('#gateNote').textContent =
-    'Only the United States is live today. The others are listed so you can see where this is going — each one is a content pack, not a different website.';
+  // Generated from what is actually there. The sentence used to name the United States in
+  // so many words, which would have gone stale the day a second pack landed.
+  const live = COUNTRIES.filter((c) => c.ready).map((c) => countryLabel(c, true));
+  $('#gateNote').textContent = live.length
+    ? t('gate.note', { countries: countryList(live, t('list.and')) })
+    : t('gate.note.none');
 }
 
 /** Locks the country to the account, server-side. The gate is only ever shown to an
@@ -230,7 +416,7 @@ function renderGate() {
 async function pickCountry(code) {
   const note = $('#gateNote');
   document.querySelectorAll('.country').forEach((b) => { b.disabled = true; });
-  note.textContent = 'Setting up your questions…';
+  note.textContent = t('gate.setting');
   try {
     const { user } = await api('/api/me/country', { method: 'POST', body: { country: code } });
     state.me = user;
@@ -268,10 +454,10 @@ function applyTheme(theme) {
   const dark = theme === 'dark';
   // The button offers the other one, so it is labelled with what it will do.
   btn.setAttribute('aria-pressed', String(dark));
-  btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-  btn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  btn.setAttribute('aria-label', dark ? t('theme.toLight') : t('theme.toDark'));
+  btn.title = dark ? t('theme.toLight') : t('theme.toDark');
   const label = btn.querySelector('.theme-label');
-  if (label) label.textContent = dark ? 'Light' : 'Dark';
+  if (label) label.textContent = dark ? t('theme.light') : t('theme.dark');
 }
 function initTheme() {
   applyTheme(effectiveTheme());
@@ -288,6 +474,20 @@ function initTheme() {
   // Follow the system until somebody chooses otherwise.
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (!readTheme()) { applyTheme(effectiveTheme()); if (state.pack) render(); }
+  });
+}
+
+/* ------------------------------------------------------------------ language */
+
+/** Writes the current language over the markup in app.html.
+ *
+ *  The page ships with English in it, because HTML that arrives empty flashes blank and
+ *  because a reader with no JavaScript should still see words. Every element that holds a
+ *  word the app chose - as opposed to a word from the question pool - carries data-i18n,
+ *  and this replaces it once the language is known. */
+function localizeDom(root = document) {
+  root.querySelectorAll('[data-i18n]').forEach((n) => {
+    n.textContent = t(n.dataset.i18n);
   });
 }
 
@@ -336,11 +536,37 @@ async function resolveDynamicAnswers(pack, countryCode) {
   return pack;
 }
 
+/** Drops every question the pack marks `servable: false`, before anything else sees it.
+ *
+ *  One German question asks "was zeigt dieses Bild?" about a photograph we have no licence
+ *  to redistribute. Without the photograph there is no question - just four building names
+ *  and no way to choose - so the pack refuses to serve it and this is what enforces that.
+ *
+ *  Done here, at load, rather than filtered at each screen: every screen reads the pack,
+ *  and one that forgot to filter would put an unanswerable question in front of somebody.
+ *  Removing it once means the flashcards, the test, the interview, the map of the test and
+ *  every count are all consistent, because none of them ever knew it existed. */
+function pruneUnservable(pack) {
+  let dropped = 0;
+  ['categories', 'stateCategories'].forEach((key) => {
+    if (!Array.isArray(pack[key])) return;
+    pack[key].forEach((cat) => {
+      const before = (cat.questions || []).length;
+      cat.questions = (cat.questions || []).filter((q) => q.servable !== false);
+      dropped += before - cat.questions.length;
+    });
+  });
+  if (dropped) {
+    console.info(`${dropped} question(s) withheld by the content pack (servable: false)`);
+  }
+  return pack;
+}
+
 async function loadPack(country, versionId) {
   const version = (country.versions || []).find((v) => v.id === versionId) || country.versions[0];
   const res = await fetch(`/content/${country.code}/${version.file}`);
   if (!res.ok) throw new Error(`content pack missing for ${country.code}`);
-  const pack = await resolveDynamicAnswers(await res.json(), country.code);
+  const pack = pruneUnservable(await resolveDynamicAnswers(await res.json(), country.code));
   return { pack, versionId: version.id };
 }
 
@@ -348,6 +574,10 @@ async function loadPack(country, versionId) {
  *  serve /app without a session - so this is not the gate, it is where we find out *which*
  *  account we are and what it is allowed to see. */
 async function boot() {
+  // Started here rather than awaited below, so looking for the content packs runs
+  // alongside the two API calls instead of after them.
+  const packsFound = countriesReady();
+
   if (!state.me) {
     const [{ user }, config] = await Promise.all([
       api('/api/me'),
@@ -355,6 +585,11 @@ async function boot() {
     ]);
     state.me = user;
     state.config = config;
+    // The best guess available before a pack is loaded. The country picker is the one
+    // screen an account with no country ever sees, and the browser's own preference is a
+    // better guess there than English for everybody. A loaded pack overrides it below.
+    setLanguage(preferredLanguage());
+    localizeDom();
     initTheme();
     // Only the owner can open /insights; everyone else gets a 404 from it.
     const insights = $('#insightsLink');
@@ -364,6 +599,7 @@ async function boot() {
     }
   }
 
+  await packsFound;
   const country = COUNTRIES.find((c) => c.code === state.me.country && c.ready);
   if (!country) {
     // No country on the account yet: a Google signup, which had nowhere to ask.
@@ -386,6 +622,10 @@ async function boot() {
   state.country = country;
   state.pack = pack;
   state.versionId = versionId;
+  // The pack decides. A German pack means German buttons and <html lang="de">, which is
+  // what tells a screen reader to read the questions with a German voice.
+  setLanguage(pack.language || country.language || 'en');
+  localizeDom();
   state.mode = saved.mode || 'study';
   if (state.mode === 'insights' && !state.me.isOwner) state.mode = 'study';
   state.topicId = null;
@@ -405,21 +645,27 @@ async function boot() {
 /** Only ever appears against Paddle's sandbox. A test card must never be mistakable for a
  *  real payment. */
 function showSandboxBanner() {
-  const bar = el('div', 'sandbox', 'Paddle sandbox — payments on this page are tests, no money moves.');
+  const bar = el('div', 'sandbox', esc(t('sandbox.banner')));
   document.body.prepend(bar);
 }
 
 /* ------------------------------------------------------------------ rail */
 function renderRail() {
   const c = state.country;
-  const v = c.versions.find((x) => x.id === state.versionId);
+  // Guarded: a country row with no versions would throw here, and `versions` is exactly
+  // the field that is empty for a country whose pack has not been cleared to ship.
+  const v = (c.versions || []).find((x) => x.id === state.versionId);
+  // The country's name in the language on screen: a German account reads "Deutschland",
+  // not "Germany". The test name underneath is not translated - it is the official name.
   $('#picked').innerHTML = `<span class="flag">${c.flag}</span>
-    <span><b>${esc(c.name)}</b><small>${esc(v.label)}</small></span>`;
+    <span><b>${esc(countryLabel(c))}</b><small>${esc(v ? v.label : c.test)}</small></span>`;
 
   renderVersions(c);
 
   document.querySelectorAll('.mode[data-mode]').forEach((b) => {
     b.setAttribute('aria-current', String(b.dataset.mode === state.mode));
+    // The label is markup in app.html carrying data-i18n; localizeDom() has already put
+    // the right language on it. Nothing here writes mode names.
     b.onclick = () => {
       // A test in progress is paused, not thrown away. Answering a question and then
       // looking at Performance used to discard the whole attempt with nothing said; the
@@ -438,13 +684,13 @@ function renderRail() {
   topics.innerHTML = '';
   $('#topicsBlock').hidden = state.mode !== 'study';
   const all = el('button', 'topic');
-  all.innerHTML = 'All sections';
+  all.innerHTML = esc(t('rail.allSections'));
   all.setAttribute('aria-current', String(!state.topicId));
   all.onclick = () => { state.topicId = null; state.cardIndex = 0; state.revealed = false; renderRail(); render(); };
   topics.appendChild(all);
-  (state.pack.categories || []).forEach((cat) => {
+  studyCategories().forEach((cat) => {
     const b = el('button', 'topic');
-    b.innerHTML = esc(subsection(cat.subsection));
+    b.innerHTML = esc(sectionLabel(cat));
     b.setAttribute('aria-current', String(state.topicId === cat.id));
     b.onclick = () => { state.topicId = cat.id; state.cardIndex = 0; state.revealed = false; renderRail(); render(); };
     topics.appendChild(b);
@@ -453,7 +699,7 @@ function renderRail() {
   // Who is signed in, and the country they are locked to. Shown rather than hidden in a
   // menu: on a shared computer it should be obvious whose progress is on screen.
   $('#who').innerHTML = `<b>${esc(state.me.name || state.me.email)}</b>
-    <small>${esc(state.me.name ? state.me.email : (isPro() ? 'Full access' : 'Free account'))}</small>`;
+    <small>${esc(state.me.name ? state.me.email : (isPro() ? t('who.fullAccess') : t('who.freeAccount')))}</small>`;
 
   $('#signOut').onclick = async () => {
     flushSync();
@@ -478,7 +724,7 @@ function renderVersions(country) {
   if (block.hidden) return;
 
   const box = $('#versions');
-  box.setAttribute('aria-label', `Which version of the ${country.test} to study`);
+  box.setAttribute('aria-label', t('rail.versionsLabel', { test: country.test }));
   box.innerHTML = '';
   versions.forEach((v) => {
     const b = el('button', 'ver', esc(v.label));
@@ -486,7 +732,7 @@ function renderVersions(country) {
     b.onclick = () => switchVersion(v.id);
     box.appendChild(b);
   });
-  $('#versionNote').textContent = 'Study the version that applies to your own application.';
+  $('#versionNote').textContent = t('rail.versionNote');
 }
 
 /** Switches question pool. Loads the other pack first, then drops what belonged to the old
@@ -497,7 +743,7 @@ function renderVersions(country) {
 async function switchVersion(versionId) {
   if (versionId === state.versionId) return;
   if (state.test && !testFinished(state.test)
-      && !confirm('Switching test version discards the practice test you have in progress. Continue?')) return;
+      && !confirm(t('rail.versionSwitchConfirm'))) return;
 
   const buttons = [...document.querySelectorAll('.ver')];
   buttons.forEach((b) => { b.disabled = true; });
@@ -510,6 +756,14 @@ async function switchVersion(versionId) {
     state.revealed = false;
     state.test = null;
     store.write({ versionId: loaded.versionId });
+    // The new pack decides the language, exactly as it does at boot. Two versions of one
+    // country are not necessarily in one language: Canada's test may be taken in English
+    // or French and IRCC publishes the guide in both, so its two versions are en-CA and
+    // fr-CA. Without this the questions switched to French and every button around them
+    // stayed English, and <html lang> kept saying en-CA - which also tells a screen reader
+    // to read French questions with an English voice.
+    setLanguage(loaded.pack.language || state.country.language || 'en');
+    localizeDom();
     // Sent now rather than on the usual debounce. Answers can wait 1.2 seconds; a version
     // change cannot, because a reload in that window would come back on the old pool - and
     // boot() hydrates from the server, so the local copy would be overwritten, not kept.
@@ -517,12 +771,86 @@ async function switchVersion(versionId) {
     renderRail();
     render();
     const v = (state.country.versions || []).find((x) => x.id === state.versionId);
-    announce(`Now studying the ${v ? v.label : versionId}.`);
+    announce(t('rail.versionSwitched', { label: v ? v.label : versionId }));
   } catch {
     // Nothing was replaced, so say so rather than leaving a dead picker.
     buttons.forEach((b) => { b.disabled = false; });
-    $('#versionNote').textContent = 'That version could not be loaded. You are still on the one you were using.';
+    $('#versionNote').textContent = t('rail.versionFailed');
   }
+}
+
+/** What this question pool actually is, when the pack says something about itself.
+ *
+ *  Three things get shown, and only if the pack carries them:
+ *
+ *  - `disclosure`, whenever the pack states that the official pool is not published. The
+ *    Australian practice set is twenty questions and the real test draws from a pool
+ *    nobody publishes; showing those twenty under a heading reading "every official
+ *    question" would be a straightforward untruth. The pack is the only thing that knows,
+ *    so the pack's own words are used.
+ *  - `licence.attribution`, when there is a licence. Not decoration: CC BY requires
+ *    attribution, and an attribution nobody can see does not satisfy it.
+ *  - `nonAffiliation`, for a pack of questions we wrote ourselves. Canada and the UK do
+ *    not publish their question pools at all, so a pack for them is our own questions
+ *    testing facts from the official study guide. That has to be said in the open, in the
+ *    pack's own words, on the screen showing the questions - not buried in a Terms page.
+ *  - `valuesRule.note`, or any pack rule stated in prose - Australia additionally requires
+ *    every values question right. Stated rather than implemented, and stated in the pack's
+ *    own words rather than paraphrased.
+ *
+ *  All of it is content, so none of it is translated. */
+function packNotice(pane) {
+  const p = state.pack || {};
+  const box = el('div', 'pack-note');
+  let any = false;
+
+  // Shown whenever the pack carries one, not only for a practice subset. The German
+  // catalogue's disclosure is the sentence that matters most on the whole screen: BAMF says
+  // its own catalogue wording "can differ slightly" from the exam paper, so "the official
+  // catalogue" is the strongest true claim and this is where that is said.
+  if (p.disclosure) {
+    box.appendChild(el('p', 'label', esc(t('pack.about'))));
+    box.appendChild(el('p', null, esc(p.disclosure)));
+    any = true;
+  }
+  // Whose questions these are. Shown immediately after the disclosure, and deliberately
+  // not styled down: for an `authored-practice` pack this is the sentence that stops a
+  // learner believing they are looking at the real exam questions.
+  if (p.nonAffiliation) {
+    box.appendChild(el('p', 'pack-mine', esc(p.nonAffiliation)));
+    any = true;
+  }
+  const rule = p.valuesRule && p.valuesRule.note;
+  if (rule) {
+    box.appendChild(el('p', 'label', esc(t('pack.extraRule'))));
+    box.appendChild(el('p', null, esc(rule)));
+    any = true;
+  }
+  const lic = p.licence || p.license;
+  if (lic && lic.attribution && lic.name) {
+    // "Official material from X, reproduced under Y" is right for a pack that reproduces
+    // an official pool, and nonsense for one we wrote: it produced "Official material from
+    // Facts drawn from Discover Canada ... reproduced under Our own questions". For an
+    // authored pack the attribution is already a complete statement of who wrote what, so
+    // it is shown as it stands.
+    const own = p.contentType === 'authored-practice';
+    const line = el(
+      'p',
+      'pack-lic',
+      esc(own ? lic.attribution : t('pack.licence', { attribution: lic.attribution, licence: lic.name }))
+    );
+    if (lic.url) {
+      line.appendChild(document.createTextNode(' '));
+      const a = el('a', null, esc(t('pack.licenceLink')));
+      a.href = lic.url;
+      a.rel = 'noopener';
+      a.target = '_blank';
+      line.appendChild(a);
+    }
+    box.appendChild(line);
+    any = true;
+  }
+  if (any) pane.appendChild(box);
 }
 
 /* ------------------------------------------------------------------ render */
@@ -547,17 +875,77 @@ function crumb(pane, text) {
 }
 
 /* ---------- study: free forever ---------- */
-function renderStudy(pane) {
-  const cat = (state.pack.categories || []).find((c) => c.id === state.topicId);
-  const pool = cat ? cat.questions : allQuestions();
-  crumb(pane, cat ? `${titleCase(cat.section)} › ${subsection(cat.subsection)}` : 'All sections · free forever');
-  pane.appendChild(el('h2', null, cat ? esc(subsection(cat.subsection)) : 'Flashcards'));
-  pane.appendChild(el('p', 'sub', 'Every official question, free forever. Click the card to see the accepted answers.'));
+/** One picture from the pack.
+ *
+ *  `object-fit: contain` inside a fixed box, and no filter of any kind. The images arrive
+ *  already composited onto white, which is why they sit on a white tile in dark mode too:
+ *  several are black line art and one option is a black Chi-Rho that vanishes completely on
+ *  a dark ground. A white tile in the dark theme is not an oversight - it is what the
+ *  official document looks like, and it is the only version of these that is legible. */
+function packImage(path, alt, cls) {
+  return `<img class="${cls}" src="${esc(imgUrl(path))}" alt="${esc(alt)}" loading="lazy" decoding="async">`;
+}
 
-  if (!pool.length) { pane.appendChild(el('div', 'card', '<p>No questions in this section.</p>')); return; }
+/** The single figure some questions are answered from, with its own credit when the pack
+ *  gives one. Rendered above the options, because the option numbers are printed inside
+ *  the picture. */
+function questionFigure(q) {
+  const path = figureOf(q);
+  if (!path) return '';
+  const credit = q.imageCredit ? `<figcaption class="credit">${esc(q.imageCredit)}</figcaption>` : '';
+  return `<figure class="qfig">${packImage(path, t('study.figureAlt'), 'qfig-img')}${credit}</figure>`;
+}
+
+/** Says where the questions came from, which for the German catalogue is a legal duty and
+ *  not a courtesy: section 63 UrhG requires the source to be stated, and the pack says so
+ *  itself in `licence.attributionMustBeOnScreen`.
+ *
+ *  Appended to every screen that shows a question - study, the practice intro, a practice
+ *  question, the results, the read-aloud mode - rather than only to the one screen where it
+ *  looked tidiest. A pack with no licence block (the United States' federal work needs
+ *  none) renders nothing, so nothing about the US changes. */
+function packAttribution(pane) {
+  const lic = (state.pack && (state.pack.licence || state.pack.license)) || null;
+  if (!lic || !lic.attribution) return;
+  pane.appendChild(el('p', 'pack-credit', esc(t('pack.source', { attribution: lic.attribution }))));
+}
+
+/** The official options, drawn in the order the official material prints them.
+ *
+ *  Never shuffled. On a multiple-choice paper the order is part of the question - somebody
+ *  who has learned the printed catalogue should recognise the same card here, and for the
+ *  picture questions the order is the order the pictures are printed left to right.
+ *
+ *  Marks the right answer only when it has been asked for. */
+function optionList(options, correct, q) {
+  const right = new Set(correct || []);
+  const pics = q ? optionImagesOf(q) : null;
+  return `<ul class="olist${pics ? ' has-pics' : ''}">${options.map((o, idx) => {
+    const ok = right.has(o);
+    // The option's own label is the alt text. It is not a description of the picture -
+    // nothing here could honestly describe a coat of arms - but it is what tells somebody
+    // which numbered option they are looking at.
+    const pic = pics && pics[idx] ? packImage(pics[idx], o, 'oimg') : '';
+    return `<li class="${ok ? 'is-right' : ''}"><span class="k" aria-hidden="true">${idx + 1}</span>`
+      + `<span class="otext">${pic}<span>${esc(o)}</span></span>`
+      + `${ok ? `<span class="mark">${esc(t('study.correctAnswer'))}</span>` : ''}</li>`;
+  }).join('')}</ul>`;
+}
+
+function renderStudy(pane) {
+  const cat = studyCategories().find((c) => c.id === state.topicId);
+  const pool = cat ? cat.questions : allQuestions();
+  crumb(pane, cat ? sectionCrumb(cat) : t('study.crumbAll'));
+  pane.appendChild(el('h2', null, cat ? esc(sectionLabel(cat)) : esc(t('study.title'))));
+  pane.appendChild(el('p', 'sub', esc(isSubsetPack() ? t('study.subSubset') : t('study.sub'))));
+  packNotice(pane);
+
+  if (!pool.length) { pane.appendChild(el('div', 'card', `<p>${esc(t('study.empty'))}</p>`)); return; }
   const i = state.cardIndex % pool.length;
   const q = pool[i];
   const answers = q.answers || [];
+  // What shape is this question? Asked of the question, not of the country.
+  const options = fixedOptions(q);
 
   const prog = el('div', 'progress', `<i style="width:${Math.max(2, ((i + 1) / pool.length) * 100)}%"></i>`);
   pane.appendChild(prog);
@@ -567,17 +955,39 @@ function renderStudy(pane) {
   // silently changes from a question to a list of answers.
   wrap.setAttribute('aria-expanded', String(state.revealed));
   const card = el('div', 'card');
+  // Said on both sides of the card, because "Bild 1" is not an answer and the reason has
+  // to be on screen wherever the option list is.
+  const pictureNote = needsPicture(q)
+    ? `<p class="note">${esc(Array.isArray(q.sourcePages) && q.sourcePages.length
+        ? t('study.needsPicturePage', { page: q.sourcePages.join(', ') })
+        : t('study.needsPicture'))}</p>`
+    : '';
+
   if (!state.revealed) {
-    card.innerHTML = `<span class="label">Question ${q.id}</span>
+    // A multiple-choice question shows its options on the front. Without them the card is
+    // not the question the person will actually be asked.
+    card.innerHTML = `<span class="label">${esc(t('study.questionLabel', { id: q.id }))}</span>
       <p class="q">${esc(q.question)}</p>
-      <p class="label" style="margin-top:18px">Click to reveal</p>`;
+      ${questionFigure(q)}
+      ${options ? optionList(options, null, q) : ''}
+      ${pictureNote}
+      <p class="label" style="margin-top:18px">${esc(t('study.clickReveal'))}</p>`;
+  } else if (options) {
+    // The question stays on screen: options with no question above them are unreadable.
+    card.innerHTML = `<span class="label">${esc(answers.length > 1 ? t('study.acceptedAnswers', { n: answers.length }) : t('study.correctAnswer'))}</span>
+      <p class="q">${esc(q.question)}</p>
+      ${questionFigure(q)}
+      ${optionList(options, answers, q)}
+      ${pictureNote}
+      ${q.note ? `<p class="note">${esc(q.note)}</p>` : ''}
+      <p class="label" style="margin-top:16px">${esc(t('study.clickBack'))}</p>`;
   } else {
     const many = answers.length > 1;
-    card.innerHTML = `<span class="label">${many ? `Accepted answers \u00b7 ${answers.length}` : 'Answer'}</span>
-      ${acceptsAnyOne(q.question, answers.length) ? '<p style="color:var(--accent-ink);font-size:13.5px;margin:6px 0 0">Any one of these is accepted.</p>' : ''}
+    card.innerHTML = `<span class="label">${esc(many ? t('study.acceptedAnswers', { n: answers.length }) : t('study.answer'))}</span>
+      ${acceptsAnyOne(q.question, answers.length) ? `<p style="color:var(--accent-ink);font-size:13.5px;margin:6px 0 0">${esc(t('study.anyOne'))}</p>` : ''}
       <ul class="answers">${answers.map((a) => `<li><span class="tick" aria-hidden="true">\u2713</span><span>${esc(a)}</span></li>`).join('')}</ul>
       ${q.note ? `<p class="note">${esc(q.note)}</p>` : ''}
-      <p class="label" style="margin-top:16px">Click to go back</p>`;
+      <p class="label" style="margin-top:16px">${esc(t('study.clickBack'))}</p>`;
   }
   wrap.appendChild(card);
   wrap.onclick = () => {
@@ -592,22 +1002,51 @@ function renderStudy(pane) {
   pane.appendChild(wrap);
 
   const row = el('div', 'row');
-  const prev = el('button', 'btn ghost', 'Previous');
+  const prev = el('button', 'btn ghost', esc(t('btn.previous')));
   prev.onclick = () => { state.cardIndex = (i - 1 + pool.length) % pool.length; state.revealed = false; render(); refocus('.btn.ghost'); };
-  const next = el('button', 'btn', 'Next question');
+  const next = el('button', 'btn', esc(t('btn.nextQuestion')));
   next.onclick = () => { state.cardIndex = (i + 1) % pool.length; state.revealed = false; render(); refocus('.row .btn:not(.ghost)'); };
   row.append(prev, next);
   // Position without a total: enough to know where you are, without publishing how
   // many questions the pool holds.
-  row.appendChild(el('span', 'label', `Card ${i + 1}`));
+  row.appendChild(el('span', 'label', esc(t('study.card', { n: i + 1 }))));
   pane.appendChild(row);
+  packAttribution(pane);
 }
 
 /* ---------- practice: first test free, then paid ---------- */
+
+/** Can this question be marked at all?
+ *
+ *  Free text needs at least one accepted answer. A multiple-choice question needs at least
+ *  one of its accepted answers to actually appear among its options - otherwise there is
+ *  no button that counts as right, and the person would be marked wrong whatever they
+ *  pressed. The pack validator refuses that shape, and this refuses to ask it. */
+function isGradeable(q) {
+  const answers = q.answers || [];
+  const options = fixedOptions(q);
+  if (!options) return answers.length > 0;
+  return answers.some((a) => options.includes(a));
+}
+
 function buildTest(count) {
-  const pool = allQuestions().filter((q) => !isLocal(q));
+  const pool = allQuestions().filter((q) => !isLocal(q) && !needsPicture(q) && isGradeable(q));
   return shuffle(pool).slice(0, Math.min(count, pool.length)).map((q) => {
     const acceptable = q.answers || [];
+    const official = fixedOptions(q);
+
+    if (official) {
+      /* The official material already prints the options, and prints them in an order.
+       * Both are part of the question: somebody who has learned the printed catalogue is
+       * looking for the answer in the place it was printed. So neither the options nor
+       * their order is regenerated here - which also means we never invent a wrong answer
+       * for a test whose wrong answers are themselves official. */
+      const correct = acceptable.filter((a) => official.includes(a));
+      return { q, acceptable: correct, expected: 1, correct: new Set(correct), options: official, picked: [], graded: null };
+    }
+
+    /* Free text - the United States shape. There are no official wrong options, so
+     * plausible ones are borrowed from other questions' answers. */
     const expected = expectedCount(q.question, acceptable.length);
     const correct = shuffle(acceptable).slice(0, expected);
     const others = shuffle(
@@ -627,17 +1066,17 @@ function buildTest(count) {
 /** A test is finished once every question has been walked past. That is also the moment it
  *  counts against the free allowance, because the history row is written on the results
  *  screen - see the note on renderPausedTest. */
-const testFinished = (t) => t.at >= t.items.length;
+const testFinished = (test) => test.at >= test.items.length;
 
 /** The outcome of a graded question, in words. Built in one place so the sentence drawn on
  *  the card and the sentence announced to a screen reader cannot drift apart. */
 function verdictFor(item) {
   const answers = [...item.correct];
-  const lead = item.graded ? 'Correct.' : 'Not correct.';
+  const lead = item.graded ? t('verdict.correct') : t('verdict.incorrect');
   // A right answer to a one-answer question needs no restatement; anything else does.
   const rest = item.graded && answers.length === 1
     ? ''
-    : `The answer${answers.length > 1 ? 's are' : ' is'} ${answers.join('; ')}.`;
+    : t(answers.length > 1 ? 'verdict.answersAre' : 'verdict.answerIs', { answers: answers.join('; ') });
   return { cls: item.graded ? 'right' : 'wrong', glyph: item.graded ? '\u2713' : '\u2715', lead, rest, text: `${lead} ${rest}`.trim() };
 }
 
@@ -652,83 +1091,111 @@ function verdictFor(item) {
  *  because that is when the history row is written. Resuming is therefore always free, and
  *  somebody who abandons a test can still start another - the same as before this screen
  *  existed. Closing that would mean holding the attempt on the server. */
-function renderPausedTest(pane, t) {
-  crumb(pane, 'Practice test');
-  pane.appendChild(el('h2', null, 'You have a test in progress'));
-  pane.appendChild(el('p', 'sub',
-    `Paused at question ${t.at + 1} of ${t.items.length}. Nothing you have answered is lost.`));
-  pane.appendChild(el('div', 'progress', `<i style="width:${(t.at / t.items.length) * 100}%"></i>`));
+function renderPausedTest(pane, test) {
+  const where = { n: test.at + 1, total: test.items.length };
+  crumb(pane, t('practice.crumb'));
+  pane.appendChild(el('h2', null, esc(t('paused.title'))));
+  pane.appendChild(el('p', 'sub', esc(t('paused.sub', where))));
+  pane.appendChild(el('div', 'progress', `<i style="width:${(test.at / test.items.length) * 100}%"></i>`));
 
   const card = el('div', 'card');
-  card.innerHTML = `<span class="label">Paused</span>
-    <p class="q">Question ${t.at + 1} of ${t.items.length}</p>
-    <p style="color:var(--ink-2);margin:10px 0 0">${t.correct} correct so far \u00b7 ${t.pass} needed to pass.</p>`;
+  card.innerHTML = `<span class="label">${esc(t('paused.label'))}</span>
+    <p class="q">${esc(t('practice.questionOf', where))}</p>
+    <p style="color:var(--ink-2);margin:10px 0 0">${esc(test.pass
+      ? t('paused.correctSoFar', { n: test.correct, pass: test.pass })
+      : t('paused.correctSoFarNoMark', { n: test.correct }))}</p>`;
   pane.appendChild(card);
 
   const row = el('div', 'row');
-  const go = el('button', 'btn', 'Resume test');
+  const go = el('button', 'btn', esc(t('btn.resumeTest')));
   go.onclick = () => {
-    t.paused = false;
+    test.paused = false;
     render();
     refocus('.opt');
   };
-  const drop = el('button', 'btn ghost', 'Discard and start a new test');
+  const drop = el('button', 'btn ghost', esc(t('btn.discardTest')));
   drop.onclick = () => { state.test = null; render(); };
   row.append(go, drop);
   pane.appendChild(row);
   if (!isPro() && !usedFreeTest()) {
-    pane.appendChild(el('p', 'pay-note', 'This is your free test. Resuming picks it up where you left off.'));
+    pane.appendChild(el('p', 'pay-note', esc(t('paused.freeNote'))));
   }
 }
 
 function renderPractice(pane) {
-  const asked = state.pack.askedPerInterview || 10;
-  const pass = state.pack.passRequirement || Math.ceil(asked * 0.6);
+  /* Read from the pack, with no fallback. This used to read
+   *   askedPerInterview || 10   and   passRequirement || Math.ceil(asked * 0.6)
+   * which is a 60% pass mark invented out of nothing and a ten-question test belonging to
+   * no country at all. Germany asks 33 and needs 17 (51%); Spain asks 25 and needs 15
+   * (60%); the United States asks 20 and needs 12. A default here would quietly tell one
+   * of them somebody else's rules. */
+  const { asked, pass } = packFormat();
   const version = (state.country.versions || []).find((v) => v.id === state.versionId);
 
   if (state.test && state.test.paused && !testFinished(state.test)) return renderPausedTest(pane, state.test);
 
   if (!state.test) {
-    crumb(pane, 'Practice test');
-    pane.appendChild(el('h2', null, 'Practice test'));
+    crumb(pane, t('practice.crumb'));
+    pane.appendChild(el('h2', null, esc(t('practice.title'))));
     pane.appendChild(el('p', 'sub',
-      `In the real interview you're asked up to ${asked} questions and need ${pass} correct to pass. This test uses the same format.`));
+      esc(asked && pass ? t('practice.sub', { asked, pass }) : t('practice.subUnknown'))));
+    packNotice(pane);
 
-    if (usedFreeTest() && !isPro()) { paywall(pane, 'Unlimited practice tests'); return; }
+    // Nothing to build a test out of, so say that rather than making the numbers up.
+    if (!asked || !pass) {
+      pane.appendChild(el('div', 'card', `<p>${esc(t('practice.unavailable'))}</p>`));
+      return;
+    }
+
+    if (usedFreeTest() && !isPro()) { paywall(pane, t('paywall.unlimitedTests')); return; }
 
     const card = el('div', 'card');
-    card.innerHTML = `<span class="label">${esc(state.country.name)}${version ? ` \u00b7 ${esc(version.label)}` : ''}</span>
-      <p class="q">${asked} questions \u00b7 ${pass} to pass</p>
-      <p style="color:var(--ink-2);margin:10px 0 0">${usedFreeTest() ? 'Unlimited tests are part of your access.' : 'Your first full test is free.'}</p>`;
+    card.innerHTML = `<span class="label">${esc(countryLabel(state.country))}${version ? ` \u00b7 ${esc(version.label)}` : ''}</span>
+      <p class="q">${esc(t('practice.card', { asked, pass }))}</p>
+      <p style="color:var(--ink-2);margin:10px 0 0">${esc(usedFreeTest() ? t('practice.unlimited') : t('practice.firstFree'))}</p>`;
     pane.appendChild(card);
     const row = el('div', 'row');
-    const go = el('button', 'btn', 'Start test');
+    const go = el('button', 'btn', esc(t('btn.startTest')));
     go.onclick = () => { state.test = { items: buildTest(asked), at: 0, correct: 0, pass }; render(); };
     row.appendChild(go);
     pane.appendChild(row);
+    packAttribution(pane);
     return;
   }
 
-  const t = state.test;
-  if (testFinished(t)) return renderResults(pane, t);
+  /* Named `test`, not `t`. `t` is the translation function, and a local called `t` here
+     shadowed it - so every string in this function would have tried to call the test
+     object. Caught before it ran, but it is exactly the kind of collision a one-letter
+     name invites. */
+  const test = state.test;
+  if (testFinished(test)) return renderResults(pane, test);
 
-  const item = t.items[t.at];
-  crumb(pane, `Question ${t.at + 1} of ${t.items.length}`);
-  pane.appendChild(el('div', 'progress', `<i style="width:${((t.at) / t.items.length) * 100}%"></i>`));
+  const item = test.items[test.at];
+  crumb(pane, t('practice.questionOf', { n: test.at + 1, total: test.items.length }));
+  pane.appendChild(el('div', 'progress', `<i style="width:${((test.at) / test.items.length) * 100}%"></i>`));
 
-  const instruction = item.expected > 1 ? `Select ${item.expected} answers` : 'Select one answer';
+  const instruction = item.expected > 1
+    ? t('practice.selectN', { n: item.expected })
+    : t('practice.selectOne');
   const card = el('div', 'card');
-  card.innerHTML = `<span class="label">${instruction}</span>
-    <p class="q">${esc(item.q.question)}</p>`;
+  // The figure goes above the options because the option numbers are printed inside it.
+  card.innerHTML = `<span class="label">${esc(instruction)}</span>
+    <p class="q">${esc(item.q.question)}</p>
+    ${questionFigure(item.q)}`;
   const opts = el('div', 'opts');
   // Named as a group, so the options are announced as the answers to this question rather
-  // than as four loose buttons somewhere on a page.
+  // than as loose buttons somewhere on a page. How many there are is the pack's business:
+  // the Einbuergerungstest prints four, the CCSE three.
   opts.setAttribute('role', 'group');
-  opts.setAttribute('aria-label', `${instruction}: ${item.q.question}`);
+  opts.setAttribute('aria-label', t('practice.optsLabel', { instruction, question: item.q.question }));
+  const optionPics = optionImagesOf(item.q);
   item.options.forEach((o, idx) => {
     // The number is a visual anchor, not a shortcut: read out before every option it is
-    // just noise.
-    const b = el('button', 'opt', `<span class="k" aria-hidden="true">${idx + 1}</span><span>${esc(o)}</span>`);
+    // just noise. Where the option IS a picture, the picture sits with the label rather
+    // than replacing it, so the numbered option and the image stay tied together.
+    const pic = optionPics && optionPics[idx] ? packImage(optionPics[idx], o, 'oimg') : '';
+    const b = el('button', `opt${pic ? ' has-pic' : ''}`,
+      `<span class="k" aria-hidden="true">${idx + 1}</span><span class="otext">${pic}<span>${esc(o)}</span></span>`);
     if (item.graded !== null) {
       const right = item.correct.has(o);
       const picked = item.picked.includes(o);
@@ -739,24 +1206,24 @@ function renderPractice(pane) {
       // button reachable and gives it a state to report.
       b.setAttribute('aria-disabled', 'true');
       const mark = right
-        ? (picked ? 'Correct, your answer' : 'Correct answer')
-        : (picked ? 'Your answer, incorrect' : '');
+        ? (picked ? t('opt.correctYours') : t('opt.correct'))
+        : (picked ? t('opt.yoursIncorrect') : '');
       if (mark) {
         b.appendChild(el('span', 'mark',
-          `<span aria-hidden="true">${right ? '\u2713' : '\u2715'}</span> ${mark}`));
+          `<span aria-hidden="true">${right ? '\u2713' : '\u2715'}</span> ${esc(mark)}`));
       }
     } else if (item.picked.includes(o)) {
       // Mid-question on a "name two" - the first pick has to show somewhere.
       b.dataset.state = 'picked';
       b.setAttribute('aria-pressed', 'true');
-      b.appendChild(el('span', 'mark', 'Selected'));
+      b.appendChild(el('span', 'mark', esc(t('opt.selected'))));
     } else {
       if (item.expected > 1) b.setAttribute('aria-pressed', 'false');
       b.onclick = () => {
         item.picked.push(o);
         if (item.picked.length >= item.expected) {
           item.graded = item.picked.every((p) => item.correct.has(p));
-          if (item.graded) t.correct += 1;
+          if (item.graded) test.correct += 1;
           recordAnswer(item.q, item.graded);
         }
         render();
@@ -785,82 +1252,105 @@ function renderPractice(pane) {
 
   if (item.graded !== null) {
     const row = el('div', 'row');
-    const next = el('button', 'btn next-q', t.at + 1 >= t.items.length ? 'See results' : 'Next question');
+    const next = el('button', 'btn next-q',
+      esc(test.at + 1 >= test.items.length ? t('btn.seeResults') : t('btn.nextQuestion')));
     next.onclick = () => {
-      t.at += 1;
+      test.at += 1;
       render();
       refocus('.opt, .pane .btn');
     };
     row.appendChild(next);
     pane.appendChild(row);
   }
+  packAttribution(pane);
 }
 
-function renderResults(pane, t) {
-  const pct = Math.round((t.correct / t.items.length) * 100);
-  const passed = t.correct >= t.pass;
+function renderResults(pane, test) {
+  const pct = Math.round((test.correct / test.items.length) * 100);
+  const passed = test.correct >= test.pass;
   const hist = store.read().history || [];
-  if (!t.saved) {
-    t.saved = true;
+  if (!test.saved) {
+    test.saved = true;
     store.write({ history: [...hist, { at: Date.now(), pct, passed }].slice(-50) });
   }
-  crumb(pane, 'Results');
-  pane.appendChild(el('h2', null, passed ? 'Pass' : 'Not yet'));
-  pane.appendChild(el('p', 'sub', `${t.correct} of ${t.items.length} correct (${pct}%) — you needed ${t.pass} to pass.`));
+  crumb(pane, t('results.crumb'));
+  pane.appendChild(el('h2', null, esc(passed ? t('results.pass') : t('results.notYet'))));
+  pane.appendChild(el('p', 'sub', esc(t('results.sub', {
+    correct: test.correct, total: test.items.length, pct, pass: test.pass,
+  }))));
 
-  const missed = t.items.filter((i) => i.graded === false);
+  const missed = test.items.filter((i) => i.graded === false);
   if (missed.length) {
-    pane.appendChild(el('h2', null, `Review the ${missed.length} you missed`));
+    pane.appendChild(el('h2', null, esc(tn('results.review', missed.length))));
     missed.forEach((m) => {
       const c = el('div', 'card');
       c.style.marginBottom = '12px';
+      const official = fixedOptions(m.q);
       c.innerHTML = `<p style="font-weight:600;margin:0 0 8px">${esc(m.q.question)}</p>
-        <span class="label">${m.acceptable.length > 1 ? `Accepted answers · ${m.acceptable.length}` : 'Answer'}</span>
-        ${acceptsAnyOne(m.q.question, m.acceptable.length) ? '<p style="color:var(--accent-ink);font-size:13px;margin:5px 0 0">Any one of these is accepted.</p>' : ''}
-        <ul class="answers">${m.acceptable.map((a) => `<li><span class="tick" aria-hidden="true">✓</span><span>${esc(a)}</span></li>`).join('')}</ul>
+        ${questionFigure(m.q)}
+        <span class="label">${esc(m.acceptable.length > 1 ? t('study.acceptedAnswers', { n: m.acceptable.length }) : (official ? t('study.correctAnswer') : t('study.answer')))}</span>
+        ${acceptsAnyOne(m.q.question, m.acceptable.length) ? `<p style="color:var(--accent-ink);font-size:13px;margin:5px 0 0">${esc(t('study.anyOne'))}</p>` : ''}
+        ${official
+          ? optionList(official, m.acceptable, m.q)
+          : `<ul class="answers">${m.acceptable.map((a) => `<li><span class="tick" aria-hidden="true">\u2713</span><span>${esc(a)}</span></li>`).join('')}</ul>`}
         ${m.q.note ? `<p class="note">${esc(m.q.note)}</p>` : ''}`;
       pane.appendChild(c);
     });
   }
   const row = el('div', 'row');
-  const again = el('button', 'btn', 'Back to practice');
+  const again = el('button', 'btn', esc(t('btn.backToPractice')));
   again.onclick = () => { state.test = null; render(); };
   row.appendChild(again);
   pane.appendChild(row);
+  packAttribution(pane);
 }
 
 /* ---------- interview: paid ---------- */
 function renderInterview(pane) {
-  crumb(pane, 'Interview');
-  pane.appendChild(el('h2', null, 'Interview practice'));
-  pane.appendChild(el('p', 'sub', 'The question is read aloud, the way the officer will ask it. You answer out loud, then check yourself.'));
-  if (!isPro()) { paywall(pane, 'Interview practice'); return; }
+  crumb(pane, t('interview.crumb'));
+  pane.appendChild(el('h2', null, esc(t('interview.title'))));
+  pane.appendChild(el('p', 'sub', esc(t('interview.sub'))));
+  if (!isPro()) { paywall(pane, t('interview.title')); return; }
 
-  const pool = allQuestions().filter((q) => !isLocal(q));
+  // A question whose four options are "Bild 1" to "Bild 4" cannot be practised out loud
+  // either, so the same exclusion applies.
+  const pool = allQuestions().filter((q) => !isLocal(q) && !needsPicture(q));
   const q = pool[Math.floor(Math.random() * pool.length)];
+  const options = fixedOptions(q);
   const card = el('div', 'card');
-  card.innerHTML = `<span class="label">Practice interviewer</span><p class="q">${esc(q.question)}</p>`;
+  card.innerHTML = `<span class="label">${esc(t('interview.label'))}</span><p class="q">${esc(q.question)}</p>${questionFigure(q)}`;
   const row = el('div', 'row');
-  const say = el('button', 'btn ghost', 'Read it aloud');
+  const say = el('button', 'btn ghost', esc(t('btn.readAloud')));
   say.onclick = () => {
-    if (!('speechSynthesis' in window)) { say.textContent = 'Speech not supported here'; return; }
+    if (!('speechSynthesis' in window)) { say.textContent = t('interview.noSpeech'); return; }
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(q.question);
-    u.lang = 'en-US';
+    /* The pack's language, not en-US. A German question read by an English voice is close
+     * to unintelligible, and this was hardcoded to en-US - which would have made the whole
+     * mode useless the moment a German pack loaded. */
+    u.lang = (state.pack && state.pack.language) || currentLocale();
     speechSynthesis.speak(u);
   };
-  const reveal = el('button', 'btn', 'Reveal the answer');
+  const reveal = el('button', 'btn', esc(t('btn.revealAnswer')));
   reveal.onclick = () => {
     reveal.remove();
-    const list = el('ul', 'answers');
-    list.innerHTML = (q.answers || []).map((a) => `<li><span class="tick" aria-hidden="true">✓</span><span>${esc(a)}</span></li>`).join('');
-    card.appendChild(list);
+    // A multiple-choice question is revealed as its options with the right one marked;
+    // free text as the list of answers an officer accepts.
+    if (options) {
+      const box = el('div', null, optionList(options, q.answers || [], q));
+      card.appendChild(box);
+    } else {
+      const list = el('ul', 'answers');
+      list.innerHTML = (q.answers || []).map((a) => `<li><span class="tick" aria-hidden="true">\u2713</span><span>${esc(a)}</span></li>`).join('');
+      card.appendChild(list);
+    }
   };
-  const next = el('button', 'btn quiet', 'Another question');
+  const next = el('button', 'btn quiet', esc(t('btn.anotherQuestion')));
   next.onclick = () => { render(); refocus('.btn.quiet'); };
   row.append(say, reveal, next);
   pane.append(card, row);
-  pane.appendChild(el('p', 'sub', 'Your browser speaks the question. The microphone is never used and no audio is recorded.'));
+  pane.appendChild(el('p', 'sub', esc(t('interview.privacy'))));
+  packAttribution(pane);
 }
 
 /* ---------- performance: the reason to come back ----------
@@ -934,20 +1424,30 @@ function accuracyRing(pct, passPct) {
   const R = 52, C = 64, SW = 10;
   const circ = 2 * Math.PI * R;
   const shown = pct === null ? 0 : pct;
-  const state = pct === null ? 'none' : pct >= passPct ? 'ok' : 'low';
-  const a = (passPct / 100) * 2 * Math.PI - Math.PI / 2;
-  const tick = [
-    C + Math.cos(a) * (R - SW / 2 - 3), C + Math.sin(a) * (R - SW / 2 - 3),
-    C + Math.cos(a) * (R + SW / 2 + 3), C + Math.sin(a) * (R + SW / 2 + 3),
-  ];
-  return `<svg class="ring is-${state}" viewBox="0 0 ${C * 2} ${C * 2}" role="img"
-       aria-label="${pct === null ? 'No answers recorded yet' : `Accuracy ${pct} percent, pass mark ${passPct} percent`}">
+  // Three states, and "above or below the line" is only one of them: a pack that does not
+  // publish a pass mark gets a ring with no line on it rather than a line at a guessed
+  // percentage.
+  const ringState = pct === null ? 'none' : passPct === null ? 'ok' : pct >= passPct ? 'ok' : 'low';
+  let tickMark = '';
+  if (passPct !== null) {
+    const a = (passPct / 100) * 2 * Math.PI - Math.PI / 2;
+    const tick = [
+      C + Math.cos(a) * (R - SW / 2 - 3), C + Math.sin(a) * (R - SW / 2 - 3),
+      C + Math.cos(a) * (R + SW / 2 + 3), C + Math.sin(a) * (R + SW / 2 + 3),
+    ];
+    tickMark = `<line class="ring-tick" x1="${tick[0].toFixed(1)}" y1="${tick[1].toFixed(1)}" x2="${tick[2].toFixed(1)}" y2="${tick[3].toFixed(1)}" stroke-width="2"/>`;
+  }
+  const label = pct === null
+    ? t('perf.ringNone')
+    : passPct === null ? t('perf.ringLabelNoMark', { pct }) : t('perf.ringLabel', { pct, passPct });
+  return `<svg class="ring is-${ringState}" viewBox="0 0 ${C * 2} ${C * 2}" role="img"
+       aria-label="${esc(label)}">
     <circle class="ring-bg" cx="${C}" cy="${C}" r="${R}" fill="none" stroke-width="${SW}"/>
     <circle class="ring-fg" cx="${C}" cy="${C}" r="${R}" fill="none" stroke-width="${SW}" stroke-linecap="round"
             transform="rotate(-90 ${C} ${C})" stroke-dasharray="${(circ * shown / 100).toFixed(1)} ${circ.toFixed(1)}"/>
-    <line class="ring-tick" x1="${tick[0].toFixed(1)}" y1="${tick[1].toFixed(1)}" x2="${tick[2].toFixed(1)}" y2="${tick[3].toFixed(1)}" stroke-width="2"/>
+    ${tickMark}
     <text class="ring-big" x="${C}" y="${C + 1}" text-anchor="middle" dominant-baseline="middle">${pct === null ? '—' : pct + '%'}</text>
-    <text class="ring-cap" x="${C}" y="${C + 24}" text-anchor="middle">ACCURACY</text>
+    <text class="ring-cap" x="${C}" y="${C + 24}" text-anchor="middle">${esc(t('perf.accuracyCap'))}</text>
   </svg>`;
 }
 
@@ -960,14 +1460,20 @@ function trendChart(recent, passPct) {
   ]);
   const line = pts.map((pt, i) => `${i ? 'L' : 'M'}${pt[0].toFixed(1)} ${pt[1].toFixed(1)}`).join(' ');
   const area = `${line} L${pts[pts.length - 1][0].toFixed(1)} ${H - PAD} L${pts[0][0].toFixed(1)} ${H - PAD} Z`;
-  const passY = H - PAD - (passPct / 100) * (H - PAD * 2);
   const last = pts[pts.length - 1];
+  // No pass mark in the pack means no pass line on the chart. Drawing one anyway would be
+  // an invented threshold on a screen whose whole promise is that nothing is invented.
+  let passLine = '';
+  if (passPct !== null) {
+    const passY = H - PAD - (passPct / 100) * (H - PAD * 2);
+    passLine = `<line class="t-pass" x1="${PAD}" x2="${W - PAD}" y1="${passY.toFixed(1)}" y2="${passY.toFixed(1)}"/>
+    <text class="t-cap" x="${PAD}" y="${(passY - 7).toFixed(1)}">${esc(t('perf.passMarkCap', { pct: passPct }))}</text>`;
+  }
   return `<svg class="trend" viewBox="0 0 ${W} ${H}" role="img"
-       aria-label="Your last ${recent.length} scores, oldest first, most recent ${recent[recent.length - 1].pct} percent">
+       aria-label="${esc(t('perf.trendLabel', { n: recent.length, pct: recent[recent.length - 1].pct }))}">
     <path class="t-area" d="${area}"/>
     <path class="t-line" d="${line}"/>
-    <line class="t-pass" x1="${PAD}" x2="${W - PAD}" y1="${passY.toFixed(1)}" y2="${passY.toFixed(1)}"/>
-    <text class="t-cap" x="${PAD}" y="${(passY - 7).toFixed(1)}">${passPct}% pass mark</text>
+    ${passLine}
     ${pts.map((pt, i) => `<circle class="t-dot" cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="${i === pts.length - 1 ? 4.5 : 2.6}"/>`).join('')}
     <text class="t-now" x="${last[0].toFixed(1)}" y="${(last[1] - 11).toFixed(1)}" text-anchor="end">${recent[recent.length - 1].pct}%</text>
   </svg>`;
@@ -990,9 +1496,10 @@ function renderPerformance(pane) {
   const hist = store.read().history || [];
   const log = store.read().answers || [];
   const recent = hist.slice(-9);
-  const pass = state.pack.passRequirement || 12;
-  const asked = state.pack.askedPerInterview || 20;
-  const passPct = Math.round((pass / asked) * 100);
+  /* From the pack. This was `passRequirement || 12` and `askedPerInterview || 20` - the
+     United States' own numbers, standing in for any pack that did not carry its own. On a
+     German pack that would have drawn a 60% pass line on a test whose pass mark is 51%. */
+  const { passPct } = packFormat();
 
   const answered = log.length;
   const correct = log.filter((r) => r.ok).length;
@@ -1008,17 +1515,28 @@ function renderPerformance(pane) {
   const deck = el('div', 'deck');
 
   /* ---- the ring, and one sentence that says what it means ---- */
+  // Above or below the line is only sayable when there is a line. Without one the sentence
+  // states the accuracy and stops, rather than implying a verdict.
+  const above = passPct === null ? null : overall >= passPct;
+  const weakest = attempted.length
+    ? ` ${above === false ? t('perf.startWith', { label: attempted[0].label, pct: attempted[0].pct })
+                          : t('perf.weakest', { label: attempted[0].label, pct: attempted[0].pct })}`
+    : '';
   const headline = !answered
-    ? 'Nothing here is estimated. Answer a question and this fills in with your own results.'
-    : overall >= passPct
-      ? `You are answering above the ${passPct}% pass mark.${attempted.length ? ` Weakest: ${attempted[0].label} at ${attempted[0].pct}%.` : ''}`
-      : `You are below the ${passPct}% pass mark.${attempted.length ? ` Start with ${attempted[0].label}, at ${attempted[0].pct}%.` : ''}`;
+    ? t('perf.headlineEmpty')
+    : passPct === null
+      ? `${t('perf.headlineNoMark')}${weakest}`
+      : `${t(above ? 'perf.headlineAbove' : 'perf.headlineBelow', { pct: passPct })}${weakest}`;
+
+  const heading = !answered
+    ? t('perf.whereYouStand')
+    : above === null ? t('perf.whereYouStand') : t(above ? 'perf.onTrack' : 'perf.notThereYet');
 
   const head = el('div', 'deck-head');
   head.innerHTML = `<div class="deck-ring">${accuracyRing(overall, passPct)}</div>
     <div class="deck-say">
-      <p class="label">Performance</p>
-      <h2>${answered ? (overall >= passPct ? 'On track' : 'Not there yet') : 'Where you stand'}</h2>
+      <p class="label">${esc(t('perf.label'))}</p>
+      <h2>${esc(heading)}</h2>
       <p class="deck-sub">${esc(headline)}</p>
     </div>`;
   deck.appendChild(head);
@@ -1026,58 +1544,62 @@ function renderPerformance(pane) {
   /* ---- the figures strip ---- */
   const strip = el('div', 'strip');
   strip.innerHTML = [
-    [`${seenPct}%`, 'Of the pool seen'],
-    [hist.length || '—', 'Tests finished'],
-    [streak || '—', 'Day streak'],
-    [recent.length ? `${recent[recent.length - 1].pct}%` : '—', 'Latest score'],
-    [answered || '—', 'Answers recorded'],
-  ].map(([v, l]) => `<div class="cell"><b class="mono">${v}</b><span class="label">${l}</span></div>`).join('');
+    [`${seenPct}%`, t('perf.poolSeen')],
+    [hist.length || '—', t('perf.testsFinished')],
+    [streak || '—', t('perf.dayStreak')],
+    [recent.length ? `${recent[recent.length - 1].pct}%` : '—', t('perf.latestScore')],
+    [answered || '—', t('perf.answersRecorded')],
+  ].map(([v, l]) => `<div class="cell"><b class="mono">${v}</b><span class="label">${esc(l)}</span></div>`).join('');
   deck.appendChild(strip);
 
   /* ---- three columns: the map, the charts, the sections ---- */
   const cols = el('div', 'deck-cols');
 
   const mapPanel = el('div', 'panel');
-  mapPanel.innerHTML = `<p class="label">Your map of the test</p>
+  mapPanel.innerHTML = `<p class="label">${esc(t('perf.map'))}</p>
     <div class="map">${(state.pack.categories || []).map((cat) => {
       const cells = cat.questions.map((q) => {
         const r = latest.get(String(q.id));
         const cls = !r ? 'u' : r.ok ? 'r' : 'w';
-        return `<i class="c ${cls}" title="${esc(`${q.question}\n${!r ? 'Not asked yet' : r.ok ? 'Answered correctly' : 'Answered wrongly'}`)}"></i>`;
+        const said = !r ? t('perf.notAskedYet') : r.ok ? t('perf.answeredRight') : t('perf.answeredWrong');
+        return `<i class="c ${cls}" title="${esc(`${q.question}\n${said}`)}"></i>`;
       }).join('');
-      return `<div class="map-row"><span class="map-name">${esc(subsection(cat.subsection))}</span><span class="map-cells">${cells}</span></div>`;
+      return `<div class="map-row"><span class="map-name">${esc(sectionLabel(cat))}</span><span class="map-cells">${cells}</span></div>`;
     }).join('')}</div>
-    <p class="map-key"><span><i class="c r"></i> right</span><span><i class="c w"></i> wrong</span><span><i class="c u"></i> not asked yet</span></p>`;
+    <p class="map-key"><span><i class="c r"></i> ${esc(t('perf.keyRight'))}</span><span><i class="c w"></i> ${esc(t('perf.keyWrong'))}</span><span><i class="c u"></i> ${esc(t('perf.keyUnasked'))}</span></p>`;
   cols.appendChild(mapPanel);
 
   if (recent.length >= 2) {
     const c = el('div', 'panel');
-    c.innerHTML = `<p class="label">Scores · last ${recent.length}</p>${trendChart(recent, passPct)}`;
+    c.innerHTML = `<p class="label">${esc(t('perf.scores', { n: recent.length }))}</p>${trendChart(recent, passPct)}`;
     cols.appendChild(c);
   }
   const act = activity(30);
   if (act.some((d) => d.n)) {
     const peak = Math.max(...act.map((d) => d.n));
     const c = el('div', 'panel');
-    c.innerHTML = `<p class="label">Answers per day · 30</p>
+    c.innerHTML = `<p class="label">${esc(t('perf.answersPerDay', { days: act.length }))}</p>
       <div class="spark">${act.map((d) => {
         const h = d.n ? Math.max(10, Math.round((d.n / peak) * 100)) : 4;
-        const when = d.date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-        return `<i style="height:${h}%" class="${d.n ? 'on' : ''}" title="${esc(d.n ? `${d.n} answer${d.n === 1 ? '' : 's'} on ${when}` : `Nothing on ${when}`)}"></i>`;
+        // The pack's locale, so a German reader gets "7. Sept." rather than "Sep 7".
+        const when = d.date.toLocaleDateString(currentLocale(), { day: 'numeric', month: 'short' });
+        return `<i style="height:${h}%" class="${d.n ? 'on' : ''}" title="${esc(d.n ? tn('perf.answersOn', d.n, { when }) : t('perf.nothingOn', { when }))}"></i>`;
       }).join('')}</div>`;
     cols.appendChild(c);
   }
   if (attempted.length) {
     const c = el('div', 'panel');
-    c.innerHTML = `<p class="label">Accuracy by section · weakest first</p>`;
+    c.innerHTML = `<p class="label">${esc(t('perf.accuracyBySection'))}</p>`;
     const list = el('div', 'sec-list');
     attempted.forEach((a) => {
-      const weak = a.pct < passPct;
+      // With no pass mark from the pack there is no "weak", so nothing is coloured as if
+      // there were.
+      const weak = passPct !== null && a.pct < passPct;
       // The whole row is the control, rather than a separate "Study X" line underneath it.
       // Long section names made that line wrap, which doubled the panel's height and left
       // the column badly out of balance.
       const row = el('button', 'sec');
-      row.setAttribute('aria-label', `Study ${a.label}, currently ${a.pct}% correct`);
+      row.setAttribute('aria-label', t('perf.studySection', { label: a.label, pct: a.pct }));
       row.innerHTML = `<div class="sec-head">
           <span class="sec-name">${esc(a.label)}</span>
           <span class="mono sec-pct ${weak ? 'is-low' : 'is-ok'}">${a.pct}%</span>
@@ -1092,9 +1614,9 @@ function renderPerformance(pane) {
   }
   if (untouched.length) {
     const c = el('div', 'panel');
-    c.innerHTML = `<p class="label">Not tested yet · ${untouched.length} section${untouched.length === 1 ? '' : 's'}</p>
+    c.innerHTML = `<p class="label">${esc(tn('perf.notTested', untouched.length))}</p>
       <p class="panel-note">${untouched.map((u) => esc(u.label)).join(' · ')}</p>
-      <p class="panel-note dim">Shown separately on purpose: never having been asked is not the same as getting it wrong.</p>`;
+      <p class="panel-note dim">${esc(t('perf.notTestedNote'))}</p>`;
     cols.appendChild(c);
   }
   deck.appendChild(cols);
@@ -1102,7 +1624,7 @@ function renderPerformance(pane) {
 
   if (!answered) {
     const row = el('div', 'row');
-    const go = el('button', 'btn', 'Take a practice test');
+    const go = el('button', 'btn', esc(t('btn.takeTest')));
     go.onclick = () => { state.mode = 'practice'; state.test = null; store.write({ mode: 'practice' }); renderRail(); render(); };
     row.appendChild(go);
     pane.appendChild(row);
@@ -1131,13 +1653,13 @@ function renderInsights(pane) {
     return;
   }
 
-  crumb(pane, 'Insights');
+  crumb(pane, t('ins.crumb'));
   const head = el('div', 'ins-head');
-  head.innerHTML = `<div><h2>Site insights</h2>
-      <p class="sub">Where visitors come from, and how many got as far as an account, a checkout and a payment.</p></div>`;
+  head.innerHTML = `<div><h2>${esc(t('ins.title'))}</h2>
+      <p class="sub">${esc(t('ins.sub'))}</p></div>`;
   const ranges = el('div', 'ins-ranges');
   [7, 28, 90].forEach((d) => {
-    const b = el('button', 'ins-range', `${d} days`);
+    const b = el('button', 'ins-range', esc(t('ins.range', { n: d })));
     b.setAttribute('aria-pressed', String(d === insightsRange));
     b.onclick = () => { insightsRange = d; render(); };
     ranges.appendChild(b);
@@ -1146,7 +1668,7 @@ function renderInsights(pane) {
   pane.appendChild(head);
 
   const body = el('div', 'ins-body');
-  body.innerHTML = '<p class="sub">Loading…</p>';
+  body.innerHTML = `<p class="sub">${esc(t('ins.loading'))}</p>`;
   pane.appendChild(body);
 
   api(`/api/analytics?days=${insightsRange}`)
@@ -1154,25 +1676,26 @@ function renderInsights(pane) {
     .catch((err) => {
       body.innerHTML = '';
       const c = el('div', 'panel');
-      c.innerHTML = `<p class="label">Not available</p>
+      c.innerHTML = `<p class="label">${esc(t('ins.notAvailable'))}</p>
         <p class="panel-note">${esc(err.message)}</p>
-        <p class="panel-note dim">If this says the tables are missing, the migration has not been applied to the live database yet.</p>`;
+        <p class="panel-note dim">${esc(t('ins.migrationNote'))}</p>`;
       body.appendChild(c);
     });
 }
 
 function drawInsights(body, d) {
   body.innerHTML = '';
-  const t = d.totals || {};
+  // `totals`, not `t`: `t` is the translation function.
+  const totals = d.totals || {};
 
   const strip = el('div', 'strip');
   strip.innerHTML = [
-    [t.views ?? 0, 'Page views'],
-    [t.accounts ?? 0, 'Accounts created'],
-    [t.checkouts ?? 0, 'Checkouts opened'],
-    [t.payments ?? 0, 'Payments completed'],
-    [t.refunds ?? 0, 'Refunds'],
-  ].map(([v, l]) => `<div class="cell"><b class="mono">${v}</b><span class="label">${l}</span></div>`).join('');
+    [totals.views ?? 0, t('ins.pageViews')],
+    [totals.accounts ?? 0, t('ins.accountsCreated')],
+    [totals.checkouts ?? 0, t('ins.checkoutsOpened')],
+    [totals.payments ?? 0, t('ins.paymentsCompleted')],
+    [totals.refunds ?? 0, t('ins.refunds')],
+  ].map(([v, l]) => `<div class="cell"><b class="mono">${v}</b><span class="label">${esc(l)}</span></div>`).join('');
   body.appendChild(strip);
 
   const cols = el('div', 'deck-cols');
@@ -1180,37 +1703,36 @@ function drawInsights(body, d) {
   if (series.length) {
     const peak = Math.max(...series.map((r) => r.views)) || 1;
     const c = el('div', 'panel');
-    c.innerHTML = `<p class="label">Page views per day · ${d.days}</p>
+    c.innerHTML = `<p class="label">${esc(t('ins.viewsPerDay', { days: d.days }))}</p>
       <div class="spark">${series.map((r) => {
         const h = r.views ? Math.max(10, Math.round((r.views / peak) * 100)) : 4;
-        return `<i style="height:${h}%" class="${r.views ? 'on' : ''}" title="${esc(`${r.views} view${r.views === 1 ? '' : 's'} on ${r.day}`)}"></i>`;
+        return `<i style="height:${h}%" class="${r.views ? 'on' : ''}" title="${esc(tn('ins.viewsOn', r.views, { day: r.day }))}"></i>`;
       }).join('')}</div>
-      <p class="panel-note dim">${esc(d.from)} to ${esc(d.to)} · peak ${peak} in a day</p>`;
+      <p class="panel-note dim">${esc(t('ins.rangeNote', { from: d.from, to: d.to, peak }))}</p>`;
     cols.appendChild(c);
   }
 
   const steps = [
-    ['Page views', t.views ?? 0],
-    ['Accounts created', t.accounts ?? 0],
-    ['Checkouts opened', t.checkouts ?? 0],
-    ['Payments completed', t.payments ?? 0],
+    [t('ins.pageViews'), totals.views ?? 0],
+    [t('ins.accountsCreated'), totals.accounts ?? 0],
+    [t('ins.checkoutsOpened'), totals.checkouts ?? 0],
+    [t('ins.paymentsCompleted'), totals.payments ?? 0],
   ];
   const top = Math.max(...steps.map(([, v]) => v)) || 1;
   const funnel = el('div', 'panel');
-  funnel.innerHTML = `<p class="label">How far people got</p>
+  funnel.innerHTML = `<p class="label">${esc(t('ins.howFar'))}</p>
     <div class="fun">${steps.map(([l, v]) => `
       <div class="fun-row">
-        <div class="fun-top"><span>${l}</span><b class="mono">${v}</b></div>
+        <div class="fun-top"><span>${esc(l)}</span><b class="mono">${v}</b></div>
         <div class="fun-bar"><i style="width:${Math.round((v / top) * 100)}%"></i></div>
       </div>`).join('')}</div>
-    <p class="panel-note dim">Four separate counts, not one journey. Nothing here identifies a
-      visitor, so we cannot tell which view became an account.</p>`;
+    <p class="panel-note dim">${esc(t('ins.funnelNote'))}</p>`;
   cols.appendChild(funnel);
 
   const countries = (d.countries || []).slice(0, 12);
   const cc = el('div', 'panel');
   if (countries.length) {
-    cc.innerHTML = `<p class="label">Where visitors are</p>
+    cc.innerHTML = `<p class="label">${esc(t('ins.whereVisitors'))}</p>
       <div class="ins-table">${countries.map((c) => `
         <div class="ins-row">
           <span class="ins-k">${esc(countryName(c.code))}</span>
@@ -1218,14 +1740,14 @@ function drawInsights(body, d) {
           <b class="mono">${c.views}</b>
         </div>`).join('')}</div>`;
   } else {
-    cc.innerHTML = `<p class="label">Where visitors are</p><p class="panel-note">No views recorded in this range yet.</p>`;
+    cc.innerHTML = `<p class="label">${esc(t('ins.whereVisitors'))}</p><p class="panel-note">${esc(t('ins.noViews'))}</p>`;
   }
   cols.appendChild(cc);
 
   const pages = (d.pages || []).slice(0, 12);
   const pc = el('div', 'panel');
   if (pages.length) {
-    pc.innerHTML = `<p class="label">Most-viewed pages</p>
+    pc.innerHTML = `<p class="label">${esc(t('ins.mostViewed'))}</p>
       <div class="ins-table">${pages.map((r) => `
         <div class="ins-row">
           <span class="ins-k mono">${esc(r.path)}</span>
@@ -1233,23 +1755,23 @@ function drawInsights(body, d) {
           <b class="mono">${r.views}</b>
         </div>`).join('')}</div>`;
   } else {
-    pc.innerHTML = `<p class="label">Most-viewed pages</p><p class="panel-note">Nothing recorded in this range yet.</p>`;
+    pc.innerHTML = `<p class="label">${esc(t('ins.mostViewed'))}</p><p class="panel-note">${esc(t('ins.nothingRecorded'))}</p>`;
   }
   cols.appendChild(pc);
 
   const byC = countries.filter((c) => c.accounts || c.checkouts);
   const ac = el('div', 'panel');
   if (byC.length) {
-    ac.innerHTML = `<p class="label">Accounts and checkouts by country</p>
+    ac.innerHTML = `<p class="label">${esc(t('ins.accountsCheckouts'))}</p>
       <div class="ins-table">${byC.map((c) => `
         <div class="ins-row three">
           <span class="ins-k">${esc(countryName(c.code))}</span>
           <b class="mono">${c.accounts}</b><b class="mono dim">${c.checkouts}</b>
         </div>`).join('')}</div>
-      <p class="panel-note dim">Accounts, then checkouts opened.</p>`;
+      <p class="panel-note dim">${esc(t('ins.accountsThenCheckouts'))}</p>`;
   } else {
-    ac.innerHTML = `<p class="label">Accounts and checkouts by country</p>
-      <p class="panel-note">No accounts or checkouts recorded in this range yet.</p>`;
+    ac.innerHTML = `<p class="label">${esc(t('ins.accountsCheckouts'))}</p>
+      <p class="panel-note">${esc(t('ins.noAccounts'))}</p>`;
   }
   cols.appendChild(ac);
 
@@ -1271,18 +1793,16 @@ const isExcluded = () => {
 function excludeMeControl() {
   const box = el('div', 'panel');
   const on = isExcluded();
-  box.innerHTML = `<p class="label">Your own visits</p>`;
+  box.innerHTML = `<p class="label">${esc(t('ins.yourVisits'))}</p>`;
   const row = el('div', 'opt-row');
   const btn = el('button', 'opt-toggle');
   btn.setAttribute('role', 'switch');
   btn.setAttribute('aria-checked', String(on));
   btn.innerHTML = `<span class="opt-track"><span class="opt-knob"></span></span>
-    <span class="opt-text">Don't count my visits</span>`;
+    <span class="opt-text">${esc(t('ins.dontCount'))}</span>`;
   const note = el('p', 'panel-note dim');
   const say = (v) => {
-    note.textContent = v
-      ? 'Your visits in this browser are not counted, and Google Analytics is switched off here too. Other browsers and devices are still counted separately.'
-      : 'Your own visits are being counted, which will flatter the numbers while traffic is low.';
+    note.textContent = v ? t('ins.excludedOn') : t('ins.excludedOff');
   };
   btn.onclick = () => {
     const next = !isExcluded();
@@ -1323,21 +1843,21 @@ function showCheckoutError(detail) {
   if (!msg) return;
   msg.hidden = false;
   msg.className = 'pay-msg bad';
-  msg.textContent = `The checkout could not open (${detail}). Nothing has been charged. Please try again, or contact support and we will sort it out.`;
+  msg.textContent = t('checkout.failed', { detail });
 }
 
 function paywall(pane, what) {
   const box = el('div', 'card locked');
   box.innerHTML = `<div class="disc">🔓</div>
-    <h3>${esc(what)} is part of full access</h3>
-    <p>Everything you're studying stays free. Full access adds unlimited practice tests and interview practice.</p>
+    <h3>${esc(t('paywall.title', { what }))}</h3>
+    <p>${esc(t('paywall.body'))}</p>
     <p class="price">${PRICE}</p>
-    <p class="label">One time · no subscription</p>
-    <p class="pay-note" style="margin-top:6px">Plus any tax your country charges. Paddle shows you the total before you pay.</p>`;
+    <p class="label">${esc(t('paywall.oneTime'))}</p>
+    <p class="pay-note" style="margin-top:6px">${esc(t('paywall.tax'))}</p>`;
 
   const row = el('div', 'row');
   row.style.justifyContent = 'center';
-  const buy = el('button', 'btn', `Unlock for ${PRICE}`);
+  const buy = el('button', 'btn', esc(t('paywall.unlockFor', { price: PRICE })));
   const msg = el('p', 'pay-msg');
   msg.hidden = true;
 
@@ -1347,23 +1867,23 @@ function paywall(pane, what) {
     // land here: the keys are not set yet, or they are set but Paddle has not finished
     // approving the account, which it refuses checkouts for.
     buy.disabled = true;
-    buy.textContent = 'Not on sale yet';
+    buy.textContent = t('paywall.notOnSale');
     msg.hidden = false;
     msg.textContent = paddleCfg && paddleCfg.salesPaused
-      ? 'Full access goes on sale shortly — our payment provider is still finishing our account checks. Everything free is available now, and there is nothing to pay to keep studying.'
-      : 'Full access is not on sale on the website yet. Everything free is available now.';
+      ? t('paywall.salesPaused')
+      : t('paywall.notConfigured');
   }
 
   buy.onclick = async () => {
     msg.hidden = true;
     msg.className = 'pay-msg';
     buy.disabled = true;
-    buy.textContent = 'Opening checkout…';
+    buy.textContent = t('paywall.opening');
     try {
       // The server hands over the price and stamps the account id on the transaction, so
       // the webhook knows whose access to unlock.
       const checkout = await api('/api/checkout', { method: 'POST' });
-      if (!initPaddle(checkout)) throw new Error('The payment window could not load. Check your connection and try again.');
+      if (!initPaddle(checkout)) throw new Error(t('paywall.windowFailed'));
 
       // Watch for the entitlement regardless of what the overlay does next.
       //
@@ -1394,13 +1914,13 @@ function paywall(pane, what) {
           // checkout.completed plus the watcher below do the work.
         },
       });
-      buy.textContent = `Unlock for ${PRICE}`;
+      buy.textContent = t('paywall.unlockFor', { price: PRICE });
       buy.disabled = false;
     } catch (err) {
       msg.hidden = false;
       msg.className = 'pay-msg bad';
       msg.textContent = err.message;
-      buy.textContent = `Unlock for ${PRICE}`;
+      buy.textContent = t('paywall.unlockFor', { price: PRICE });
       buy.disabled = false;
     }
   };
@@ -1408,10 +1928,9 @@ function paywall(pane, what) {
   row.appendChild(buy);
   box.appendChild(row);
   box.appendChild(msg);
-  box.appendChild(el('p', 'pay-note',
-    'Payment is handled by Paddle, our reseller. Your card details never reach us. '
-    + 'One-time payment, no subscription — see <a href="/refunds">refunds</a> and '
-    + '<a href="/terms">terms</a>.'));
+  // The one string in the set that carries markup, because the two links belong inside the
+  // sentence. Every translation of it holds the same two hrefs.
+  box.appendChild(el('p', 'pay-note', t('paywall.footer')));
   pane.appendChild(box);
 }
 
@@ -1474,8 +1993,8 @@ function watchForAccess() {
 async function confirmPurchase(transactionId) {
   const pane = $('#pane');
   pane.innerHTML = '';
-  pane.appendChild(el('h2', null, 'Thank you — confirming your payment'));
-  const note = el('p', 'sub', 'This usually takes a couple of seconds.');
+  pane.appendChild(el('h2', null, esc(t('confirm.title'))));
+  const note = el('p', 'sub', esc(t('confirm.sub')));
   pane.appendChild(note);
 
   const settle = () => {
@@ -1507,17 +2026,16 @@ async function confirmPurchase(transactionId) {
       return;
     }
     if (answered.status && answered.status !== 'completed') {
-      note.textContent = 'Your bank is still processing the payment. Waiting…';
+      note.textContent = t('confirm.waiting');
     }
     await new Promise((r) => setTimeout(r, 2500));
   }
 
-  note.textContent =
-    'Your payment went through, but the confirmation has not reached us yet. It normally arrives within a minute or two. Check again below — and if full access is still missing, send us the receipt Paddle emailed you and we will put it right straight away.';
+  note.textContent = t('confirm.stuck');
   const row = el('div', 'row');
-  const again = el('button', 'btn', 'Check again');
+  const again = el('button', 'btn', esc(t('btn.checkAgain')));
   again.onclick = () => confirmPurchase(transactionId);
-  const help = el('a', 'btn ghost', 'Contact support');
+  const help = el('a', 'btn ghost', esc(t('btn.contactSupport')));
   help.href = '/support';
   help.style.textDecoration = 'none';
   row.append(again, help);
@@ -1541,7 +2059,7 @@ boot()
     $('#booting').hidden = true;
     $('#gate').hidden = true;
     $('#shell').hidden = false;
-    $('#pane').innerHTML = `<h2>Something went wrong loading your account</h2>
+    $('#pane').innerHTML = `<h2>${esc(t('error.bootTitle'))}</h2>
       <p class="sub">${esc(err.message)}</p>
-      <p class="sub"><a href="/app">Try again</a> · <a href="/support">Contact support</a></p>`;
+      <p class="sub"><a href="/app">${esc(t('error.tryAgain'))}</a> · <a href="/support">${esc(t('btn.contactSupport'))}</a></p>`;
   });

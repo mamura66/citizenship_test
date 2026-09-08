@@ -1,0 +1,1275 @@
+{
+ "version": "2026-09-08",
+ "language": "en-AU",
+ "country": "AU",
+ "officialTestName": "Australian citizenship test",
+ "contentType": "authored-practice",
+ "officialPoolPublished": false,
+ "source": "Australian Citizenship: Our Common Bond (testable section), Australian Government Department of Home Affairs - https://immi.homeaffairs.gov.au/citizenship-subsite/files/our-common-bond-testable.pdf",
+ "sourceRetrieved": "2026-09-08",
+ "basedOn": "Australian Citizenship: Our Common Bond, testable section, © Commonwealth of Australia 2020, CC BY 4.0 - https://immi.homeaffairs.gov.au/citizenship-subsite/files/our-common-bond-testable.pdf",
+ "nonAffiliation": "These are our own practice questions. They are not the questions used in the real test, and this app is not affiliated with, endorsed by or approved by the Australian Government or the Department of Home Affairs. Home Affairs says of its own sample test that the questions will be different on the day.",
+ "disclosure": "Australia does not publish the questions used in the citizenship test - Home Affairs publishes a twenty-question sample and says the real questions will be different on the day. These are practice questions we wrote, and each one tests a fact stated in the testable section of Australian Citizenship: Our Common Bond, the free official booklet, which is the material the real test is drawn from. Every question records the part of the booklet it came from.",
+ "questionFormat": "single-choice-4",
+ "askedPerTest": 20,
+ "passRequirement": 15,
+ "timeLimitMinutes": 45,
+ "valuesRule": {
+  "section": "Part 4 - Australian values",
+  "askedPerTest": 5,
+  "passRequirement": 5,
+  "note": "All five Australian values questions must be answered correctly, as well as an overall mark of at least 15 out of 20. Missing one values question means not passing, whatever the overall mark."
+ },
+ "totalQuestions": 75,
+ "licence": {
+  "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+  "url": "https://creativecommons.org/licenses/by/4.0/",
+  "attribution": "Facts drawn from Australian Citizenship: Our Common Bond (testable section), © Commonwealth of Australia 2020, used under CC BY 4.0. Questions written by Prepare for Citizenship.",
+  "noticeSource": "https://immi.homeaffairs.gov.au/citizenship-subsite/files/our-common-bond-testable.pdf",
+  "reviewStatus": "cleared",
+  "reviewedOn": "2026-09-08",
+  "obligations": [
+   "CC BY 4.0 requires attribution, and an attribution nobody can see does not satisfy it - the string above has to be on screen where the questions are.",
+   "The Commonwealth Coat of Arms is excluded from the licence and is not used.",
+   "Never present these as the questions used in the real test."
+  ]
+ },
+ "categories": [
+  {
+   "id": "au-p1",
+   "section": "Part 1 - Australia and its people",
+   "questions": [
+    {
+     "id": 1,
+     "question": "Who are Australia's first inhabitants?",
+     "options": [
+      "The Dutch explorers",
+      "The free settlers from Ireland",
+      "The Aboriginal and Torres Strait Islander peoples",
+      "The British settlers of 1788"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The Aboriginal and Torres Strait Islander peoples"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 2,
+     "question": "Whose cultures and traditions are the oldest continuous ones in the world?",
+     "options": [
+      "The Torres Strait Islander peoples' alone",
+      "The Papua New Guinean peoples'",
+      "The Aboriginal and Torres Strait Islander peoples'",
+      "The Australian colonists'"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The Aboriginal and Torres Strait Islander peoples'"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 3,
+     "question": "Where are the Torres Strait Islander people from?",
+     "options": [
+      "The Bass Strait islands",
+      "Islands between the northern tip of Queensland and Papua New Guinea",
+      "Mainland Australia and Tasmania",
+      "The islands off Western Australia"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Islands between the northern tip of Queensland and Papua New Guinea"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 4,
+     "question": "On what date did the First Fleet arrive from Great Britain?",
+     "options": [
+      "26 January 1901",
+      "26 January 1788",
+      "25 April 1915",
+      "1 January 1901"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "26 January 1788"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 5,
+     "question": "What was the First Fleet?",
+     "options": [
+      "The first 11 convict ships to arrive from Great Britain",
+      "The fleet that discovered the Torres Strait",
+      "The ships that carried gold to Britain",
+      "The first free settlers' ships from Ireland"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The first 11 convict ships to arrive from Great Britain"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 6,
+     "question": "Who was the first Governor of the colony of New South Wales?",
+     "options": [
+      "Sir Henry Parkes",
+      "Governor Lachlan Macquarie",
+      "Captain Arthur Phillip",
+      "Captain James Cook"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Captain Arthur Phillip"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 7,
+     "question": "Why did the British Government decide to transport convicts to New South Wales?",
+     "options": [
+      "British laws were harsh and the jails could not hold everyone imprisoned",
+      "To find gold for the Crown",
+      "To defend the colony against invasion",
+      "To build the Sydney Harbour Bridge"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "British laws were harsh and the jails could not hold everyone imprisoned"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 8,
+     "question": "In which year did a gold rush begin in the colonies of New South Wales and Victoria?",
+     "options": [
+      "1901",
+      "1788",
+      "1861",
+      "1851"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "1851"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 9,
+     "question": "Which was the first colony established by the British in Australia?",
+     "options": [
+      "Western Australia",
+      "Tasmania",
+      "Victoria",
+      "New South Wales"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "New South Wales"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 10,
+     "question": "How many states and mainland territories does the Commonwealth of Australia have?",
+     "options": [
+      "Six states and two mainland territories",
+      "Five states and three mainland territories",
+      "Six states and six territories",
+      "Eight states and no territories"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Six states and two mainland territories"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 11,
+     "question": "Which city is the capital of both Australia and the Australian Capital Territory?",
+     "options": [
+      "Sydney",
+      "Melbourne",
+      "Darwin",
+      "Canberra"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Canberra"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 12,
+     "question": "Which is Australia's largest city?",
+     "options": [
+      "Sydney",
+      "Canberra",
+      "Perth",
+      "Melbourne"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Sydney"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 13,
+     "question": "What is the capital city of Victoria?",
+     "options": [
+      "Geelong",
+      "Hobart",
+      "Melbourne",
+      "Sydney"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Melbourne"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 14,
+     "question": "What is the capital city of Queensland?",
+     "options": [
+      "Brisbane",
+      "Cairns",
+      "Townsville",
+      "Gold Coast"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Brisbane"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 15,
+     "question": "What is the capital city of Western Australia?",
+     "options": [
+      "Adelaide",
+      "Perth",
+      "Fremantle",
+      "Broome"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Perth"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 16,
+     "question": "What is the capital city of South Australia?",
+     "options": [
+      "Perth",
+      "Port Augusta",
+      "Melbourne",
+      "Adelaide"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Adelaide"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 17,
+     "question": "What is the capital city of Tasmania?",
+     "options": [
+      "Hobart",
+      "Devonport",
+      "Burnie",
+      "Launceston"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Hobart"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 18,
+     "question": "What is the capital city of the Northern Territory?",
+     "options": [
+      "Canberra",
+      "Katherine",
+      "Alice Springs",
+      "Darwin"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Darwin"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 19,
+     "question": "Which flag is the official flag of Australia?",
+     "options": [
+      "The Australian National Flag",
+      "The Torres Strait Islander Flag",
+      "The Australian Aboriginal Flag",
+      "The Union Jack"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The Australian National Flag"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 20,
+     "question": "What are the three colours of the Australian National Flag?",
+     "options": [
+      "Blue, white and red",
+      "Black, red and yellow",
+      "Blue, white and gold",
+      "Green, blue and white"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Blue, white and red"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 21,
+     "question": "What sits in the top left corner of the Australian National Flag?",
+     "options": [
+      "The Southern Cross",
+      "The Commonwealth Coat of Arms",
+      "The Union Jack, the flag of the United Kingdom",
+      "The Commonwealth Star"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The Union Jack, the flag of the United Kingdom"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 22,
+     "question": "How many points does the Commonwealth Star on the flag have, and why?",
+     "options": [
+      "Eight - one for each state and territory",
+      "Five - one for each original colony",
+      "Six - one for each state",
+      "Seven - one for each of the six states and one for the territories"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Seven - one for each of the six states and one for the territories"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 23,
+     "question": "What is the group of stars on the right of the Australian National Flag?",
+     "options": [
+      "The Seven Sisters",
+      "The Federation Stars",
+      "The Commonwealth Star",
+      "The Southern Cross"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The Southern Cross"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 24,
+     "question": "What does the yellow circle on the Australian Aboriginal Flag represent?",
+     "options": [
+      "The Southern Cross",
+      "Gold",
+      "The desert",
+      "The sun"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The sun"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 25,
+     "question": "What does the white dancer's headdress in the centre of the Torres Strait Islander Flag symbolise?",
+     "options": [
+      "All Torres Strait Islanders",
+      "The Australian Government",
+      "Peace between the islands",
+      "The sea"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "All Torres Strait Islanders"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 26,
+     "question": "What is the official symbol of the Commonwealth of Australia?",
+     "options": [
+      "The Southern Cross",
+      "The Australian National Flag",
+      "The Commonwealth Coat of Arms",
+      "The golden wattle"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The Commonwealth Coat of Arms"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 27,
+     "question": "Which two native animals support the shield on the Commonwealth Coat of Arms?",
+     "options": [
+      "An emu and a wombat",
+      "A kangaroo and an emu",
+      "A platypus and a kangaroo",
+      "A koala and a kangaroo"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "A kangaroo and an emu"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 28,
+     "question": "What is Australia's national anthem?",
+     "options": [
+      "Song of Australia",
+      "God Save the King",
+      "Advance Australia Fair",
+      "Waltzing Matilda"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Advance Australia Fair"
+     ],
+     "guideSection": "Part 1 - Australia and its people",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    }
+   ]
+  },
+  {
+   "id": "au-p2",
+   "section": "Part 2 - Australia's democratic beliefs, rights and liberties",
+   "questions": [
+    {
+     "id": 29,
+     "question": "What kind of system of government does Australia have?",
+     "options": [
+      "A direct democracy",
+      "An absolute monarchy",
+      "A presidential republic",
+      "A parliamentary democracy"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "A parliamentary democracy"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 30,
+     "question": "In Australia's system of government, where does the power of the government come from?",
+     "options": [
+      "The Governor-General",
+      "The Prime Minister",
+      "The Australian people, because citizens vote for people to represent them in parliament",
+      "The High Court"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The Australian people, because citizens vote for people to represent them in parliament"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 31,
+     "question": "What does the Rule of Law mean?",
+     "options": [
+      "The government is not bound by the laws it passes",
+      "No person, group or religious rule is above the law",
+      "Only citizens are required to obey the law",
+      "Judges may set aside a law they disagree with"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "No person, group or religious rule is above the law"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 32,
+     "question": "Who must obey Australia's laws?",
+     "options": [
+      "Everyone except serving judges",
+      "Everyone except elected representatives",
+      "Everyone except the police",
+      "Everyone, including government, community and religious leaders, business people and the police"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Everyone, including government, community and religious leaders, business people and the police"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 33,
+     "question": "How do Australians believe change should occur?",
+     "options": [
+      "Through discussion, peaceful persuasion and the democratic process",
+      "Through whichever means is quickest",
+      "Through the decisions of religious leaders",
+      "Through protest that may include violence if a cause is just"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Through discussion, peaceful persuasion and the democratic process"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 34,
+     "question": "What does freedom of speech allow people in Australia to do?",
+     "options": [
+      "Say and write what they think and discuss their ideas, while still obeying Australian laws",
+      "Say anything at all, with no limits",
+      "Criticise the government only in private",
+      "Publish opinions only if they are true"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Say and write what they think and discuss their ideas, while still obeying Australian laws"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 35,
+     "question": "What is freedom of association?",
+     "options": [
+      "The right to practise any religion",
+      "The right to form and join associations to pursue common goals",
+      "The right to say what you think",
+      "The right to move freely between states"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The right to form and join associations to pursue common goals"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 36,
+     "question": "What does freedom of expression cover?",
+     "options": [
+      "Only political speech",
+      "Only speech in parliament",
+      "Only spoken and written words",
+      "Expressing views through art, film, music and literature"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Expressing views through art, film, music and literature"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 37,
+     "question": "Which of these is an Australian democratic belief?",
+     "options": [
+      "Preference for the wealthy in courts of law",
+      "Loyalty to one political party",
+      "Obedience to religious leaders above the law",
+      "Respect for all individuals regardless of background"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Respect for all individuals regardless of background"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 38,
+     "question": "How are Australians expected to treat one another?",
+     "options": [
+      "According to their religion",
+      "According to their wealth",
+      "With dignity and respect, regardless of background",
+      "According to their standing in the community"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "With dignity and respect, regardless of background"
+     ],
+     "guideSection": "Part 2 - Australia's democratic beliefs, rights and liberties",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    }
+   ]
+  },
+  {
+   "id": "au-p3",
+   "section": "Part 3 - Government and the law in Australia",
+   "questions": [
+    {
+     "id": 39,
+     "question": "On what date did the Australian colonies unite into a federation?",
+     "options": [
+      "1 January 1900",
+      "1 January 1901",
+      "25 April 1915",
+      "26 January 1788"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "1 January 1901"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 40,
+     "question": "What is the name of the federation the colonies became?",
+     "options": [
+      "The Federation of Australian States",
+      "The Commonwealth of Australia",
+      "The Dominion of Australia",
+      "The United States of Australia"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The Commonwealth of Australia"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 41,
+     "question": "What is the Australian Constitution?",
+     "options": [
+      "A list of the rights of every Australian citizen",
+      "An agreement between the states and the United Kingdom",
+      "The legal document that sets out the basic rules for the government of Australia",
+      "The Act that created the High Court only"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The legal document that sets out the basic rules for the government of Australia"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 42,
+     "question": "What did the Australian Constitution establish?",
+     "options": [
+      "The office of Prime Minister and the Cabinet",
+      "The Parliament of the Commonwealth of Australia and the High Court of Australia",
+      "The six state parliaments",
+      "The Australian Public Service"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The Parliament of the Commonwealth of Australia and the High Court of Australia"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 43,
+     "question": "Which court has the ultimate power to apply and interpret the laws of Australia?",
+     "options": [
+      "The Supreme Court of New South Wales",
+      "The Federal Court of Australia",
+      "The High Court of Australia",
+      "The Australian Human Rights Commission"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "The High Court of Australia"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 44,
+     "question": "How can the Australian people change the Australian Constitution?",
+     "options": [
+      "By a decision of the High Court",
+      "By a proclamation of the Governor-General",
+      "By a vote of the House of Representatives alone",
+      "By voting in a referendum"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "By voting in a referendum"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 45,
+     "question": "What is the 'double majority' needed to change the Australian Constitution?",
+     "options": [
+      "A majority of voters in every state",
+      "Two-thirds of voters across the nation",
+      "A majority of voters in a majority of states, and a majority of voters across the nation",
+      "A majority in both Houses of Parliament"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "A majority of voters in a majority of states, and a majority of voters across the nation"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 46,
+     "question": "What did more than 90 per cent of Australians vote 'Yes' to in the 1967 Referendum?",
+     "options": [
+      "Creating the Australian Capital Territory",
+      "Adopting Advance Australia Fair as the anthem",
+      "Ending appeals to British courts",
+      "Allowing Aboriginal peoples to be counted in the Census"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Allowing Aboriginal peoples to be counted in the Census"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 47,
+     "question": "How does the Australian Constitution stop one person or group from holding all the power?",
+     "options": [
+      "It limits the Prime Minister to two terms",
+      "It requires elections every three years",
+      "It divides power between the legislative, executive and judicial powers",
+      "It gives the High Court power over parliament"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "It divides power between the legislative, executive and judicial powers"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 48,
+     "question": "What is legislative power?",
+     "options": [
+      "The power to put laws into practice",
+      "The power to make laws",
+      "The power to dissolve parliament",
+      "The power to interpret and apply the law"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The power to make laws"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 49,
+     "question": "What is executive power?",
+     "options": [
+      "The power to make laws",
+      "The power to change the Constitution",
+      "The power to interpret the law",
+      "The power to put the laws into practice"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The power to put the laws into practice"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 50,
+     "question": "Who holds judicial power in Australia?",
+     "options": [
+      "Judges, who interpret and apply the law",
+      "Parliament",
+      "The Prime Minister and the Cabinet",
+      "The Governor-General"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Judges, who interpret and apply the law"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 51,
+     "question": "Which two Houses make up the Australian Parliament?",
+     "options": [
+      "The House of Representatives and the High Court",
+      "The House of Commons and the Senate",
+      "The Lower House and the Cabinet",
+      "The House of Representatives and the Senate"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The House of Representatives and the Senate"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 52,
+     "question": "By what other names is the House of Representatives known?",
+     "options": [
+      "The House of Review",
+      "The Upper House or the States' House",
+      "The Federal Chamber",
+      "The Lower House or the People's House"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The Lower House or the People's House"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 53,
+     "question": "By what other names is the Senate known?",
+     "options": [
+      "The Council of States",
+      "The Upper House, the House of Review or the States' House",
+      "The Federal Chamber",
+      "The Lower House or the People's House"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The Upper House, the House of Review or the States' House"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 54,
+     "question": "How many senators are there in total?",
+     "options": [
+      "40",
+      "150",
+      "76",
+      "12"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "76"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 55,
+     "question": "How many senators does each state elect?",
+     "options": [
+      "10",
+      "2",
+      "6",
+      "12"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "12"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 56,
+     "question": "How many senators do the Australian Capital Territory and the Northern Territory each elect?",
+     "options": [
+      "Twelve",
+      "Six",
+      "Two",
+      "None"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Two"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 57,
+     "question": "How is the number of members of the House of Representatives for each state and territory decided?",
+     "options": [
+      "By the state parliaments",
+      "By the number of people in that state or territory",
+      "By the size of the state's area",
+      "Equally, regardless of population"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "By the number of people in that state or territory"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 58,
+     "question": "How are all the states represented in the Senate?",
+     "options": [
+      "In proportion to their area",
+      "In proportion to their population",
+      "By their Premiers",
+      "Equally, regardless of their size or population"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Equally, regardless of their size or population"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 59,
+     "question": "What is the leader of a state government called?",
+     "options": [
+      "The Governor",
+      "The Chief Minister",
+      "The Prime Minister",
+      "The Premier"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "The Premier"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 60,
+     "question": "What is the leader of a territory government called?",
+     "options": [
+      "The Chief Minister",
+      "The Administrator",
+      "The Governor",
+      "The Premier"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "The Chief Minister"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 61,
+     "question": "Who is the Sovereign's representative in Australia, and on whose advice are they appointed?",
+     "options": [
+      "The Governor of New South Wales, appointed by the states",
+      "The Governor-General, appointed on the advice of the Australian Prime Minister",
+      "The Chief Justice, appointed on the advice of the Cabinet",
+      "The Prime Minister, appointed on the advice of parliament"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "The Governor-General, appointed on the advice of the Australian Prime Minister"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 62,
+     "question": "In which elections is voting compulsory in Australia?",
+     "options": [
+      "Local government elections only",
+      "Federal elections only",
+      "No elections; voting is always voluntary",
+      "Federal and state or territory elections"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Federal and state or territory elections"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    },
+    {
+     "id": 63,
+     "question": "What does each state government have of its own?",
+     "options": [
+      "Its own citizenship",
+      "Its own currency and defence force",
+      "Its own High Court",
+      "Its own parliament and constitution"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Its own parliament and constitution"
+     ],
+     "guideSection": "Part 3 - Government and the law in Australia",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond"
+    }
+   ]
+  },
+  {
+   "id": "au-p4",
+   "section": "Part 4 - Australian values",
+   "questions": [
+    {
+     "id": 64,
+     "question": "What does Australian society value about the rights of all people?",
+     "options": [
+      "The rights of the community above those of the individual",
+      "Their equal rights, regardless of gender, sexual orientation, age, disability, religion, race or origin",
+      "The rights of citizens above those of residents",
+      "The rights of those born in Australia above those of migrants"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Their equal rights, regardless of gender, sexual orientation, age, disability, religion, race or origin"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 65,
+     "question": "In Australia, what does the law say about marriage between two men or two women?",
+     "options": [
+      "It depends on the state",
+      "It requires the approval of a court",
+      "Two people can marry each other, including two men or two women",
+      "Marriage is only between a man and a woman"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Two people can marry each other, including two men or two women"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 66,
+     "question": "What rights do men and women have in Australia?",
+     "options": [
+      "Women have priority in family matters",
+      "Equal rights, with equality of opportunity to pursue their goals and interests",
+      "Men have priority in employment",
+      "Rights that differ by state"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Equal rights, with equality of opportunity to pursue their goals and interests"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 67,
+     "question": "What is the position of physical violence against a spouse or partner in Australia?",
+     "options": [
+      "It is never acceptable and is a criminal offence",
+      "It is only an offence if reported by a doctor",
+      "It is a private family matter",
+      "It is dealt with by community leaders"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "It is never acceptable and is a criminal offence"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 68,
+     "question": "Who may apply to the courts for a divorce in Australia?",
+     "options": [
+      "Only with the agreement of both spouses",
+      "Only after approval by a religious authority",
+      "Either a husband or a wife, even if the other spouse wishes to continue the marriage",
+      "Only the husband"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Either a husband or a wife, even if the other spouse wishes to continue the marriage"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 69,
+     "question": "What does a 'fair go' mean in Australia?",
+     "options": [
+      "Everyone receives the same income",
+      "Everyone, regardless of background, has an equal opportunity to achieve success in life",
+      "Everyone is given a government job if they need one",
+      "People of the same class are treated alike"
+     ],
+     "correctIndex": 1,
+     "answers": [
+      "Everyone, regardless of background, has an equal opportunity to achieve success in life"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 70,
+     "question": "On what basis should a person get a job in Australia?",
+     "options": [
+      "Their skills and experience",
+      "Their ethnicity",
+      "Their wealth",
+      "Their gender"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "Their skills and experience"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 71,
+     "question": "What should what someone achieves in life be the result of?",
+     "options": [
+      "Their religion",
+      "Their family's wealth",
+      "Their hard work and talents",
+      "The class they were born into"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Their hard work and talents"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 72,
+     "question": "Do people of different faiths receive different treatment under Australian law?",
+     "options": [
+      "Yes - it depends on the state",
+      "Yes - Christians receive preferential treatment",
+      "Yes - only recognised religions are protected",
+      "No - people of all faiths receive the same treatment"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "No - people of all faiths receive the same treatment"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 73,
+     "question": "Is it lawful in Australia to treat someone differently because of their gender?",
+     "options": [
+      "No - it is against the law to discriminate against a person because of their gender",
+      "Yes, where a job has always been done by one gender",
+      "Yes, in religious organisations",
+      "Yes, in private businesses"
+     ],
+     "correctIndex": 0,
+     "answers": [
+      "No - it is against the law to discriminate against a person because of their gender"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 74,
+     "question": "What rights do men and women have over personal matters such as marriage and religion?",
+     "options": [
+      "The head of the household decides",
+      "Parents decide until the age of 25",
+      "Religious leaders decide",
+      "Both have the right to make their own independent choices, protected from intimidation or violence"
+     ],
+     "correctIndex": 3,
+     "answers": [
+      "Both have the right to make their own independent choices, protected from intimidation or violence"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    },
+    {
+     "id": 75,
+     "question": "What access do both men and women have to education and employment?",
+     "options": [
+      "Access set by each state",
+      "Women have priority for education",
+      "Equal access, and both may vote, stand for parliament and join the Defence Force and police",
+      "Men have priority for employment"
+     ],
+     "correctIndex": 2,
+     "answers": [
+      "Equal access, and both may vote, stand for parliament and join the Defence Force and police"
+     ],
+     "guideSection": "Part 4 - Australian values",
+     "guideUrl": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+     "valuesQuestion": true
+    }
+   ]
+  }
+ ]
+}

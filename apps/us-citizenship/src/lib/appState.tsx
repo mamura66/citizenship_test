@@ -1,13 +1,24 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DEFAULT_COUNTRY, getCountry, type CountryCode } from '../content/countries';
 
-type CivicsVersion = '2008' | '2025';
+/** A version id as the country's own pack declares it: '2025', '2008', '2025-05-07'. */
+type CivicsVersion = string;
 
 interface AppState {
   /** True once persisted state has been read from disk - gate any redirects on this. */
   hydrated: boolean;
+  /** Which country's test this person is preparing for. */
+  country: CountryCode;
+  /**
+   * Switch country. Everything progress-related is stored per country, so this also
+   * swaps starred questions, practice history and the chosen region - it never carries
+   * one country's answers into another's report.
+   */
+  setCountry: (c: CountryCode) => void;
   civicsVersion: CivicsVersion;
   setCivicsVersion: (v: CivicsVersion) => void;
+  /** The user's own state, territory or Bundesland - whatever their test asks about. */
   homeState: string | null;
   setHomeState: (s: string | null) => void;
   starredIds: Set<number>;
@@ -26,14 +37,40 @@ interface AppState {
 
 const AppStateContext = createContext<AppState | null>(null);
 
-const KEYS = {
+/* Storage keys.
+ *
+ * Anything that describes progress is stored per country, because progress is keyed by
+ * question id and the ids collide: the USCIS pool runs 1..128 and Germany's runs 1..300
+ * plus 1001.. for the Bundesländer. Sharing one key would show a German user their US
+ * practice history as though it were theirs, and star a German question because a US one
+ * with the same number was starred. That is the same failure the website prevents by
+ * locking the country to an account; here there are no accounts, so the data is namespaced
+ * instead and switching country is allowed.
+ *
+ * The four LEGACY_* names are what a build before this shipped wrote. They are read once,
+ * copied into the ':us' namespace, and then left alone - an existing user's US progress is
+ * theirs, and leaving the old keys in place means this change is reversible.
+ */
+const GLOBAL_KEYS = {
+  country: 'country',
+  firstName: 'firstName',
+  interviewDate: 'interviewDate',
+  hasOnboarded: 'hasOnboarded',
+};
+
+const scoped = (base: string, country: string) => `${base}:${country}`;
+const SCOPED = {
   civicsVersion: 'civicsVersion',
   homeState: 'homeState',
   starredIds: 'starredIds',
   practiceHistory: 'practiceHistory',
-  firstName: 'firstName',
-  interviewDate: 'interviewDate',
-  hasOnboarded: 'hasOnboarded',
+};
+
+const LEGACY = {
+  civicsVersion: 'civicsVersion',
+  homeState: 'homeState',
+  starredIds: 'starredIds',
+  practiceHistory: 'practiceHistory',
 };
 
 type PracticeEntry = { date: string; scorePct: number; passed: boolean };
@@ -80,7 +117,10 @@ function parseArray(raw: string): unknown[] {
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
-  const [civicsVersion, setCivicsVersionState] = useState<CivicsVersion>('2025');
+  const [country, setCountryState] = useState<CountryCode>(DEFAULT_COUNTRY);
+  const [civicsVersion, setCivicsVersionState] = useState<CivicsVersion>(
+    getCountry(DEFAULT_COUNTRY).versions[0].id
+  );
   const [homeState, setHomeStateState] = useState<string | null>(null);
   const [starredIds, setStarredIds] = useState<Set<number>>(new Set());
   const [practiceHistory, setPracticeHistory] = useState<PracticeEntry[]>([]);
@@ -88,51 +128,103 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [interviewDate, setInterviewDateState] = useState<string | null>(null);
   const [hasOnboarded, setHasOnboardedState] = useState(false);
 
+  /**
+   * Read the progress that belongs to one country and apply it.
+   *
+   * `migrateFrom` is the pre-namespacing key, used only for the United States and only
+   * when the namespaced key is absent. A user who has been studying in this app already
+   * has their stars and their score history under the old names, and losing them on
+   * upgrade would look exactly like the app wiping their work.
+   */
+  const loadScopedFor = async (code: CountryCode) => {
+    const def = getCountry(code);
+    const fallbackVersion = def.versions[0].id;
+    const legacyOk = code === 'us';
+
+    // Each key is read on its own so one unusable value cannot cost another its data -
+    // see loadKey. A key with no namespaced value falls back to the legacy name, and what
+    // it finds there is written into the namespace so the fallback happens once.
+    const readScoped = async (
+      key: string,
+      legacyKey: string,
+      apply: (raw: string) => void
+    ) => {
+      let used = false;
+      await loadKey(scoped(key, code), (raw) => { apply(raw); used = true; });
+      if (used || !legacyOk) return;
+      await loadKey(legacyKey, (raw) => {
+        apply(raw);
+        AsyncStorage.setItem(scoped(key, code), raw).catch(() => {});
+      });
+    };
+
+    let version = fallbackVersion;
+    let region: string | null = null;
+    let stars = new Set<number>();
+    let history: PracticeEntry[] = [];
+
+    await Promise.all([
+      readScoped(SCOPED.civicsVersion, LEGACY.civicsVersion, (raw) => {
+        // A version the pack no longer declares is ignored rather than trusted: studying
+        // a pool this build does not have is worse than falling back to the current one.
+        if (def.versions.some((v) => v.id === raw)) version = raw;
+      }),
+      readScoped(SCOPED.homeState, LEGACY.homeState, (raw) => {
+        if (raw) region = raw;
+      }),
+      readScoped(SCOPED.starredIds, LEGACY.starredIds, (raw) => {
+        const ids = parseArray(raw).filter(
+          (n): n is number => typeof n === 'number' && Number.isFinite(n)
+        );
+        stars = new Set(ids);
+      }),
+      readScoped(SCOPED.practiceHistory, LEGACY.practiceHistory, (raw) => {
+        // The performance screen must only ever show scores actually recorded, so a
+        // malformed row is dropped rather than coerced into a number.
+        const entries = parseArray(raw).filter(
+          (e): e is PracticeEntry =>
+            !!e &&
+            typeof e === 'object' &&
+            typeof (e as PracticeEntry).date === 'string' &&
+            typeof (e as PracticeEntry).scorePct === 'number' &&
+            Number.isFinite((e as PracticeEntry).scorePct) &&
+            typeof (e as PracticeEntry).passed === 'boolean'
+        );
+        history = entries;
+      }),
+    ]);
+
+    setCivicsVersionState(version);
+    setHomeStateState(region);
+    setStarredIds(stars);
+    setPracticeHistory(history);
+  };
+
   useEffect(() => {
     (async () => {
-      // One key's bad data must never cost another key's good data, so each is
-      // read and validated on its own (see loadKey above). loadKey does not
-      // throw, so this Promise.all cannot reject; `hydrated` is still set in
-      // `finally` because a loader that somehow failed must not leave the app
-      // stuck behind the splash forever.
+      // loadKey does not throw, so this cannot reject; `hydrated` is still set in
+      // `finally` because a loader that somehow failed must not leave the app stuck
+      // behind the splash forever.
       try {
+        let code: CountryCode = DEFAULT_COUNTRY;
+        await loadKey(GLOBAL_KEYS.country, (raw) => {
+          // Only a country this build actually ships. A stored code we no longer have a
+          // pack for would otherwise offer a test with no questions behind it.
+          if (getCountry(raw).code === raw) code = raw as CountryCode;
+        });
+        setCountryState(code);
+
         await Promise.all([
-          loadKey(KEYS.civicsVersion, (raw) => {
-            if (raw === '2008' || raw === '2025') setCivicsVersionState(raw);
-          }),
-          loadKey(KEYS.homeState, (raw) => {
-            if (raw) setHomeStateState(raw);
-          }),
-          loadKey(KEYS.starredIds, (raw) => {
-            // Keep the ids that are usable rather than dropping the whole review
-            // deck because one entry is not a number.
-            const ids = parseArray(raw).filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
-            setStarredIds(new Set(ids));
-          }),
-          loadKey(KEYS.practiceHistory, (raw) => {
-            // Same rule, and it matters more here: the performance screen must
-            // only ever show scores actually recorded, so a malformed row is
-            // dropped instead of being coerced into a number.
-            const entries = parseArray(raw).filter(
-              (e): e is PracticeEntry =>
-                !!e &&
-                typeof e === 'object' &&
-                typeof (e as PracticeEntry).date === 'string' &&
-                typeof (e as PracticeEntry).scorePct === 'number' &&
-                Number.isFinite((e as PracticeEntry).scorePct) &&
-                typeof (e as PracticeEntry).passed === 'boolean'
-            );
-            setPracticeHistory(entries);
-          }),
-          loadKey(KEYS.firstName, (raw) => {
+          loadKey(GLOBAL_KEYS.firstName, (raw) => {
             if (raw) setFirstNameState(raw);
           }),
-          loadKey(KEYS.interviewDate, (raw) => {
+          loadKey(GLOBAL_KEYS.interviewDate, (raw) => {
             if (raw) setInterviewDateState(raw);
           }),
-          loadKey(KEYS.hasOnboarded, (raw) => {
+          loadKey(GLOBAL_KEYS.hasOnboarded, (raw) => {
             if (raw === 'true') setHasOnboardedState(true);
           }),
+          loadScopedFor(code),
         ]);
       } finally {
         setHydrated(true);
@@ -140,14 +232,35 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
+  /**
+   * Change country.
+   *
+   * The progress state is cleared before the new country's is read, not after. Loading is
+   * asynchronous, and leaving the old values in place across that gap would render one
+   * country's practice history and starred questions under another country's test - which
+   * is precisely the "real data about a test you are not taking" failure this app has to
+   * avoid.
+   */
+  const setCountry = (c: CountryCode) => {
+    if (c === country) return;
+    const def = getCountry(c);
+    setCountryState(c);
+    setCivicsVersionState(def.versions[0].id);
+    setHomeStateState(null);
+    setStarredIds(new Set());
+    setPracticeHistory([]);
+    AsyncStorage.setItem(GLOBAL_KEYS.country, c).catch(() => {});
+    loadScopedFor(c);
+  };
+
   const setCivicsVersion = (v: CivicsVersion) => {
     setCivicsVersionState(v);
-    AsyncStorage.setItem(KEYS.civicsVersion, v).catch(() => {});
+    AsyncStorage.setItem(scoped(SCOPED.civicsVersion, country), v).catch(() => {});
   };
 
   const setHomeState = (s: string | null) => {
     setHomeStateState(s);
-    AsyncStorage.setItem(KEYS.homeState, s ?? '').catch(() => {});
+    AsyncStorage.setItem(scoped(SCOPED.homeState, country), s ?? '').catch(() => {});
   };
 
   // Storage writes stay OUTSIDE the state updater callbacks: React may invoke an
@@ -157,36 +270,38 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (next.has(id)) next.delete(id);
     else next.add(id);
     setStarredIds(next);
-    AsyncStorage.setItem(KEYS.starredIds, JSON.stringify([...next])).catch(() => {});
+    AsyncStorage.setItem(scoped(SCOPED.starredIds, country), JSON.stringify([...next])).catch(() => {});
   };
 
   const recordPracticeResult = (scorePct: number, passed: boolean) => {
     const next = [...practiceHistory, { date: new Date().toISOString(), scorePct, passed }].slice(-50);
     setPracticeHistory(next);
-    AsyncStorage.setItem(KEYS.practiceHistory, JSON.stringify(next)).catch(() => {});
+    AsyncStorage.setItem(scoped(SCOPED.practiceHistory, country), JSON.stringify(next)).catch(() => {});
   };
 
   const setFirstName = (name: string | null) => {
     const trimmed = name?.trim() || null;
     setFirstNameState(trimmed);
-    if (trimmed) AsyncStorage.setItem(KEYS.firstName, trimmed).catch(() => {});
-    else AsyncStorage.removeItem(KEYS.firstName).catch(() => {});
+    if (trimmed) AsyncStorage.setItem(GLOBAL_KEYS.firstName, trimmed).catch(() => {});
+    else AsyncStorage.removeItem(GLOBAL_KEYS.firstName).catch(() => {});
   };
 
   const setInterviewDate = (iso: string | null) => {
     setInterviewDateState(iso);
-    if (iso) AsyncStorage.setItem(KEYS.interviewDate, iso).catch(() => {});
-    else AsyncStorage.removeItem(KEYS.interviewDate).catch(() => {});
+    if (iso) AsyncStorage.setItem(GLOBAL_KEYS.interviewDate, iso).catch(() => {});
+    else AsyncStorage.removeItem(GLOBAL_KEYS.interviewDate).catch(() => {});
   };
 
   const setHasOnboarded = (v: boolean) => {
     setHasOnboardedState(v);
-    AsyncStorage.setItem(KEYS.hasOnboarded, v ? 'true' : 'false').catch(() => {});
+    AsyncStorage.setItem(GLOBAL_KEYS.hasOnboarded, v ? 'true' : 'false').catch(() => {});
   };
 
   const value = useMemo(
     () => ({
       hydrated,
+      country,
+      setCountry,
       civicsVersion,
       setCivicsVersion,
       homeState,
@@ -202,7 +317,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       hasOnboarded,
       setHasOnboarded,
     }),
-    [hydrated, civicsVersion, homeState, starredIds, practiceHistory, firstName, interviewDate, hasOnboarded]
+    [hydrated, country, civicsVersion, homeState, starredIds, practiceHistory, firstName, interviewDate, hasOnboarded]
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

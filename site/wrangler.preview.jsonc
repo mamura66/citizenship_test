@@ -1,0 +1,108 @@
+// Preview site. Same code as production, nothing else shared.
+//
+//     npx wrangler deploy --config wrangler.preview.jsonc
+//
+// The point of this file is isolation, so read the differences from wrangler.jsonc as a
+// list of things that MUST NOT be copied back:
+//
+//   * A different Worker name, so this is a separate Worker and not a version of the live
+//     one. A preview *version* of the same Worker would share its KV and its database, and
+//     every test signup would land among real accounts.
+//   * No `routes`. This is reachable only on its own workers.dev hostname and can never
+//     answer for prepareforcitizenship.com.
+//   * Its own KV namespace and its own D1 database. Accounts, progress, entitlements and
+//     analytics created here are invisible to production and vice versa.
+//   * No `send_email` binding. `emailConfigured()` is false without it, so the app degrades
+//     honestly instead of sending real mail from the real support address to whatever
+//     address somebody types into a preview form.
+//   * `ANALYTICS: "off"`. Preview traffic must not reach the production GA4 property; the
+//     numbers on the insights page are supposed to be customers.
+//   * Paddle in sandbox with sales paused and no live token, so no real money can move.
+//   * `PREVIEW: "true"`, which makes the Worker set `X-Robots-Tag: noindex` on every
+//     response. robots.txt is a static asset shared with production, so the header is the
+//     only thing that reliably keeps two identical sites out of one search index.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pfc-preview",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-05",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // Kept identical to production on purpose. This list decides which paths reach code at
+    // all, and a preview that routed differently would be testing a different app - which
+    // has already cost this project two bugs.
+    "run_worker_first": [
+      "/api/*",
+      "/app",
+      "/app.html",
+      "/login",
+      "/login.html",
+      "/signup",
+      "/signup.html",
+      "/forgot",
+      "/forgot.html",
+      "/reset",
+      "/reset.html",
+      "/google*",
+      "/BingSiteAuth.xml",
+      "/insights",
+      // Kept in step with production so the preview exercises the same routing. The
+      // preview sets no COUNTRIES_OFFERED, so this path passes straight through and the
+      // preview offers every country that has a pack - which is the point of it.
+      "/content/packs.json",
+      // The other addition: the preview answers robots.txt
+      // itself with a blanket disallow, because the static file is shared with production
+      // and has to keep pointing crawlers at the real site.
+      "/robots.txt"
+    ]
+  },
+
+  "kv_namespaces": [
+    // Its own. Same binding name so the code needs no change; different namespace id so
+    // the data is separate.
+    { "binding": "PFC", "id": "20f3738135a94032a9a02ed19b5f7946" }
+  ],
+
+  "d1_databases": [
+    {
+      "binding": "ANALYTICS_DB",
+      "database_name": "pfc-analytics-preview",
+      "database_id": "12f86e20-2808-4c58-b468-848a0c7b301d",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  "vars": {
+    // Filled in after the first deploy, once the workers.dev hostname is known. It matters:
+    // password-reset links and the Google redirect URI are built from this and never from
+    // the request's Host header.
+    "PUBLIC_ORIGIN": "https://pfc-preview.sandeep-sandha.workers.dev",
+
+    // Off, not merely a different id. Preview visits must not appear in the real numbers.
+    "ANALYTICS": "off",
+    "GA4_MEASUREMENT_ID": "",
+    "CF_ANALYTICS_TOKEN": "",
+
+    // Left blank: these verify ownership of the real domain and mean nothing here.
+    "GOOGLE_SITE_VERIFICATION": "",
+    "BING_SITE_VERIFICATION": "",
+
+    // Sandbox, paused, and no client token, so the paywall shows its honest
+    // "not on sale yet" panel and no checkout can be opened at all.
+    "PADDLE_ENVIRONMENT": "sandbox",
+    "PADDLE_SALES_PAUSED": "true",
+    "PADDLE_CLIENT_TOKEN": "",
+    "PADDLE_PRICE_ID": "",
+
+    // So the owner-only insights screen can be looked at here. The gate still returns 404
+    // to everybody else, exactly as in production.
+    "ANALYTICS_OWNER_EMAIL": "sandeep.sandha@gmail.com",
+
+    "PREVIEW": "true"
+  }
+}

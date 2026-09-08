@@ -1714,3 +1714,699 @@ cd site && npx wrangler d1 migrations apply pfc-analytics --remote
 ```
 
 Until then `/insights` shows the setup card rather than failing.
+
+## v32 — Germany and Spain, and a licence that stops one of them (2026-09-07, overnight)
+
+Sandeep: *"Let us go for Germany and spain and update the home page. after that, go for UK,
+canada and Australia later... Do this work in a new branch. Do not deploy in production."*
+Then: *"Dont wait for me if you get stuck"*, and website first, app tomorrow.
+
+Branch `feature/multi-country`, off a `main` that was first brought up to date with what is
+actually deployed.
+
+### Why these two countries
+
+The product's promise is "the real official questions, not reworded". That promise, not
+market size, decides which countries are buildable:
+
+| | Official pool published? | Naturalisations 2024 |
+|---|---|---|
+| United States | yes, all 128, public domain federal work | — |
+| **Germany** | **yes — 300 national + 160 state-specific, free from BAMF** | **288,700, largest in the EU** |
+| **Spain** | **yes — 300, free from Instituto Cervantes** | **252,500, second in the EU** |
+| United Kingdom | **no** — pool is confidential Crown copyright | — |
+| Canada | no — study guide only | — |
+| Australia | no — study guide, some official practice material | — |
+
+Germany is the best technical fit of any country: its 10 questions per Bundesland are the
+same shape as the US "answers that depend on where you live", which already exists.
+
+The home page had been promising Canada, the UK and Australia — the three hardest markets.
+
+### Spain: extracted, verified, and held back
+
+The pack is complete and correct. Extraction found and fixed a real defect worth recording:
+pypdf drops spaces after kerned capitals, turning "Todos" into "T odos" — 118 occurrences,
+root-caused in pypdf's source (it takes `abs()` of the TJ kern and so cannot tell a
+tightening pair from a space) and proven against the raw content stream rather than guessed.
+Validator: 116 checks, 0 failures.
+
+**It is not shippable yet.** The manual carries no reuse clause, but the legal notice for
+the site publishing it withholds precisely what a paid product needs:
+
+> no podrán alterarlos, modificarlos, **explotarlos, reproducirlos, distribuirlos, ni
+> comunicarlos públicamente**
+
+Verified first-hand at cervantes.org/es/aviso-legal, not taken on report. And Instituto
+Cervantes ships its own free official CCSE app, so this would compete with the rights
+holder's own product.
+
+So the pack moved to `legal-hold/es-ccse/`, gitignored. That path is outside
+`apps/us-citizenship/content/`, which is what `tools/sync-content.sh` publishes — so Spain
+cannot reach the website by accident, and the questions cannot reach the public repository
+either. Publishing material whose terms forbid redistribution is the same problem whether
+it is sold or merely pushed to GitHub.
+
+Next step is an email to Instituto Cervantes asking permission. It costs nothing and is the
+obvious move before any legal spend.
+
+Germany's position is expected to be better: German copyright law treats official works
+differently from a site's terms of use. Pending that agent's report.
+
+### The English-speaking three, researched properly
+
+Every claim below is from the responsible government body, quoted in the per-country
+`SOURCES.md`. The research agent wrote **no question text of its own** — the one pack it
+produced was generated from source data and then diffed against the live rendered test.
+
+**United Kingdom — no pack, and none possible without a licence.** No free official
+question content exists. The handbook, the *Official Practice Questions and Answers*, the
+study guide and the e-learning are all priced TSO products; the practice-questions book
+retails at £7.99 against our $9.99 price, so a per-unit royalty could make the country
+unviable on its own. The Open Government Licence covers only material "expressly made
+available under this licence" and expressly exempts information not published — and the
+National Archives' delegations register already lists *"The Official DVSA Revision Theory
+Test Question Banks"*, which is a direct precedent for a UK government question bank being
+licensed outside the OGL. The Home Office is not in that register.
+
+**Canada — no pack, blocked on one letter.** IRCC publishes *Discover Canada* free and
+links 31 study questions (3 worked multiple-choice, 28 open-ended with no printed answers).
+Canada.ca's terms permit non-commercial reproduction "without charge or further permission"
+but require "prior written permission from the copyright administrator" for commercial
+redistribution. We sell the app, so that permission is a precondition rather than a
+formality. Cheapest of the three to unblock: a letter, no fee. Second-largest market at
+379,530 naturalisations in 2023.
+
+**Australia — buildable, and built.** The department publishes the complete official
+practice test free: 20 multiple-choice questions including the five values questions that
+must all be answered correctly. Home Affairs material is Creative Commons Attribution 3.0
+Australia, and *Our Common Bond* itself is CC BY 4.0 — an explicit commercial-use licence
+with attribution. That last point is the interesting one: Australia is the only one of the
+three where the **study material** is openly licensed, so a real product can be built on
+open content rather than on questions we wrote.
+
+Pack at `apps/us-citizenship/content/au/citizenship-practice.json`, verified by stepping
+through all 20 live questions in Chromium: 20/20 exact match on text and options. It
+declares `contentType: "official-practice-subset"` and `officialPoolPublished: false`, and
+carries a user-facing disclosure — because "20 official practice questions" and "every
+question you could be asked" are materially different products and a customer deserves to
+know which one they have.
+
+**Not marked ready.** Twenty questions is not yet a product, and one licence point is open:
+the practice test is served from a subdomain carrying no copyright footer of its own while
+the notice speaks of "this website". Written confirmation from Home Affairs is needed
+first. I could not re-verify the quoted copyright pages myself tonight — both URLs 404'd
+for me hours later — so those quotes stand on the agent's retrieval, not on mine.
+
+Recommended order: **Australia** (only one where the premise is currently true), then
+**Canada** (a permission letter), then the **UK** last and only once the rights enquiry has
+a number attached.
+
+### Housekeeping done alongside
+
+- Both US packs gained `language: "en-US"`; the shared validator requires it and the US
+  content predates the field.
+- `tools/validate-content-pack.py` crashed with an `AttributeError` on the vocabulary
+  files. They *do* have a `categories` key, but theirs maps a topic to a list of words, so
+  the guard had to test the shape rather than the presence of the key. Now every JSON file
+  under `content/` either validates or is skipped with a reason.
+
+## v33 — Germany's picture questions, and the five photographs we cannot ship (2026-09-07, overnight)
+
+Germany's pack arrived complete on text and empty on artwork: 38 of its 460 questions show
+a picture, and for 19 of them the four options **are** the pictures — the literal strings
+`"Bild 1".."Bild 4"`. Without the files those questions render as four blank tiles and no
+answer is reachable, which reads to a learner as a broken test rather than a missing asset.
+Thirty-seven now ship their artwork. One is deliberately withheld, and the reason is the
+more useful half of this entry.
+
+### The order was the whole risk
+
+For a "which of these four is the Bavarian coat of arms" question, getting the order wrong
+marks the wrong answer correct **and the screen still looks completely fine**. There is no
+visual symptom. So the order was not taken from the obvious place: the images are stored as
+PDF XObjects named `/Im1`../`/Im4`, and on **8 of the 19 pages `/Im1` is not the leftmost
+picture**. Naming would have silently corrupted the answer key on nearly half of them.
+
+Instead each page's content stream was interpreted — `q`, `Q`, `cm`, `Do`, maintaining the
+transformation matrix — to recover where every image is actually *drawn*, then ordered by
+x. That is only valid if the four sit in one row, so that was checked rather than assumed:
+all 19 pages place their pictures in a single row with clean column gaps and overlapping
+vertical extents.
+
+Verified three ways, because one way is not verification:
+
+1. **By eye.** Contact sheets rendered and read: question 21 → Bild 1 is the Bundesadler;
+   209 → Bild 4 is the DDR hammer-and-compass; 226 → Bild 2 is the ring of gold stars;
+   1011 → Bild 2 is the Bavarian lozenge; 1041 → Bild 3 is the Bremen key; 1008 → arrow 2
+   points at the south-west. Every one matches the `correctIndex` already in the pack.
+   Question 130 was read at full size: ballot 1 is the only one with exactly one mark in
+   each column, which is precisely what makes it the valid one.
+2. **By image identity, needing no eyes.** The same 16 state coats of arms recur as
+   distractors across the 16 state questions. Hashing every file gives 24 distinct
+   pictures, of which exactly 16 are the correct answer for exactly one Bundesland each,
+   and **no picture is marked correct for two states**. A misalignment would almost
+   certainly have broken that invariant.
+3. **Against the earlier independent check.** The answer key built from the interactive
+   catalogue already said Bayern = 2 and Baden-Württemberg = 1 before any image existed.
+   The pictures agree.
+
+### Two bugs found by looking that reasoning would have missed
+
+**Almost every image carries an `/SMask`** — a soft transparency mask. Decoding without
+applying it gives each coat of arms an opaque block where its background should be. Pillow
+applies it; the first extraction pass, which did not, would have shipped 89 images with
+boxes around them.
+
+**Transparency itself was the second bug.** With the alpha preserved, question 130's ballot
+papers are black line art on nothing, and question 21's second option is a black Chi-Rho.
+On a dark theme both disappear entirely — the answer literally cannot be seen. Every file
+is therefore composited onto white, which is also exactly how the BAMF page prints it. The
+rendering rule is recorded in the pack and passed to the website agent: **white tile in
+both themes, no invert, no filter, no blend.** This was found by rendering the image and
+looking at it, not by thinking about it.
+
+### The licence boundary, which is sharper than expected
+
+Section 5(2) UrhG frees the official *work* — question and option text — from copyright,
+subject to no modification (§62) and source attribution (§63). It does **not** transfer
+rights in a photograph BAMF licensed for its own publication. The catalogue has no imprint
+and no general rights statement; its only `©` notices sit inline on five pages and name
+third parties:
+
+| Question | Credit |
+|---|---|
+| 55  | © Deutscher Bundestag/Achim Melde |
+| 70  | © Bundesregierung/Engelbert Reineke |
+| 181 | © Bundesregierung/Engelbert Reineke |
+| 216 | © Deutscher Bundestag/Janine Schmitz |
+| 235 | © Bundesregierung/Richard Schulze-Vorberg |
+
+None of those five is written to disk. Four of them read perfectly well without their
+photograph and stay servable as ordinary text questions. **Question 55 asks "Was zeigt
+dieses Bild?"** — it is *about* the photograph, so without it there is no answer. It is
+marked `servable: false` and anything loading the pack must filter it out: **459 of 460**.
+Withholding one question is a much smaller cost than serving an unanswerable one, or
+redistributing somebody's photograph.
+
+Question 187 is the useful counter-example and the reason the test is the credit line
+rather than the page: it has `hasImage`, but its page carries no credit because the picture
+is the DDR flag — a state emblem drawn as part of the official work. Inspected, and
+shipped.
+
+What *is* shipped — coats of arms, flags, the 1945 occupation-zone map, the 16 state
+locator maps, the specimen ballots — carries no separate credit anywhere in the catalogue.
+The ballots additionally cite `Bundeswahlordnung, Anlage 26`, a statutory annex.
+
+### Guardrails, so none of this can quietly regress
+
+- `tools/extract-de-catalogue-images.py` — the extraction, repeatable, because BAMF revises
+  the catalogue. `--write` regenerates; `--verify` re-derives the order from the PDF and
+  only reports. It **refuses** to write a picture from a credited page, and it re-runs the
+  no-picture-correct-for-two-states check every time. Currently: clean.
+- `tools/validate-content-pack.py` gained image checks — every referenced file must exist,
+  option-image count must match option count, `correctIndex` must be a valid index whose
+  option agrees with `answers`, and a question that ships a file while carrying a `©`
+  credit is a hard **error**. So is a `requiresImage` question with no image that is not
+  marked `servable: false`: it would go out unanswerable.
+- The same validator was **only ever walking `categories`**, so Germany's 160 Bundesland
+  questions had been getting no id-uniqueness and no answer-is-an-option checks at all.
+  Now both lists are walked, with `stateQuestionsTotal` checked the way `totalQuestions`
+  always was.
+- `tools/sync-content.sh` copied JSON only, so the artwork would never have reached the
+  website however correct it was. It now also copies each country's `img/` directory —
+  deliberately not everything non-JSON, since `us/officials/photos` are app assets and
+  `SOURCES.md` / `NOTES.md` have no business being served. Its cleanup of a pack-less
+  country also became `rm -rf`: `rmdir` silently left a directory whose images had synced
+  but whose pack was held back.
+
+### One correction to my own validator
+
+Adding the state questions surfaced 12 "duplicate question text" errors, which looked like
+an extraction bug and was not. BAMF's catalogue really does ask "Welches Land ist ein
+Nachbarland von Deutschland?" five times, each with a different set of four countries and a
+different right answer — five separate official questions sharing one sentence. My rule was
+wrong, not the content. A question's identity is its text **and** its options; only both
+repeating together means one of the two is dead weight. The shared stems are now reported
+as a `note`, which is a third severity added for exactly this: worth saying, not worth
+failing.
+
+### Still open for Germany
+
+- **BAMF attribution has to appear on screen** wherever these questions are shown. §63 is
+  an obligation, not a courtesy. The string is in `licence.attribution`; the website agent
+  has it. Not yet visually confirmed on a rendered page.
+- **Do not claim the wording matches the exam.** BAMF's own front page says the wording
+  "können leicht von den verwendeten Originalfragen abweichen". "From the official
+  catalogue" is the strongest true claim available.
+- The 44 negation questions still lose their underlined emphasis.
+- Germany has no official topic taxonomy; everything sits in one `allgemeine-fragen`
+  category, which is honest but makes study-by-section meaningless for Germany.
+- Germany is still **not wired into** `site/public/countries.js` or
+  `site/src/lib/countries.js`, so it cannot be chosen yet. Those files belong to the
+  website agent, still running.
+
+## v34 — The website speaks German, and readiness stops being a flag (2026-09-07, overnight)
+
+Germany is selectable and fully rendered. The US is untouched and still live.
+
+### Readiness is derived, never declared
+
+`ready: true` was a claim, and a claim can be wrong — a country could be offered with no
+questions behind it, which locks an account to a test we cannot serve. So nothing edits a
+readiness flag any more. The browser reads `content/packs.json`, the manifest
+`sync-content.sh` writes *from the files it actually copied*; the server independently asks
+the asset router whether the pack file exists. The two never consult each other, so the
+worst a stale manifest can do is offer a country the server then refuses.
+
+Australia is the case that proves the difference between the two failure modes. Its pack
+exists and declares `pending-legal-review`, so `sync-content.sh` now **deletes** it from
+`site/public/` rather than merely leaving it out of the manifest. Everything under
+`public/` is a public URL: omitting a pack from the manifest stops it being *chosen*, not
+served. For uncleared material, being published *is* the problem.
+
+That fix was incomplete and I found the gap by testing it rather than reading it. A
+synthetic held-back country carrying one image: the pack JSON was removed and **the image
+was still served**, because `rmdir` quietly fails on a non-empty `img/`. A picture
+question's artwork is the pack's content, so it now goes with it.
+
+### Three languages, and two places where translation was the wrong tool
+
+`site/public/strings.js` — `en`/`de`/`es`, flat dotted keys, chosen from the pack's BCP-47
+`language`. `en` is byte-identical to what the app said before, because the US is live.
+
+Two calls that are corrections rather than translations, and both need a native speaker's
+eye:
+
+- **"Interview" mode is not an interview outside the US.** The Einbürgerungstest and the
+  CCSE are written multiple-choice papers; nobody asks anything aloud. German reads
+  "Laut üben", Spanish "Práctica en voz alta". Calling it an interview would be false.
+- **Register differs by language on purpose:** German uses "Sie", which is BAMF's own
+  register; Spanish uses "tú".
+
+### The hardcoded assumptions were worse than untranslated — they were wrong
+
+Not one of these was a missing string. Each would have shown a German user a fact about
+the American test:
+
+1. `askedPerInterview || 10` and `passRequirement || ceil(asked * 0.6)` — a ten-question
+   test and a 60% pass mark invented for any pack that did not state its own.
+2. `passRequirement || 12` / `askedPerInterview || 20` on the performance screen — the
+   US's numbers, which would have drawn a 60% pass line on a German test whose mark is
+   52%. Both now return `null` when the pack is silent, and the UI says so instead of
+   borrowing.
+3. `titleCase()` on every heading turned "TEIL II" into "Teil Ii".
+4. `subsection(cat.subsection)` printed the literal word **"undefined"** as a section name
+   for any pack without subsections — Germany, Spain and Australia all qualify.
+5. Speech synthesis was pinned to `en-US`, so a German question was read aloud by an
+   English voice — close to unintelligible, and the mode would have been useless.
+6. The English country name was shown to a German account.
+
+Germany's **160 Bundesland questions** were being ignored outright; they are now one
+section per Bundesland, studyable, and excluded from anything graded — the same treatment
+US "answers will vary" questions have always had.
+
+### Verified in a browser, not from a report
+
+Signed up as a German account in Chromium and walked to Aufgabe 21:
+
+- All four option images **decode** — `naturalWidth > 0`, which is the check that
+  distinguishes a working image from an `<img>` that merely exists.
+- The BAMF credit is on screen with the question, per §63 UrhG.
+- In dark mode the artwork carries no `filter` and no `mix-blend-mode`, and option 2's
+  black Chi-Rho is plainly visible on its white tile. That is the precise bug the white
+  backing exists to prevent, and it is now shown working rather than argued.
+
+`licence.name` had been reading "(no copyright, subject to §§ 62 and 63 UrhG)" in the
+middle of an otherwise German sentence on screen. Now German.
+
+Suites: multicountry 80/80 (new), homecountries 21/21 (new), auth-flow 27/27, ui-fixes
+34/34, pages-check 30/30, api 58/58, insights 57/57, notrack 4/4, de-pictures 9/9 (new).
+**Nothing deployed.**
+
+### Needs a person, not another agent
+
+- **A native German and Spanish speaker** should read the translated terms of art. The
+  specific keys are tabled in the agent's report; `perf.startWith` in Spanish still places
+  a pack-supplied section name after a preposition, which was already wrong in German and
+  had to be rephrased.
+- The app's country picker still badges Canada, UK and Australia "Coming". None has a
+  published question pool, so that badge over-promises.
+- Spain remains blocked on its licence and is **named nowhere** on the home page.
+
+## v35 — Germany in the iPhone app (2026-09-08)
+
+The app had **no country concept at all** — no picker, no badges, nothing. Onboarding asked
+for a name and an interview date, and every screen was the USCIS civics test. So this was
+not "wire in a pack": it was building the country dimension. Decision taken with the user:
+**one app with a country picker**, not a second app, so there is one listing, one $9.99
+purchase covering every country, and the existing reviews and ranking carry over.
+
+### Metro cannot resolve a picture by name, and the failure is silent
+
+Germany's questions reference their artwork by string (`"optionImages": ["img/q21-bild1.jpg", …]`).
+React Native cannot use that: Metro bundles an image only where it sees a `require()` with a
+**literal** path, and the versioned Expo docs for SDK 57 document only static paths. A
+dynamic `require()` throws; worse, an unbundled image renders as an empty tile, so the pack
+is valid, the JSON loads, the question renders, and four blank squares appear where the
+answer should be.
+
+`tools/gen-app-image-map.py` therefore writes `src/content/images.generated.ts`, one real
+`require()` per path, looked up by string. `--check` fails when it is stale. Verified by
+exporting an iOS bundle before and after: 57 files → 107.
+
+**Metro deduplicates by content**, which was worth confirming rather than assuming: the 95
+files are only **50 distinct images** (the same coat of arms is a distractor in several
+questions, and questions 21 and 209 share all four pictures), so 53 jpg in the bundle =
+49 distinct German + 4 US official photos. The artwork costs the binary about half what the
+directory listing suggests.
+
+`react-native`'s own `Image` is used, not `expo-image`: it takes the result of `require()`,
+and adding a native module would force a new build for no benefit.
+
+### Progress had to be namespaced per country before Germany could exist
+
+Progress is keyed by question id, and the ids **collide**: USCIS runs 1..128, Germany runs
+1..300 plus 1001.. for the Bundesländer. One shared key would have shown a German user
+their US practice history as their own and starred a German question because a US one with
+the same number was starred. The website prevents this by locking the country to an
+account; the app has no accounts, so the storage is namespaced (`starredIds:de`) and
+switching is allowed instead.
+
+An existing user's data is migrated on first launch: the pre-namespacing keys are read
+once, copied into `:us`, and **left in place**, so the change is reversible. Verified in a
+browser by seeding the old keys and reloading — stars, history, version and home state all
+arrive under `:us`, with the originals intact.
+
+`setCountry` clears progress state *before* loading the new country's, because loading is
+asynchronous and the gap would otherwise render one country's history under another
+country's test.
+
+### What was wrong rather than merely untranslated
+
+- **The practice screen invented a pass mark.** `civicsVersion === '2025' ? 20 : 10` and
+  `? 12 : 6` are American numbers; on the German test that is a 20-question paper needing
+  12, where the real one asks 33 and needs 17. Now from `packFormat()`, which returns
+  **null** when the pack is silent, and the screen says the document does not state it
+  rather than borrowing.
+- **`prepare()` invented distractors and shuffled the options.** For Germany both are
+  wrong: the three wrong answers are themselves official, and `optionImages` is
+  index-aligned with `options`, so a shuffle puts every picture against the wrong answer
+  with nothing on screen looking amiss. A test that prints its own options is now asked
+  exactly as printed.
+- **A practice test would have included all sixteen Bundesländer.** A candidate answers
+  their own ten and never the other 150. `questionsForRegion()` returns nationwide plus the
+  one region that applies, and omits sub-national questions entirely when no region is set.
+- **Speech synthesis was pinned to `en-US`** in three places. A German question read by an
+  English voice is close to unintelligible, so that mode would have been useless.
+- **`topicGuideFor()` fell back to "the official USCIS study materials"** for any section it
+  did not know — which is simply untrue of a Bundesland. It returns null now and the line
+  is omitted; a confident wrong pointer is worse than none.
+- **`subsection` was typed as required**, and making it optional immediately surfaced three
+  call sites that would have printed the literal word "undefined" as a section name — the
+  same bug the website had.
+- The 160 Bundesland questions live in `stateCategories`, **which the app ignored
+  completely**. All sixteen are now sections you can study.
+
+`titleCaseSection()` looked like the same class of bug ("TEIL II" → "Teil Ii") but its one
+call site immediately `.toUpperCase()`s the result, so it was left alone. Checking beat
+fixing.
+
+### Verified in a browser, both languages
+
+Driven through Expo web with Playwright, reading the rendered DOM.
+
+German, 14 checks: Settings names the Einbürgerungstest and hides the 2008/2025 picker;
+the card reads "Lernkarten" and "AUFGABE 21"; the pool is **459, not 460**, so the withheld
+question is gone; all four pictures **decode** (`naturalWidth > 0`, which is what separates
+a working image from an `<img>` that merely exists); the answer face outlines Bild 1, the
+Bundesadler, matching `correctIndex`; the BAMF credit is on the screen with the questions
+per §63 UrhG; no English chrome and no mention of USCIS anywhere.
+
+US regression plus migration, 12 checks: English throughout, "QUESTION n" labels, no
+options list on a free-recall question, no source credit (a federal work needs none), and
+the 2008 pack correctly stating 10 questions and 6 to pass — read from the pack, not from a
+literal.
+
+Picture questions are laid out as a **2×2 grid** rather than four rows: the text is only
+"Bild 1".."Bild 4", and four stacked rows pushed the fourth option off a phone-sized card,
+so the one option a learner never scrolls to was as likely as not the right one.
+
+### Known and not fixed
+
+- **The web preview overlays both faces of the flashcard.** `backfaceVisibility: 'hidden'`
+  is correctly set on both, and react-native-web does not emit the
+  `transform-style: preserve-3d` it needs, so this is very probably preview-only — the same
+  card ships in the live US app. **Not verified on a device**: `xcrun simctl` is unavailable
+  in this environment, so this needs a simulator or TestFlight check before release.
+- **Onboarding is still US-only copy** — a Reagan quote about becoming an American, and no
+  country step. The app defaults to the US so nothing is false, but a German user's first
+  screen is about the wrong country. This wants a country question first, and it interacts
+  with the App Store rename below.
+- **`app.json` still says "US Citizenship Test 2026-Pulse"**, which is the home-screen name
+  and the store listing. Renaming a live app's identity is the user's call, not a
+  side-effect of this work.
+- `InterviewDateField` formats dates as `en-US` regardless of country.
+- Only the study, practice, settings and tab chrome are translated. Home, the read-aloud
+  mode and the paywall are still English.
+
+## v36 — Canada and Australia: our own questions, and why that is the honest route (2026-09-08)
+
+Four countries are now live-ready on the website. Two of them carry questions we wrote.
+
+### The reason there was nothing to license
+
+The user's instinct — "we don't need permission, see how competitors do it" — turned out to
+be right, and the reason matters more than the conclusion. **Neither Canada nor the United
+Kingdom publishes its question pool.** There is no official set to license, and no product
+in either market has the real questions. TSO's *official* Life in the UK app says its
+questions are "based on the style and structure of official questions"; Canadian apps ship
+hundreds "based on *Discover Canada*" behind an IRCC non-affiliation notice.
+
+So the route is the one the whole market takes, and it is lawful for the same reason it is
+lawful for them: questions we write, testing facts from the free official study guide.
+Facts are not copyrightable; the guide's expression of them is. What we will not do is copy
+a competitor's question bank — that infringes a different owner, and several of them sell
+those banks.
+
+Three of the four licence-enquiry emails are therefore superseded. **Spain's still stands**,
+and the distinction is exact: Spain *does* publish its 300 CCSE questions and expressly
+forbids reproducing them, which is why that pack sits in `legal-hold/`.
+
+### The schema could not say "these are ours"
+
+Which meant such a pack could only be labelled as something it was not. `contentType:
+"authored-practice"` now requires `basedOn` (the official material, with its URL) and
+`nonAffiliation` (in plain words: not official, not the real questions), and **refuses any
+question carrying `officialNumber`** — that field belongs only to a genuine official
+question, so its presence means either the label or the content is wrong. Verified by
+validating four deliberately broken packs.
+
+### Canada: 76 questions
+
+A useful find in IRCC's own material: it publishes a notice *about third-party study
+guides*, saying *Discover Canada* "is the only official study guide", should be a
+candidate's "primary resource", and that other material is used "at your own risk". Our
+screen says exactly that and links every chapter — a better position than the bare "not
+affiliated" the competitors carry.
+
+**The guide is stale wherever anything has moved since 2012**, and inconsistently so: the
+Oath chapter has been updated to King Charles the Third, while Symbols still has the 2012
+Diamond Jubilee and Elections still says 308 electoral districts, untrue since 2015. The
+monarch comes from the updated chapter and every time-sensitive fact is left out — no
+question about seat counts, the current Prime Minister, or how many parties sit in the
+House. One fewer question beats a confidently wrong one.
+
+**Fact audit: 46 of 46 confirmed verbatim.** Two apparent misses were the checking script,
+not the content — Canada.ca uses non-breaking spaces, so "serve until age 75" and
+"July 1, 1867" failed a naive search until whitespace was normalised.
+
+### Australia: 75 questions, and the licence verified at last
+
+The CC BY claim recorded earlier was flagged as **unverified** because the pages 404'd on
+re-check. It is now verified from the document itself: page 1 of the testable PDF carries
+`© Commonwealth of Australia 2020` and CC BY 4.0, excepting the Coat of Arms. That permits
+commercial use and adaptation with attribution, making Australia the best-licensed country
+here — we would be entitled to reproduce the booklet's wording. We write our own anyway,
+and the attribution is on screen, because CC BY is not satisfied by an attribution nobody
+can see.
+
+**The values rule is the thing a product must not get wrong.** Home Affairs' own practice
+test states it: 20 questions in 45 minutes, at least 15/20 — *and* 5/5 on the Australian
+values questions. It is not part of the 75%. Miss one and you have not passed, whatever the
+overall mark. Carried as `valuesRule`, twelve questions flagged, and printed on screen.
+
+**Fact audit: 68 of 68 confirmed verbatim.** The one apparent miss was again my search
+string: the booklet says "This includes government, community and religious leaders", and
+I had searched for "including government".
+
+The 20 genuinely official *sample* questions stay held back — the practice-test subdomain
+carries no copyright footer of its own while the department's notice speaks of "this
+website", and that ambiguity is unresolved. `sync-content.sh` deletes them from the site on
+every sync. They are not wasted: they are the originality reference the authored pack is
+checked against.
+
+### The originality gate, which earned its place twice
+
+Our whole position is that the questions are ours and only the facts are theirs. A question
+that has drifted into being one of theirs gives that up, and **nobody would notice by
+reading the file**. So every build compares our questions against whatever the government
+does publish, and refuses to write the pack on a collision. It caught:
+
+- Canada: "What does it mean that Canada is a constitutional monarchy?" — word for word
+  IRCC's own study question.
+- Australia: "What is Australia's capital city?" — word for word one of Home Affairs'
+  twenty; and "What do the colours of the Australian Aboriginal Flag represent?" against
+  their "What are the colours of the Australian Aboriginal Flag?", the same question with a
+  synonym.
+
+It is **two-tier**, because one threshold cannot tell a collision from a coincidence:
+"What is the capital city of Victoria?" scores 0.6 against "What is Australia's capital
+city?" and is a perfectly good different question — short factual questions share most of
+their significant words by construction. So 0.8+ fails the build; the 0.6–0.8 band is
+printed once for a human. The government's own questions are downloaded for the comparison
+and **never committed**: they are its expression, not ours to hold.
+
+Two mistakes of mine were caught by machinery rather than by reading: the answer was
+authored first in every question and would have shipped as option 1 every time (the apps
+deliberately never shuffle a pack's printed options, because Germany's four are official
+and reordering them breaks their alignment with the pictures) — so the builder distributes
+it with a fixed seed; and Australia's gold-rush question shipped "1788" as two different
+options, which the validator caught.
+
+### The home page was making a claim that is no longer true
+
+Four things said "official questions" about all of them:
+
+- the hero subhead, the free-tier heading, the free-tier JSON-LD and the meta/social
+  descriptions;
+- the generated country sentence — "Each one is a set of official questions";
+- the FAQ answer "The official questions are public government material", in both the
+  visible copy and the JSON-LD;
+- and the Countries section still said we *don't have* Canada or Australia and "won't
+  invent questions and call them official".
+
+Saying "official" on the home page and "these are not the official questions" on the study
+screen would be the site contradicting itself. The Countries section now explains the two
+kinds of pack in plain words, and the FAQ names which countries are which. Canada and
+Australia are back on the country strip — removed when they had no pack, restored now that
+they do, and still written as "coming" in the static HTML so only the manifest can promote
+them.
+
+`app.js` also had to learn two things: it never rendered `nonAffiliation` at all, so the
+pack declared it and the screen never showed it; and its licence line produced *"Official
+material from Facts drawn from … reproduced under Our own questions; facts drawn from a
+Crown-copyright publication"*, because that template assumes official material reproduced
+under a licence — precisely what an authored pack is not.
+
+### Tests
+
+New: `ca-verify` 12/12, `au-verify` 17/17. Existing: `multicountry` 81/81,
+`homecountries` 25/25, `pages-check` 30/30, `auth-flow` 27/27.
+
+Eight assertions across two suites had hard-coded a two-country world — `['de','us']`,
+"Canada must not be selectable", "exactly 2 enabled", "the sentence must not name Canada".
+Each was a snapshot of last night rather than the rule it meant, so they now read the
+expected set from `content/packs.json`. The multi-country suite then absorbed the fourth
+country with no edit at all, which is the test the fix was for.
+
+Two failures in my own new checks were the checks, not the code: `au-verify` asserted
+Canada's exact non-affiliation wording, and counted its own deliberate 404 probe of the
+held-back sample as a page error.
+
+A run of suites also exhausted the local sign-up rate limit and every later suite came back
+429, which reads exactly like a broken test. `scratchpad/rl-clear.sh` between suites.
+
+### Still open
+
+- **The United Kingdom needs the handbook bought** (~£12, TSO). It is the only country
+  whose study material is not free, and writing questions without it would mean writing
+  them from competitors' questions, which is the one thing ruled out.
+- **Canada needs French.** IRCC publishes both the guide and the test in French and
+  candidates may sit it in either language, so 76 English questions is not a finished
+  Canadian product.
+- Australia's 20 official sample questions stay held back pending the subdomain licence
+  question.
+- Neither Canada nor Australia is wired into the **iPhone app** — that work is on its own
+  branch and paused.
+
+## v37 — The two owed things: French done, and a decision not to fake the UK (2026-09-08)
+
+Both items from v36 were taken up. One is finished. The other is a decision, and the
+decision is the deliverable.
+
+### Canada in French — done
+
+65 questions, plus the site's fourth language. Detail in
+`apps/us-citizenship/content/ca/SOURCES.md`; the point worth repeating here is that they
+are **not translations of the English pack**. The French guide is not a translation either:
+it is the text a French candidate studies, and its terms of art are what they will meet on
+the day — "d'un océan à l'autre" for *A mari usque ad mare* where the English guide says
+"from sea to sea", "la sanction royale", "le roi Charles Trois". Translating our English
+questions would have produced French sentences carrying English concepts, which in a test
+sat in French is a worse error than a missing question.
+
+The originality gate runs against IRCC's **French** sample questions. A French question of
+ours drifting into a French question of theirs is the collision that matters, and comparing
+against the English list would never have seen it.
+
+175 French UI strings, same key set as German and Spanish, in Canadian French with IRCC's
+own vocabulary — "examen" rather than "test", "note de passage", "cartes-éclair".
+"Entrevue" is kept for the read-aloud mode, unlike German and Spanish, because Canada does
+hold interviews with an official and the word describes something that exists.
+
+**The bug only a bilingual country could expose:** `switchVersion()` replaced the pack but
+never re-applied the language. The questions turned French while every button around them
+stayed English and `<html lang>` kept saying `en-CA` — which also tells a screen reader to
+read French questions with an English voice. `boot()` had always done it correctly; the
+switch path never had to, because the United States' two versions are both English.
+
+### The United Kingdom — not shipped, on purpose
+
+The blocker was recorded as "buy the £12 handbook". That was tested properly before being
+accepted, and then accepted.
+
+**What was established, all from primary Home Office documents:** 24 multiple-choice
+questions, 45 minutes, computer based, result the same day, Welsh available in Wales and
+Scottish Gaelic in Scotland, unlimited attempts, and — in the Home Office's own words —
+"The test questions are based on the … handbook. People **must** study the handbook to
+prepare for the test." The pass mark took three documents to pin down: it is not on the
+public GOV.UK pages (a "75%" string there is in the stylesheet, which states nothing), and
+comes from *Guide AN*: "You must score 75% or more to pass the test", so 18 of 24.
+
+**Four substitutes were tried and each fails for a different reason:**
+
+1. *No free official copy.* The GOV.UK publication page 404s; TSO sells it.
+2. *OGL does not reach it.* OGL v3's exemptions exclude information not published with the
+   Information Provider's consent, and a commercially sold Crown-copyright book is not OGL
+   material. (OGL separately grants no right to use information "in a way that suggests any
+   official status" — a second reason our packs carry a non-affiliation notice.)
+3. *Third-party PDFs of the handbook are unauthorised copies.* Using one would be copying a
+   Crown-copyright book, which is the exact thing ruled out when we declined to copy
+   competitors' question banks. The rule does not bend because the owner is a government.
+4. *The Cabinet Manual route was rejected on quality, not licence.* It is genuinely OGL,
+   genuinely authoritative, 110 pages, and was downloaded and read — and it is dated
+   **2011**. It calls the Welsh legislature the "National Assembly for Wales" (renamed
+   Senedd Cymru in 2020), describes EU membership (ended 2020), and predates the repeal of
+   the Fixed-term Parliaments Act (2022).
+
+Writing questions from a 2011 constitutional document, for a test based on a 2013 handbook,
+in 2026, stacks three vintages of staleness — and coverage could not be checked against the
+syllabus at all. Germany showed how much care one stale official document needs; its
+Elections chapter still claims 308 electoral districts. Three at once, for an exam people
+pay to sit, is not a risk worth running to avoid twelve pounds.
+
+**So the UK ships nothing today, and the groundwork is written down instead.**
+`content/gb/SOURCES.md` now carries the verified mechanics, the four rejected substitutes
+with the reason each fails, and a five-step build plan. One point in it is worth flagging:
+unlike Canada and Australia, the UK publishes no sample questions, so there is nothing for
+the originality gate to compare against — it should run against the handbook's own practice
+questions if the edition has any, and otherwise be skipped **explicitly**, never silently.
+
+The site already says the right thing: the UK is listed, not selectable, deliberately off
+the home-page strip, and the Countries section explains the position in words.
+
+### Tests
+
+`ca-fr-verify` 13/13 (new), `multicountry` 81/81, `ca-verify` 12/12, `au-verify` 17/17,
+`homecountries` 25/25, `auth-flow` 27/27. 9/9 packs validate. Nothing deployed.

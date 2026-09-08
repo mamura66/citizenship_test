@@ -9,6 +9,8 @@ import { Paywall } from '../../src/components/Paywall';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { radii, spacing, type } from '../../src/theme/theme';
 import { useAppState } from '../../src/lib/appState';
+import { COUNTRIES, getCountry } from '../../src/content/countries';
+import { langOf, translator } from '../../src/lib/strings';
 import { restoreMessage, usePurchase } from '../../src/lib/purchase';
 
 // Structured as a conventional grouped settings list - a labelled section, then a
@@ -27,6 +29,8 @@ const APPEARANCE_OPTIONS: { key: 'system' | 'light' | 'dark'; label: string; ico
 export default function SettingsScreen() {
   const { colors, preference, setPreference } = useTheme();
   const {
+    country,
+    setCountry,
     civicsVersion,
     setCivicsVersion,
     practiceHistory,
@@ -36,6 +40,8 @@ export default function SettingsScreen() {
     setInterviewDate,
     homeState,
   } = useAppState();
+  const countryDef = getCountry(country);
+  const tr = translator(langOf(countryDef.language));
   const { isPro, restorePurchases } = usePurchase();
 
   const [paywallVisible, setPaywallVisible] = useState(false);
@@ -141,30 +147,69 @@ export default function SettingsScreen() {
             </View>
           </Section>
 
-          {/* ---------- Civics test version ---------- */}
-          <Section
-            title="Civics test"
-            footer="Which test you take depends on when you filed Form N-400. Check your USCIS notice if you're unsure — this app can't determine that for you."
-          >
+          {/* ---------- Which country's test ---------- */}
+          <Section title={tr('country.current')} footer={tr('country.explain')}>
             <View style={styles.segmentWrap}>
-              {(['2025', '2008'] as const).map((v) => {
-                const active = civicsVersion === v;
+              {COUNTRIES.map((c) => {
+                const active = c.code === country;
                 return (
                   <Pressable
-                    key={v}
-                    onPress={() => setCivicsVersion(v)}
+                    key={c.code}
+                    onPress={() => setCountry(c.code)}
                     style={({ pressed }) => [
                       styles.segment,
                       { backgroundColor: active ? colors.accentFill : 'transparent' },
                       pressed && !active && { opacity: 0.6 },
                     ]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
                   >
-                    <Text style={[type.subheadline, { color: active ? colors.onFill : colors.textPrimary }]}>{v} test</Text>
+                    <Text style={[type.subheadline, { color: active ? colors.onFill : colors.textPrimary }]}>
+                      {c.flag}  {c.nativeName}
+                    </Text>
                   </Pressable>
                 );
               })}
             </View>
+            <Row label={tr('country.official')}>
+              <Text style={[type.body, { color: colors.textSecondary }]}>{countryDef.officialTestName}</Text>
+            </Row>
           </Section>
+
+          {/* ---------- Which version of that test ----------
+               Drawn only when the country really has more than one version in force. Two
+               are for the United States and which applies depends on when the person filed,
+               so it has to be theirs to choose. Germany publishes one catalogue, and a
+               one-option picker would imply a decision that does not exist. */}
+          {countryDef.versions.length > 1 ? (
+            <Section
+              title={countryDef.officialTestName}
+              footer={countryDef.versions.map((v) => v.note).filter(Boolean).join(' ') || undefined}
+            >
+              <View style={styles.segmentWrap}>
+                {countryDef.versions.map((v) => {
+                  const active = civicsVersion === v.id;
+                  return (
+                    <Pressable
+                      key={v.id}
+                      onPress={() => setCivicsVersion(v.id)}
+                      style={({ pressed }) => [
+                        styles.segment,
+                        { backgroundColor: active ? colors.accentFill : 'transparent' },
+                        pressed && !active && { opacity: 0.6 },
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
+                    >
+                      <Text style={[type.subheadline, { color: active ? colors.onFill : colors.textPrimary }]}>
+                        {v.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Section>
+          ) : null}
 
           {/* ---------- Purchases ---------- */}
           <Section title="Purchases">

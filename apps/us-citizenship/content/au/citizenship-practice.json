@@ -1,0 +1,323 @@
+{
+  "version": "practice-2026",
+  "language": "en-AU",
+  "contentType": "official-practice-subset",
+  "disclosure": "These are the official practice questions published by the Australian Government Department of Home Affairs. They are a sample: the questions in the real citizenship test are different, and the official question pool is not published.",
+  "officialPoolPublished": false,
+  "source": "Australian citizenship practice test, Australian Government Department of Home Affairs - https://citizenshippracticetest.homeaffairs.gov.au/",
+  "sourceRetrieved": "2026-09-07",
+  "studyMaterial": {
+    "title": "Australian Citizenship: Our Common Bond",
+    "publisher": "Australian Government Department of Home Affairs",
+    "edition": "2020",
+    "url": "https://immi.homeaffairs.gov.au/citizenship/test-and-interview/our-common-bond",
+    "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0), with the exception of the Commonwealth Coat of Arms"
+  },
+  "licence": {
+    "name": "Creative Commons Attribution 3.0 Australia (CC BY 3.0 AU)",
+    "url": "https://creativecommons.org/licenses/by/3.0/au/",
+    "attribution": "Australian Government Department of Home Affairs",
+    "noticeSource": "https://www.homeaffairs.gov.au/access-and-accountability/using-our-website/copyright-and-disclaimer",
+    "reviewStatus": "pending-legal-review"
+  },
+  "totalQuestions": 20,
+  "askedPerTest": 20,
+  "passRequirement": 15,
+  "valuesRule": {
+    "section": "Part 4 - Australian values",
+    "askedPerTest": 5,
+    "passRequirement": 5,
+    "note": "All Australian values questions must be answered correctly, in addition to an overall mark of at least 15/20 (75%)."
+  },
+  "timeLimitMinutes": 45,
+  "categories": [
+    {
+      "id": "au-part-1-people",
+      "section": "Part 1 - Australia and its people",
+      "subsection": null,
+      "questions": [
+        {
+          "id": 1,
+          "question": "On Anzac Day, we remember",
+          "options": [
+            "all Australians who have fought and died in wars.",
+            "the creation of an independent Australian nation.",
+            "the arrival of the First Fleet from Great Britain."
+          ],
+          "answers": [
+            "all Australians who have fought and died in wars."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 2,
+          "question": "What are the colours of the Australian Aboriginal Flag?",
+          "options": [
+            "Black, red and yellow.",
+            "Green, white and black.",
+            "Blue, white and green."
+          ],
+          "answers": [
+            "Black, red and yellow."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 3,
+          "question": "What is Australia's capital city?",
+          "options": [
+            "Canberra.",
+            "Brisbane.",
+            "Perth."
+          ],
+          "answers": [
+            "Canberra."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 4,
+          "question": "When did the separate colonies join together to become the Australian nation?",
+          "options": [
+            "1601.",
+            "1901.",
+            "2001."
+          ],
+          "answers": [
+            "1901."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 5,
+          "question": "Who can deliver a Welcome to Country?",
+          "options": [
+            "Anyone that lives on the land.",
+            "An Aboriginal or Torres Strait Islander custodian of the land.",
+            "A Master of Ceremonies at an event on the land."
+          ],
+          "answers": [
+            "An Aboriginal or Torres Strait Islander custodian of the land."
+          ],
+          "valuesQuestion": false
+        }
+      ]
+    },
+    {
+      "id": "au-part-2-democratic-beliefs",
+      "section": "Part 2 - Australia's democratic beliefs, rights and liberties",
+      "subsection": null,
+      "questions": [
+        {
+          "id": 6,
+          "question": "Which is correct in Australian law?",
+          "options": [
+            "Men and women have equal rights.",
+            "Men have more rights than women.",
+            "Women have more rights than men."
+          ],
+          "answers": [
+            "Men and women have equal rights."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 7,
+          "question": "Australians believe in freedom of speech. This means",
+          "options": [
+            "people can say what they think about politics.",
+            "men have more legal rights than women.",
+            "everyone must follow a religion."
+          ],
+          "answers": [
+            "people can say what they think about politics."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 8,
+          "question": "In Australia, the government",
+          "options": [
+            "tells people which religion to follow.",
+            "is separate from any religion.",
+            "makes laws based on the official religion."
+          ],
+          "answers": [
+            "is separate from any religion."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 9,
+          "question": "By law, Australian citizens aged 18 or over must",
+          "options": [
+            "attend local council meetings.",
+            "vote in Australian elections.",
+            "join the Australian Defence Force."
+          ],
+          "answers": [
+            "vote in Australian elections."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 10,
+          "question": "Which of the following is true?",
+          "options": [
+            "Australian citizens can get an Australian passport.",
+            "Permanent residents can get an Australian passport.",
+            "Australian citizens need a visa to enter Australia."
+          ],
+          "answers": [
+            "Australian citizens can get an Australian passport."
+          ],
+          "valuesQuestion": false
+        }
+      ]
+    },
+    {
+      "id": "au-part-3-government-law",
+      "section": "Part 3 - Government and the law in Australia",
+      "subsection": null,
+      "questions": [
+        {
+          "id": 11,
+          "question": "In Australian elections,",
+          "options": [
+            "you are free and safe to vote for any candidate.",
+            "you must tell the police who you voted for.",
+            "you must write your name on your vote."
+          ],
+          "answers": [
+            "you are free and safe to vote for any candidate."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 12,
+          "question": "The Australian Constitution is a legal document that",
+          "options": [
+            "contains religious rules.",
+            "contains rules of government.",
+            "can never be changed."
+          ],
+          "answers": [
+            "contains rules of government."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 13,
+          "question": "In Australia, a referendum is a vote to change",
+          "options": [
+            "the Australian Government.",
+            "the Australian Constitution.",
+            "the Prime Minister."
+          ],
+          "answers": [
+            "the Australian Constitution."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 14,
+          "question": "In Australia, the parliament",
+          "options": [
+            "makes and changes the laws.",
+            "is chosen by the Prime Minister.",
+            "is controlled by judges."
+          ],
+          "answers": [
+            "makes and changes the laws."
+          ],
+          "valuesQuestion": false
+        },
+        {
+          "id": 15,
+          "question": "The Governor-General represents",
+          "options": [
+            "our head of state, the King of Australia.",
+            "a political party.",
+            "the current Prime Minister."
+          ],
+          "answers": [
+            "our head of state, the King of Australia."
+          ],
+          "valuesQuestion": false
+        }
+      ]
+    },
+    {
+      "id": "au-part-4-values",
+      "section": "Part 4 - Australian values",
+      "subsection": null,
+      "questions": [
+        {
+          "id": 16,
+          "question": "Freedom of speech",
+          "options": [
+            "underpins Australia’s democratic system.",
+            "is not an Australian value.",
+            "means people do not need to obey the law."
+          ],
+          "answers": [
+            "underpins Australia’s democratic system."
+          ],
+          "valuesQuestion": true
+        },
+        {
+          "id": 17,
+          "question": "Why is it important for people living in Australia to learn English?",
+          "options": [
+            "Only native English speakers can become Australian citizens.",
+            "English is the only language spoken in Australian communities.",
+            "Speaking English helps people get an education and a job."
+          ],
+          "answers": [
+            "Speaking English helps people get an education and a job."
+          ],
+          "valuesQuestion": true
+        },
+        {
+          "id": 18,
+          "question": "In Australia, the use of violence against a person is",
+          "options": [
+            "acceptable if they are a different religion.",
+            "acceptable if they have a different opinion.",
+            "never acceptable and it is against the law."
+          ],
+          "answers": [
+            "never acceptable and it is against the law."
+          ],
+          "valuesQuestion": true
+        },
+        {
+          "id": 19,
+          "question": "In Australia, we believe in mutual respect and tolerance. This means you can",
+          "options": [
+            "physically fight someone when you disagree with them.",
+            "peacefully disagree with someone.",
+            "only agree with people from the same religion."
+          ],
+          "answers": [
+            "peacefully disagree with someone."
+          ],
+          "valuesQuestion": true
+        },
+        {
+          "id": 20,
+          "question": "In Australia, volunteering is important because",
+          "options": [
+            "it strengthens our community.",
+            "it earns people lots of money.",
+            "we have to do it by law."
+          ],
+          "answers": [
+            "it strengthens our community."
+          ],
+          "valuesQuestion": true
+        }
+      ]
+    }
+  ]
+}
