@@ -2329,3 +2329,84 @@ A run of suites also exhausted the local sign-up rate limit and every later suit
   question.
 - Neither Canada nor Australia is wired into the **iPhone app** — that work is on its own
   branch and paused.
+
+## v37 — The two owed things: French done, and a decision not to fake the UK (2026-09-08)
+
+Both items from v36 were taken up. One is finished. The other is a decision, and the
+decision is the deliverable.
+
+### Canada in French — done
+
+65 questions, plus the site's fourth language. Detail in
+`apps/us-citizenship/content/ca/SOURCES.md`; the point worth repeating here is that they
+are **not translations of the English pack**. The French guide is not a translation either:
+it is the text a French candidate studies, and its terms of art are what they will meet on
+the day — "d'un océan à l'autre" for *A mari usque ad mare* where the English guide says
+"from sea to sea", "la sanction royale", "le roi Charles Trois". Translating our English
+questions would have produced French sentences carrying English concepts, which in a test
+sat in French is a worse error than a missing question.
+
+The originality gate runs against IRCC's **French** sample questions. A French question of
+ours drifting into a French question of theirs is the collision that matters, and comparing
+against the English list would never have seen it.
+
+175 French UI strings, same key set as German and Spanish, in Canadian French with IRCC's
+own vocabulary — "examen" rather than "test", "note de passage", "cartes-éclair".
+"Entrevue" is kept for the read-aloud mode, unlike German and Spanish, because Canada does
+hold interviews with an official and the word describes something that exists.
+
+**The bug only a bilingual country could expose:** `switchVersion()` replaced the pack but
+never re-applied the language. The questions turned French while every button around them
+stayed English and `<html lang>` kept saying `en-CA` — which also tells a screen reader to
+read French questions with an English voice. `boot()` had always done it correctly; the
+switch path never had to, because the United States' two versions are both English.
+
+### The United Kingdom — not shipped, on purpose
+
+The blocker was recorded as "buy the £12 handbook". That was tested properly before being
+accepted, and then accepted.
+
+**What was established, all from primary Home Office documents:** 24 multiple-choice
+questions, 45 minutes, computer based, result the same day, Welsh available in Wales and
+Scottish Gaelic in Scotland, unlimited attempts, and — in the Home Office's own words —
+"The test questions are based on the … handbook. People **must** study the handbook to
+prepare for the test." The pass mark took three documents to pin down: it is not on the
+public GOV.UK pages (a "75%" string there is in the stylesheet, which states nothing), and
+comes from *Guide AN*: "You must score 75% or more to pass the test", so 18 of 24.
+
+**Four substitutes were tried and each fails for a different reason:**
+
+1. *No free official copy.* The GOV.UK publication page 404s; TSO sells it.
+2. *OGL does not reach it.* OGL v3's exemptions exclude information not published with the
+   Information Provider's consent, and a commercially sold Crown-copyright book is not OGL
+   material. (OGL separately grants no right to use information "in a way that suggests any
+   official status" — a second reason our packs carry a non-affiliation notice.)
+3. *Third-party PDFs of the handbook are unauthorised copies.* Using one would be copying a
+   Crown-copyright book, which is the exact thing ruled out when we declined to copy
+   competitors' question banks. The rule does not bend because the owner is a government.
+4. *The Cabinet Manual route was rejected on quality, not licence.* It is genuinely OGL,
+   genuinely authoritative, 110 pages, and was downloaded and read — and it is dated
+   **2011**. It calls the Welsh legislature the "National Assembly for Wales" (renamed
+   Senedd Cymru in 2020), describes EU membership (ended 2020), and predates the repeal of
+   the Fixed-term Parliaments Act (2022).
+
+Writing questions from a 2011 constitutional document, for a test based on a 2013 handbook,
+in 2026, stacks three vintages of staleness — and coverage could not be checked against the
+syllabus at all. Germany showed how much care one stale official document needs; its
+Elections chapter still claims 308 electoral districts. Three at once, for an exam people
+pay to sit, is not a risk worth running to avoid twelve pounds.
+
+**So the UK ships nothing today, and the groundwork is written down instead.**
+`content/gb/SOURCES.md` now carries the verified mechanics, the four rejected substitutes
+with the reason each fails, and a five-step build plan. One point in it is worth flagging:
+unlike Canada and Australia, the UK publishes no sample questions, so there is nothing for
+the originality gate to compare against — it should run against the handbook's own practice
+questions if the edition has any, and otherwise be skipped **explicitly**, never silently.
+
+The site already says the right thing: the UK is listed, not selectable, deliberately off
+the home-page strip, and the Countries section explains the position in words.
+
+### Tests
+
+`ca-fr-verify` 13/13 (new), `multicountry` 81/81, `ca-verify` 12/12, `au-verify` 17/17,
+`homecountries` 25/25, `auth-flow` 27/27. 9/9 packs validate. Nothing deployed.

@@ -1,201 +1,129 @@
-# United Kingdom — no pack, and why
+# United Kingdom — everything verified, and the one thing still missing
 
-**There is no question pack in this folder, deliberately.**
+**Status, 8 September 2026: no pack, and this is a deliberate decision rather than an
+unfinished task.** Everything that can be established without the official handbook is
+established below and verified from primary Home Office sources. The remaining input is the
+handbook itself, which costs about £12 and has no lawful substitute. Once it is in hand the
+pack is a short build — the machinery, the schema and the guardrails all exist and are
+already carrying Canada and Australia.
 
-Retrieved: **2026-09-07**
-Branch: `feature/multi-country`
+## 1. The test, verified from Home Office primary sources
 
-One sentence: the *Life in the UK Test* question pool is not published anywhere by the
-UK government, the official handbook is a Crown-copyright book sold commercially by TSO
-rather than released under the Open Government Licence, and the only official practice
-questions are a £7.99 TSO product — so there is nothing we can lawfully copy, and writing
-our own questions would break the promise the product rests on.
+| | | Source |
+|---|---|---|
+| Questions | 24, multiple choice | Home Office, *Knowledge of language and life in the UK* |
+| Time | 45 minutes, computer based | same |
+| Pass mark | "You must score 75% or more to pass the test" (so 18 of 24) | Home Office, *Guide AN — Naturalisation booklet* |
+| Result | Told on the day | *Knowledge of language and life in the UK* |
+| Languages | English; Welsh at a test centre in Wales, Scottish Gaelic in Scotland | same |
+| Attempts | "Applicants may take the test as many times as is necessary to pass" | same |
+| Basis | "The test questions are based on the 'Life in the United Kingdom: A Guide for New Residents' handbook. People must study the handbook to prepare for the test." | same |
+| Also | GOV.UK: "You'll have 45 minutes to answer 24 questions about British traditions and customs" | gov.uk/life-in-the-uk-test |
 
-## 1. Does any government body publish the actual question pool?
+Note the last row of the table above and the sentence in bold in it: the Home Office does
+not merely recommend the handbook, it states that people **must** study it. Any product for
+this test is supplementary to a book the candidate is told to buy, and should say so.
 
-No source we could find. GOV.UK describes the test only by reference to the handbook:
+Quoted verbatim, because the pass mark took three documents to pin down and the next person
+should not have to repeat that:
 
-> "You'll be tested on information from the official Guide for New Residents. You'll have
-> 45 minutes to answer 24 questions about British traditions and customs."
-> — https://www.gov.uk/life-in-the-uk-test
-
-The Home Office's own caseworker guidance says the same and names the operator:
-
-> "The test lasts 45 minutes and is computer based. There are 24 multiple choice questions."
+> The test lasts 45 minutes and is computer based. There are 24 multiple choice questions.
+> People are told if they have passed or failed on the day they take the test. People can
+> take the test in Welsh if they go to a test centre in Wales, or Scottish Gaelic if they
+> take the test in Scotland. The test questions are based on the 'Life in the United
+> Kingdom: A Guide for New Residents' handbook. People must study the handbook to prepare
+> for the test. Applicants may take the test as many times as is necessary to pass.
 >
-> "The test questions are based on the 'Life in the United Kingdom: A Guide for New
-> Residents' handbook."
+> — Home Office, *Knowledge of language and life in the UK*, published for Home Office staff
+
+> You must score 75% or more to pass the test.
 >
-> "To meet the life in the UK requirement, an applicant must have successfully completed
-> the test operated by a provider approved for this purpose. The current test is
-> administered by PSI."
-> — *Knowledge of language and life in the UK: caseworker guidance*,
-> https://www.gov.uk/government/publications/knowledge-of-life-and-language-in-the-uk/knowledge-of-language-and-life-in-the-uk-caseworker-guidance-accessible
+> — Home Office, *Guide AN: Naturalisation booklet*
 
-Neither page, nor any GOV.UK page we found, publishes questions. What is published is the
-*syllabus* — the handbook's subject matter — not the items.
+The pass mark is **not** stated on the public GOV.UK test pages. A "75%" string does appear
+in the page's stylesheet, which is not a statement of anything; the figure was taken from
+Guide AN instead.
 
-Honest limits on this finding: absence of publication cannot be proved by search. We
-searched GOV.UK, the Home Office publication collections, and the National Archives'
-licensing registers. We could not open the WhatDoTheyKnow FOI thread on the 3rd-edition
-test (`/request/life_in_the_uk_test_3rd_edition`) to read the Home Office's refusal
-first-hand — the site is behind bot protection that blocked both fetch and a headless
-browser. **Do not cite that FOI as evidence until somebody reads it in a normal browser.**
+## 2. The question pool is published nowhere
 
-## 2. What *is* published, and by whom?
+Established previously and still true: the Life in the UK question bank is confidential
+Crown copyright and is not published by anyone. **Nobody has the real questions** — not us,
+not any competitor, and not the official publisher's own app, which describes its questions
+as "based on the style and structure of official questions".
 
-Nothing free. Everything official is a priced TSO product, sold at
-https://www.officiallifeintheuk.co.uk/shop (retrieved 2026-09-07; the site carries Home
-Office and TSO branding and a "© TSO" footer):
+So the route is the one Canada and Australia now use: our own questions, written from the
+official study material, `contentType: "authored-practice"`, never presented as official.
+That part is settled. The obstacle is not permission — it is *access to the study material*.
 
-| Product | Price from |
-| --- | --- |
-| Official Life in the UK e-Learning Subscription ("the official e-learning course from the Home Office") | £10.99 |
-| *Life in the United Kingdom: A Guide for New Residents* (3rd edition), book / eBook / audio | £12.99 |
-| **Official Practice Questions & Answers**, book / app | £7.99 |
-| Official Study Guide, book / eBook | £8.99 |
-| Three-book pack | £27.99 |
+## 3. Why there is no substitute for buying the handbook
 
-The handbook is ISBN 978-0-11-341340-9, published by The Stationery Office for the Home
-Office. GOV.UK links candidates to that shop; we found no free official copy of the
-handbook or of any official question set on GOV.UK.
+Each of these was checked, not assumed.
 
-So official practice questions **do** exist for the UK. They are a book you buy. That is
-the licensing route, not a scraping route (see `docs/COUNTRY-PIPELINE.md`).
+**There is no free official copy.** The handbook is a priced product of TSO, the official
+publisher. The GOV.UK publication page for it returns 404; the paid formats are paperback,
+eBook and audio.
 
-## 3. The licence, quoted
+**The Open Government Licence does not reach it.** OGL v3 covers GOV.UK pages and
+government publications made available under it — but its exemptions expressly exclude
+"Information that has not been accessed by way of publication or disclosure under
+information access legislation … by or with the consent of the Information Provider". A
+commercially sold Crown-copyright book is not OGL material. (OGL also states it grants no
+right to use information "in a way that suggests any official status", which is a second
+reason our packs carry a non-affiliation notice.)
 
-### GOV.UK's default
+**Third-party PDFs of the handbook are unauthorised copies.** Several sites host one. Using
+it would be copying a Crown-copyright book, which is the single thing this project ruled out
+when it decided not to copy competitors' question banks either. The rule does not bend
+because the owner is a government.
 
-> "All content is available under the Open Government Licence v3.0, except where otherwise
-> stated" — https://www.gov.uk/help/terms-conditions
+**The Cabinet Manual route was tried and rejected on quality, not licence.** *The Cabinet
+Manual* (Cabinet Office) is genuinely OGL, genuinely authoritative, and covers UK
+government in 110 pages — it was downloaded and read. It is dated **2011**, and it is stale
+in ways that matter for a 2026 exam:
 
-### The Open Government Licence v3.0, verbatim
+- it calls the Welsh legislature the "National Assembly for Wales", renamed Senedd Cymru /
+  Welsh Parliament in 2020;
+- it describes the UK's EU membership, which ended in 2020;
+- it predates the repeal of the Fixed-term Parliaments Act in 2022.
 
-From https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/:
+Writing questions from a 2011 constitutional document, for a test based on a 2013 handbook,
+in 2026, would stack three vintages of staleness — and there would be no way to check the
+result against the actual syllabus. Germany's pack showed how much care a single stale
+official document needs (its Elections chapter still claims 308 electoral districts); three
+at once, for an exam people pay to sit, is not a risk worth taking to avoid £12.
 
-> "Use of copyright and database right material expressly made available under this licence
-> (the 'Information') indicates your acceptance of the terms and conditions below."
->
-> "You are free to:
-> - copy, publish, distribute and transmit the Information;
-> - adapt the Information;
-> - exploit the Information commercially and non-commercially for example, by combining it
->   with other Information, or by including it in your own product or application."
->
-> "You must (where you do any of the above):
-> - acknowledge the source of the Information in your product or application by including
->   or linking to any attribution statement specified by the Information Provider(s) and,
->   where possible, provide a link to this licence;
->
-> If the Information Provider does not provide a specific attribution statement, you must
-> use the following:
->
-> Contains public sector information licensed under the Open Government Licence v3.0."
->
-> "**Exemptions**
->
-> This licence does not cover:
-> - personal data in the Information;
-> - Information that has not been accessed by way of publication or disclosure under
->   information access legislation (including the Freedom of Information Acts for the UK and
->   Scotland) by or with the consent of the Information Provider;
-> - departmental or public sector organisation logos, crests and the Royal Arms except where
->   they form an integral part of a document or dataset;
-> - military insignia;
-> - third party rights the Information Provider is not authorised to license;
-> - other intellectual property rights, including patents, trade marks, and design rights; and
-> - identity documents such as the British Passport"
->
-> "**Non-endorsement**
->
-> This licence does not grant you any right to use the Information in a way that suggests
-> any official status or that the Information Provider and/or Licensor endorse you or your
-> use of the Information."
+**Coverage cannot be verified without the book.** The five chapters are publicly known —
+values and principles; what is the UK; a long and illustrious history; a modern, thriving
+society; the UK government, the law and your role. Chapters on government, law and the
+nations could be sourced from OGL material. The history and society chapters could not: the
+handbook makes specific selections from a thousand years of history and from British
+cultural life, and guessing which ones is exactly the kind of confident wrongness that
+loses somebody an exam.
 
-Two clauses matter here. First, OGL only reaches material "expressly made available under
-this licence" — the handbook and the practice-questions book are not. Second, the
-exemptions expressly exclude "Information that has not been accessed by way of publication
-or disclosure" — which is precisely the status of an unpublished question bank.
+## 4. What to do next
 
-### How Crown copyright can sit outside the OGL
+1. Buy *Life in the United Kingdom: A Guide for New Residents*, 3rd edition, from the
+   official TSO shop (ISBN 9780113413409, about £12). Paperback or eBook both work; the
+   eBook is easier to work from.
+2. Build the pack with `tools/build-uk-practice-pack.py`, modelled on the Canadian and
+   Australian builders and sharing `tools/practice_pack.py`. Everything it needs already
+   exists: the `authored-practice` content type, the answer-position shuffle, the per-question
+   source reference, and the originality gate.
+3. The originality reference is a problem worth thinking about for one minute: unlike Canada
+   and Australia, the UK publishes no sample questions, so there is nothing to compare
+   against. The gate should therefore run against the **handbook's own practice questions**
+   if the edition carries any, and otherwise be skipped explicitly with `--offline` and a
+   note here saying so — not silently passed.
+4. Carry the mechanics from section 1: `askedPerTest` 24, `passRequirement` 18,
+   `timeLimitMinutes` 45. All three are sourced above.
+5. `uk` is the account code and `gb` is the folder. That mapping is deliberate and is
+   explained in `site/src/lib/countries.js` — the entry there must read `/content/gb/<file>`
+   against the key `uk`.
 
-From The National Archives, https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/:
+## 5. What is on the site today
 
-> "Crown copyright is defined under section 163 of the Copyright, Designs and Patents Act
-> 1988 as works made by officers or servants of the Crown in the course of their duties."
->
-> "The default licence for most Crown copyright and Crown database right information is the
-> Open Government Licence."
->
-> "It is the Keeper who decides whether Crown copyright material can be made available on
-> terms other than the Open Government Licence."
->
-> "Delegations of Authority are granted by the Keeper to enable government departments or
-> agencies to licence the re-use of Crown copyright material they produce outside the terms
-> of the Open Government Licence."
-
-The register of such delegations
-(https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/delegations-of-authority/licensed-material/,
-retrieved 2026-09-07; roughly 40 entries) contains a near-exact precedent for a government test
-question bank:
-
-> "Driver and Vehicle Standards Agency (DVSA) — The Official DVSA Revision Theory Test
-> Question Banks; Visual Media and Hazard Perception Clips; Driving: the Essential Skills'
-> (DES); All assets that are the subject of, or created for, DVSA's publishing services
-> concession contract — 16 February 2024"
-
-That is how UK government test content reaches third-party apps: a publishing concession
-and a licence, negotiated. **The Home Office does not appear in that register** as at the
-retrieval date, which tells us where to ask, not what the answer would be.
-
-## 4. Is commercial reuse permitted?
-
-State only what the documents say:
-
-- The **handbook** and the **Official Practice Questions & Answers** are Crown copyright
-  works published for sale by TSO. Neither carries an OGL notice. Neither carries any
-  grant of reuse. There is therefore no licence permitting us to reproduce them.
-- The **question pool** is not published, so no licence is on offer at all. A "practice
-  question" circulating on a third-party site is somebody's reconstruction, and copying it
-  copies their work, not the Crown's.
-- **Unclear, and for a lawyer:** whether the Home Office would grant a licence to the
-  Official Practice Questions & Answers content, on what terms and via which route (TSO's
-  publishing concession, or a Delegation of Authority from the Keeper of Public Records).
-  Also for a lawyer: the copyright status of individual short factual questions, and
-  database right in a question set. **Marked for counsel. We are not counsel and give no
-  conclusion.**
-
-## 5. Test mechanics (for the study-guide product, which needs them)
-
-| | |
-| --- | --- |
-| Questions asked | 24 |
-| Format | multiple choice, computer based |
-| Time | 45 minutes |
-| Pass mark | "You must score 75% or more to pass the test." (18/24) |
-| Fee | "It costs £50." Payable again on each re-sit: "You can rebook the test as many times as you need. You'll have to pay each time." |
-| Basis | the 3rd-edition *Guide for New Residents* handbook |
-| Operator | PSI, on behalf of the Home Office |
-| Exemptions | waived at 65+ and for a long-term physical or mental condition |
-| Languages | English; special arrangements exist for Welsh and Scots Gaelic |
-
-Sources: https://www.gov.uk/life-in-the-uk-test,
-https://www.gov.uk/life-in-the-uk-test/what-happens-test, and the caseworker guidance
-above.
-
-## 6. Watch item
-
-Third-party immigration sites report a 2025 Home Office intention to refresh the test's
-content. As at 2026-09-07 the current caseworker guidance and GOV.UK still describe the
-unchanged test against the 2013 3rd-edition handbook, and we found **no** primary GOV.UK
-publication of a new syllabus, edition or question bank. Treat the reform reporting as
-unverified. If a new handbook is published, re-check whether it is released under the OGL —
-that, and only that, would change this assessment.
-
-## Bottom line
-
-No pack. Not "not yet" for want of effort — there is no lawfully copyable official question
-content for the UK. A UK product is possible (study material plus practice questions
-clearly labelled as ours, or a licence from the Home Office/TSO); it is a different
-product, and `docs/COUNTRY-PIPELINE.md` sets out what each route costs.
+The United Kingdom is listed and not selectable — `versions: []` in
+`site/public/countries.js` and no entry in `COUNTRY_PACKS`. It is deliberately **not** on
+the home page's country strip, because a "coming soon" chip is a promise, and the Countries
+section explains the position in words instead. That copy is accurate as it stands and needs
+no change when the pack lands beyond adding the chip.

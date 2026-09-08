@@ -61,9 +61,21 @@
 > fewer question is a much smaller cost than a confidently wrong one, and the project rule
 > is that we never ship a fact we cannot source.
 >
-> **Still to do:** French. IRCC publishes the guide and the test in French, and the test may
-> be taken in either language, so a credible Canadian product needs `fr-CA`. These 76
-> questions are English only.
+> **French: done, 8 September 2026.** `practice-questions-fr.json`, 65 questions, built by
+> `tools/build-ca-fr-practice-pack.py` from the French chapters at the `/fr/` equivalent of
+> every URL above. They are **not translations** of the English pack - the French guide is
+> not a translation either, and its terms of art are the ones a French candidate reads:
+> "d'un océan à l'autre" for *A mari usque ad mare* rather than the English guide's "from
+> sea to sea", "la sanction royale", "le roi Charles Trois" as the French Oath sets it out.
+> The originality gate runs against IRCC's **French** sample questions, since a French
+> collision is the one that matters and comparing against English would never see it.
+> Fact audit: 31/31 verbatim in the French chapters. The site carries 175 French UI strings,
+> the same key set as German and Spanish.
+>
+> Canada is therefore the first country here offering two versions in two languages, which
+> is what exposed the `switchVersion()` bug: it swapped the pack without re-applying the
+> language, so the questions turned French while the buttons stayed English. The United
+> States' two versions are both English, so nothing had ever caught it.
 
 
 **There is no question pack in this folder, deliberately.**
