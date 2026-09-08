@@ -1,11 +1,12 @@
 {
- "generated": "2026-09-08T03:25:06Z",
+ "generated": "2026-09-08T04:00:39Z",
  "note": "Written by tools/sync-content.sh from the files it copied. Never edit by hand.",
  "packs": {
   "au": [
    "practice-questions.json"
   ],
   "ca": [
+   "practice-questions-fr.json",
    "practice-questions.json"
   ],
   "de": [

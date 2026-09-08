@@ -756,6 +756,14 @@ async function switchVersion(versionId) {
     state.revealed = false;
     state.test = null;
     store.write({ versionId: loaded.versionId });
+    // The new pack decides the language, exactly as it does at boot. Two versions of one
+    // country are not necessarily in one language: Canada's test may be taken in English
+    // or French and IRCC publishes the guide in both, so its two versions are en-CA and
+    // fr-CA. Without this the questions switched to French and every button around them
+    // stayed English, and <html lang> kept saying en-CA - which also tells a screen reader
+    // to read French questions with an English voice.
+    setLanguage(loaded.pack.language || state.country.language || 'en');
+    localizeDom();
     // Sent now rather than on the usual debounce. Answers can wait 1.2 seconds; a version
     // change cannot, because a reload in that window would come back on the old pool - and
     // boot() hydrates from the server, so the local copy would be overwritten, not kept.
