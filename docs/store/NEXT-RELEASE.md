@@ -100,12 +100,21 @@ number.
 Screenshot 3 (`store-assets/screenshots/3-home-readiness.png`) shows a fake name —
 **"Nature k"** — and **35% readiness, "Below the 60% pass line"**. The storefront's third
 slide is the app predicting that the user will fail, under a placeholder name. It is the
-single change most likely to move the install rate, and **it can be replaced without a
-release** — screenshots are not version-locked.
+single change most likely to move the install rate.
 
-It cannot be produced from this machine: the simulator is unavailable here, and the only
-candidate on hand (the website's John Doe shot) is a 1206×1900 crop, not a device capture.
-Two minutes on the phone:
+**Correction, 2026-09-08:** an earlier version of this note said screenshots could be
+replaced without a release. That is wrong. Apple's API answers
+`ENTITY_ERROR.ATTRIBUTE.INVALID.INVALID_STATE` for the screenshot set of a live version -
+screenshots can only be changed on a version that is being prepared. So the new slide goes
+onto **1.0.1**, after `eas submit` creates it, with
+`node tools/asc/replace-screenshot.js store-assets/screenshots/3-home-readiness.png 3 1.0.1`.
+
+**Done, 2026-09-08:** Sandeep took it on the phone - John Doe, 80% ready, green gauge,
+above the pass line - and it is staged as `store-assets/screenshots/3-home-readiness.png`
+(1284×2778). It also exposed two Home-screen bugs, fixed in 1.0.1: one session read
+"trending down" (a trend needs two points; it now says "first session"), and the tile said
+"1 TESTS". A shot after four or five tests would show "trending up" and a non-zero starred
+count; worth retaking for the version after this one. The recipe, for next time:
 
 1. Settings → Personal → First name: **John Doe**. Interview date: something 6–10 weeks out.
 2. Play practice tests until the Home gauge is green and above the pass line (four or five
