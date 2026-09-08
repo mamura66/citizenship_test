@@ -1,7 +1,10 @@
 {
- "generated": "2026-09-07T17:59:25Z",
+ "generated": "2026-09-08T03:05:34Z",
  "note": "Written by tools/sync-content.sh from the files it copied. Never edit by hand.",
  "packs": {
+  "ca": [
+   "practice-questions.json"
+  ],
   "de": [
    "einbuergerungstest.json"
   ],

@@ -782,6 +782,10 @@ async function switchVersion(versionId) {
  *    so the pack's own words are used.
  *  - `licence.attribution`, when there is a licence. Not decoration: CC BY requires
  *    attribution, and an attribution nobody can see does not satisfy it.
+ *  - `nonAffiliation`, for a pack of questions we wrote ourselves. Canada and the UK do
+ *    not publish their question pools at all, so a pack for them is our own questions
+ *    testing facts from the official study guide. That has to be said in the open, in the
+ *    pack's own words, on the screen showing the questions - not buried in a Terms page.
  *  - `valuesRule.note`, or any pack rule stated in prose - Australia additionally requires
  *    every values question right. Stated rather than implemented, and stated in the pack's
  *    own words rather than paraphrased.
@@ -801,6 +805,13 @@ function packNotice(pane) {
     box.appendChild(el('p', null, esc(p.disclosure)));
     any = true;
   }
+  // Whose questions these are. Shown immediately after the disclosure, and deliberately
+  // not styled down: for an `authored-practice` pack this is the sentence that stops a
+  // learner believing they are looking at the real exam questions.
+  if (p.nonAffiliation) {
+    box.appendChild(el('p', 'pack-mine', esc(p.nonAffiliation)));
+    any = true;
+  }
   const rule = p.valuesRule && p.valuesRule.note;
   if (rule) {
     box.appendChild(el('p', 'label', esc(t('pack.extraRule'))));
@@ -809,7 +820,17 @@ function packNotice(pane) {
   }
   const lic = p.licence || p.license;
   if (lic && lic.attribution && lic.name) {
-    const line = el('p', 'pack-lic', esc(t('pack.licence', { attribution: lic.attribution, licence: lic.name })));
+    // "Official material from X, reproduced under Y" is right for a pack that reproduces
+    // an official pool, and nonsense for one we wrote: it produced "Official material from
+    // Facts drawn from Discover Canada ... reproduced under Our own questions". For an
+    // authored pack the attribution is already a complete statement of who wrote what, so
+    // it is shown as it stands.
+    const own = p.contentType === 'authored-practice';
+    const line = el(
+      'p',
+      'pack-lic',
+      esc(own ? lic.attribution : t('pack.licence', { attribution: lic.attribution, licence: lic.name }))
+    );
     if (lic.url) {
       line.appendChild(document.createTextNode(' '));
       const a = el('a', null, esc(t('pack.licenceLink')));

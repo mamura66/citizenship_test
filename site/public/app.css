@@ -274,6 +274,9 @@ button { font: inherit; cursor: pointer; }
 .pack-note p { color: var(--ink-2); font-size: 13.5px; line-height: 1.5; margin: 0 0 8px; }
 .pack-note p:last-child { margin-bottom: 0; }
 .pack-note .label { margin-bottom: 4px; }
+/* Whose questions these are. Held at full body colour rather than the muted note colour:
+   for a pack we wrote ourselves this is the line that has to be read, not skimmed. */
+.pack-note .pack-mine { color: var(--ink); }
 .pack-note .pack-lic { color: var(--ink-3); font-size: 12.5px; }
 .pack-note a { color: var(--accent-ink); }
 

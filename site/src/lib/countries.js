@@ -29,6 +29,10 @@
 export const COUNTRY_PACKS = {
   us: '/content/us/civics-2025.json',
   de: '/content/de/einbuergerungstest.json',
+  // Canada's pack is OUR practice questions, not a copy of an official pool - Canada does
+  // not publish one. The pack declares `contentType: "authored-practice"` and carries the
+  // non-affiliation wording the website shows with the questions.
+  ca: '/content/ca/practice-questions.json',
   // Spain is here and its pack is not, deliberately: the CCSE questions are held back
   // pending a licence question, so there is no file and Spain is refused by the ordinary
   // "no pack" path. If the licence is cleared, the pack lands and Spain works.
@@ -43,9 +47,13 @@ export const COUNTRY_PACKS = {
  *
  * If a UK pack ever exists, the entry here has to read '/content/gb/<file>' against the key
  * `uk` - the account code and the folder name are allowed to differ, and mapping them in
- * one place is cheaper than migrating every stored account. There is nothing to do today:
- * the Life in the UK question bank is confidential Crown copyright and is not published,
- * so no pack is coming. */
+ * one place is cheaper than migrating every stored account.
+ *
+ * A UK pack IS now coming, but it will not be the official bank. That bank is confidential
+ * Crown copyright and is published nowhere, so nobody has it - not even the official
+ * publisher's own app, which says its questions are "based on the style and structure of
+ * official questions". The UK pack will be our own questions, written from the official
+ * handbook's facts, exactly as Canada's is. It is blocked only on buying the handbook. */
 
 /* Assets do not change without a deploy, so the answer is worth keeping. The short TTL is
  * for `wrangler dev`, where a pack can appear under a running Worker - a permanent cache

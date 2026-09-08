@@ -86,7 +86,8 @@ const COUNTRIES = [
    * Canada publishes a study guide but not its questions. The Life in the UK question bank
    * is confidential Crown copyright and will not be published. Australia publishes a
    * twenty-question practice sample and says plainly that the real pool is not published. */
-  { code: 'ca', name: 'Canada', test: 'Discover Canada test', language: 'en', versions: [], flag: `<svg viewBox="0 0 19 10" style="width:100%;height:100%;display:block"><rect width="19" height="10" fill="#fff"/><rect width="4.75" height="10" fill="#D80621"/><rect x="14.25" width="4.75" height="10" fill="#D80621"/></svg>` },
+  { code: 'ca', name: 'Canada', test: 'Canadian citizenship test', language: 'en',
+    versions: [{ id: 'practice', file: 'practice-questions.json', label: 'Practice questions' }], flag: `<svg viewBox="0 0 19 10" style="width:100%;height:100%;display:block"><rect width="19" height="10" fill="#fff"/><rect width="4.75" height="10" fill="#D80621"/><rect x="14.25" width="4.75" height="10" fill="#D80621"/></svg>` },
   { code: 'uk', name: 'United Kingdom', prose: 'the United Kingdom', test: 'Life in the UK test', language: 'en', versions: [], flag: `<svg viewBox="0 0 19 10" style="width:100%;height:100%;display:block"><rect width="19" height="10" fill="#012169"/><path d="M0 0l19 10M19 0L0 10" stroke="#fff" stroke-width="2"/><path d="M9.5 0v10M0 5h19" stroke="#fff" stroke-width="3"/><path d="M9.5 0v10M0 5h19" stroke="#C8102E" stroke-width="1.8"/></svg>` },
   /* Australia's practice questions HAVE been extracted, and are synced - but the pack
    * declares `licence.reviewStatus: "pending-legal-review"`, so tools/sync-content.sh keeps

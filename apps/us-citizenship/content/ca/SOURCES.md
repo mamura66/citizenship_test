@@ -1,4 +1,70 @@
-# Canada — no pack, and why
+# Canada — provenance
+
+> **Status, 8 September 2026: there is a pack — `practice-questions.json` — and it is
+> ours.** 76 questions we wrote, testing facts stated in *Discover Canada*. The research
+> below (which concluded "no pack, and why") is kept because its findings still hold; what
+> changed is the decision about what to do about them.
+>
+> The finding that mattered: **Canada does not publish its question pool.** So there is no
+> official pool to license, and no product in this market has the real questions. What IRCC
+> publishes is the free study guide plus 31 study items, only 3 of them multiple choice.
+> Every competitor writes its own questions from the guide behind a non-affiliation notice,
+> and IRCC has its own notice anticipating exactly that: *Discover Canada* "is the only
+> official study guide", it should be a candidate's "primary resource", and other material
+> is used "at your own risk". We say that on screen and link every chapter.
+>
+> ## How these questions were made, and checked
+>
+> Built by `tools/build-ca-practice-pack.py`, which is the only way this pack should ever
+> be regenerated. It does three things beyond assembling JSON:
+>
+> 1. **An originality gate.** It downloads IRCC's own 31 study questions and refuses to
+>    build if any question of ours reaches 0.6 Jaccard similarity against one of theirs.
+>    Our whole position is that the questions are ours and only the facts are theirs; a
+>    question that has drifted into being one of theirs quietly gives that up, and nobody
+>    would catch it by reading the file. It caught a real one on the first run — "What does
+>    it mean that Canada is a constitutional monarchy?" was word-for-word IRCC's — which is
+>    now reworded. IRCC's questions are downloaded, never committed here: they are IRCC's
+>    expression and this repository has no business holding a copy.
+> 2. **It distributes the correct answer.** The questions are authored with the right answer
+>    first, because that is how a human keeps a long list straight. Shipping that way would
+>    put the answer at option 1 every time, since the app deliberately never shuffles a
+>    pack's printed options (Germany's four are official and reordering them would break
+>    their alignment with the pictures). So the builder shuffles once, with a fixed seed, so
+>    the file is reproducible and its diffs stay readable. Current spread across positions
+>    1-4: 16 / 17 / 19 / 24.
+> 3. **It records the chapter.** Every question carries `guideSection` and `guideUrl`, so any
+>    answer can be checked against the source in one click.
+>
+> **Fact audit: 46 of 46 confirmed.** Each date, name and number used as an answer was
+> checked to appear verbatim in the downloaded chapter — Magna Carta 1215, the Charter
+> entrenched 1982, senators to age 75, royal assent by the Governor General on behalf of the
+> Sovereign, agriculture and immigration shared, the third Monday in October, the flag first
+> raised 1965, red and white national since 1921, the Union Jack as Royal Flag, Quebec's flag
+> 1948, *A Mari Usque Ad Mare*, Cabot 1497, Champlain 1608, peace with the Iroquois 1701,
+> slavery abolished throughout the Empire 1833, the Province of Canada 1840, Nova Scotia's
+> responsible government 1847-48, the Dominion born 1 July 1867, Tilley 1864, and the rest.
+> Two initially read as misses and were **my check** being wrong, not the content: Canada.ca
+> uses non-breaking spaces, so "serve until age 75" and "July 1, 1867" did not match a naive
+> search. Normalising whitespace confirmed both.
+>
+> ## What the guide's own staleness forced
+>
+> *Discover Canada* is inconsistent about anything that has moved since 2012. The Oath
+> chapter has been updated to **King Charles the Third**; the Symbols chapter still has
+> Queen Elizabeth II "celebrat[ing] her Diamond Jubilee ... in 2012"; the Elections chapter
+> still says Canada has **308 electoral districts**, which has not been true since 2015.
+>
+> So: the monarch is taken from the updated Oath chapter, and anything that has since moved
+> is left out rather than shipped as fact. There is no question here about the number of
+> electoral districts, the current Prime Minister, or how many parties sit in the House. One
+> fewer question is a much smaller cost than a confidently wrong one, and the project rule
+> is that we never ship a fact we cannot source.
+>
+> **Still to do:** French. IRCC publishes the guide and the test in French, and the test may
+> be taken in either language, so a credible Canadian product needs `fr-CA`. These 76
+> questions are English only.
+
 
 **There is no question pack in this folder, deliberately.**
 
