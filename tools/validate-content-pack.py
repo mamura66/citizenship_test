@@ -429,8 +429,17 @@ def check_mechanics(pack, r):
             for q in (c.get("questions") or [])
             if q.get("valuesQuestion")
         )
-        if isinstance(v_asked, int) and flagged and flagged != v_asked:
-            r.warn(f"{flagged} questions flagged valuesQuestion but valuesRule asks {v_asked}")
+        # The pool is allowed to be bigger than one test - that is the point of a pool.
+        # This used to demand that the flagged count EQUAL how many are drawn, which is
+        # only true for a pack holding exactly one test's worth. What actually matters is
+        # that there are enough to draw from.
+        if isinstance(v_asked, int) and flagged and flagged < v_asked:
+            r.error(
+                f"only {flagged} questions flagged valuesQuestion but valuesRule draws "
+                f"{v_asked} - a test cannot be built"
+            )
+        if isinstance(v_asked, int) and not flagged:
+            r.warn(f"valuesRule draws {v_asked} values questions but none are flagged valuesQuestion")
 
 
 def validate(path):

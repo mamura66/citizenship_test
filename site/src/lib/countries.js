@@ -33,6 +33,12 @@ export const COUNTRY_PACKS = {
   // not publish one. The pack declares `contentType: "authored-practice"` and carries the
   // non-affiliation wording the website shows with the questions.
   ca: '/content/ca/practice-questions.json',
+  // Australia the same, and better licensed: Our Common Bond's testable section is CC BY
+  // 4.0, so the facts are free for commercial use with attribution. The twenty official
+  // SAMPLE questions in content/au/citizenship-practice.json are a different thing and
+  // stay held back - sync-content.sh deletes them from the site because their own licence
+  // review is unfinished. Two packs in one folder, one served and one not, on purpose.
+  au: '/content/au/practice-questions.json',
   // Spain is here and its pack is not, deliberately: the CCSE questions are held back
   // pending a licence question, so there is no file and Spain is refused by the ordinary
   // "no pack" path. If the licence is cleared, the pack lands and Spain works.

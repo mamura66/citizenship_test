@@ -94,7 +94,8 @@ const COUNTRIES = [
    * it out of the manifest and no `versions` entry is declared here either. Two deliberate
    * steps to make Australia selectable, which is the right number for a country whose
    * published material is a twenty-question practice sample rather than the real pool. */
-  { code: 'au', name: 'Australia', test: 'Australian citizenship test', language: 'en', versions: [], flag: `<svg viewBox="0 0 19 10" style="width:100%;height:100%;display:block"><rect width="19" height="10" fill="#00008B"/><rect width="9.5" height="5" fill="#012169"/><path d="M0 0l9.5 5M9.5 0L0 5" stroke="#fff" stroke-width="1"/></svg>` },
+  { code: 'au', name: 'Australia', test: 'Australian citizenship test', language: 'en',
+    versions: [{ id: 'practice', file: 'practice-questions.json', label: 'Practice questions' }], flag: `<svg viewBox="0 0 19 10" style="width:100%;height:100%;display:block"><rect width="19" height="10" fill="#00008B"/><rect width="9.5" height="5" fill="#012169"/><path d="M0 0l9.5 5M9.5 0L0 5" stroke="#fff" stroke-width="1"/></svg>` },
 ];
 
 /** Where a country's pack lives. Null when the country has no pack declared at all, which

@@ -1,5 +1,95 @@
 # Australia — sources, licence and what was verified
 
+> **Status, 8 September 2026: this folder holds TWO packs, and only one is served.**
+>
+> * `practice-questions.json` — **75 questions of our own**, written from the testable
+>   section of *Our Common Bond*. This is the one the website serves.
+> * `citizenship-practice.json` — the **20 official sample questions**, described below.
+>   Still `pending-legal-review`, so `tools/sync-content.sh` deletes it from the website's
+>   content directory on every sync. It is not wasted: it is the originality reference the
+>   authored pack is checked against, which is a better comparison than anything scraped.
+>
+> ## The licence, verified first-hand this time
+>
+> An earlier pass recorded *Our Common Bond* as CC BY 4.0 but could not re-open the pages,
+> so that claim was flagged as unverified. It is now verified from the document itself.
+> Page 1 of the testable PDF reads:
+>
+> > © Commonwealth of Australia 2020
+> > With the exception of the Commonwealth Coat of Arms, all material presented in this
+> > publication is provided under a Creative Commons Attribution 4.0 International license
+>
+> And the department's copyright page reads:
+>
+> > All material presented on this website is provided under a Creative Commons Attribution
+> > 3.0 Australia licence, with the exception of: the Commonwealth Coat of Arms ... our logo
+> > ... materials specifically not provided under a Creative Commons attribution 3.0
+> > Australia licence ... content supplied by third parties.
+> >
+> > You should attribute material you get from this website as Australian Government
+> > Department of Home Affairs.
+>
+> CC BY 4.0 permits commercial use and adaptation with attribution, which makes Australia
+> the **best-licensed country in this project** — better than Canada, where the guide is
+> Crown copyright and only the facts are free. We would be entitled to reproduce the
+> booklet's wording here. We write our own questions anyway, because that is what the
+> product needs, and the attribution is on screen either way: CC BY is not satisfied by an
+> attribution nobody can see.
+>
+> The one gap that remains: the practice-test subdomain carries no copyright footer of its
+> own while the department's notice speaks of "this website". That ambiguity is why the 20
+> official sample questions stay held back — and it does not touch the authored pack, which
+> needs no licence for the sample at all.
+>
+> ## The test, verified from the official practice test's own landing page
+>
+> | | |
+> |---|---|
+> | Questions | 20, multiple choice |
+> | Time | 45 minutes |
+> | Pass | "at least 15/20 (75%)" **and** "5/5 (100%) of the Australian values questions" |
+> | Basis | "All the test questions are based on the OCB resource booklet" |
+> | Sample | "This is a sample test only. The questions will be different on the day of the test." |
+>
+> The values rule is the one a product must not get wrong: it is not part of the 75%. Miss
+> one values question and you have not passed, whatever the overall mark. It is carried in
+> the pack as `valuesRule`, the twelve values questions are flagged `valuesQuestion`, and
+> the rule is printed on screen in the booklet's own terms.
+>
+> ## How the 75 questions were made, and checked
+>
+> Built by `tools/build-au-practice-pack.py`, on the shared machinery in
+> `tools/practice_pack.py`. Same three guarantees as Canada — the correct answer is
+> distributed with a fixed seed, every question records `guideSection` and `guideUrl`, and
+> an originality gate runs on every build.
+>
+> **The gate earned its place again.** It is two-tier now, because one threshold cannot
+> tell these apart: "What is the capital city of Victoria?" against Home Affairs' "What is
+> Australia's capital city?" scores 0.6 and is a perfectly good different question — short
+> factual questions share most of their significant words by construction. So 0.8 and above
+> fails the build and the 0.6–0.8 band is printed for a human to read once. Two real
+> collisions were caught and reworded: our capital-city question was word for word one of
+> theirs, and "What do the colours of the Australian Aboriginal Flag represent?" was their
+> "What are the colours of the Australian Aboriginal Flag?" with a synonym.
+>
+> The validator also caught a mistake of mine that no amount of reading would have: the
+> gold-rush question shipped with "1788" as two different options.
+>
+> **Fact audit: 68 of 68 confirmed verbatim** in the testable booklet — the First Fleet's
+> 11 ships on 26 January 1788, Arthur Phillip as first Governor, the 1851 gold rush, six
+> states and two mainland territories, all eight capitals, the Commonwealth Star's seven
+> points, the yellow circle as the sun, federation on 1 January 1901, the High Court's
+> ultimate power, the 1967 referendum's 90 per cent, the double majority, 76 senators with
+> 12 per state and two each for the ACT and NT, Premier and Chief Minister, compulsory
+> voting, and every values statement used. One initially read as a miss and was **my search
+> string**, not the content: the booklet says "This includes government, community and
+> religious leaders", and I had searched for "including government".
+>
+> **Still to do:** the booklet is published in a range of community languages and the test
+> itself is English only, so unlike Canada there is no second language obligation here. But
+> the 20 official sample questions remain held back pending that one licence question.
+
+
 Pack: `citizenship-practice.json`
 Retrieved: **2026-09-07**
 Built by: content-licensing research pass, branch `feature/multi-country`

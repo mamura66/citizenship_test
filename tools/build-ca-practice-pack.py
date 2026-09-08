@@ -19,7 +19,14 @@ Two things the guide itself forced:
   * Canadian English. `language: en-CA`, so the validator holds authored text to
     non-US spelling.
 """
-import json, os, random, re, sys
+import sys
+
+from practice_pack import (
+    build_categories,
+    enforce_originality,
+    fetch_published_questions,
+    write_pack,
+)
 
 GUIDE = "Discover Canada: The Rights and Responsibilities of Citizenship"
 BASE = ("https://www.canada.ca/en/immigration-refugees-citizenship/corporate/"
@@ -300,74 +307,14 @@ Q = [
 ]
 
 # The correct answer is written first above, because that is how a human keeps a long list
-# of questions straight. It must not SHIP that way: the app never shuffles a pack's printed
-# options - Germany's four are official and reordering them would break the alignment with
-# their pictures - so a pack whose answer is always option 1 would be a pack whose answer
-# is always option 1 on screen. These questions are ours, so the pack itself distributes
-# them, once, with a fixed seed, so the file is reproducible and diffs stay readable.
-rng = random.Random(20260908)
+# of questions straight. It must not SHIP that way - see practice_pack.build_categories,
+# which distributes it with a fixed seed.
 
-
-def official_study_questions(offline: bool):
-    """IRCC's own 31 study questions, for comparison only - never for reuse.
-
-    Downloaded rather than committed: they are IRCC's expression, and this file has no
-    business carrying a copy of them. They exist here only so the build can refuse to ship
-    a question of ours that has drifted into being one of theirs.
-    """
-    if offline:
-        return []
-    import urllib.request
-    url = f"{BASE}/study-questions.html"
-    try:
-        with urllib.request.urlopen(url, timeout=60) as r:
-            page = r.read().decode("utf-8", "replace")
-    except OSError as exc:
-        raise SystemExit(f"could not fetch {url} for the originality check: {exc}\n"
-                         f"pass --offline to skip it deliberately")
-    text = re.sub(r"<[^>]+>", "\n", page)
-    return [" ".join(l.split()) for l in text.split("\n")
-            if l.strip().endswith("?") and len(l.split()) > 3]
-
-
-def check_originality(questions, official):
-    """Refuse to ship a question that is really one of IRCC's.
-
-    Our defence is that these questions are ours and only the facts are theirs. A question
-    that has converged on their wording quietly gives that up, and it is not something
-    anyone would notice by reading the file.
-    """
-    def words(s):
-        return {w for w in re.findall(r"[a-z']+", s.lower()) if len(w) > 3}
-
-    problems = []
-    for q in questions:
-        wq = words(q)
-        for o in official:
-            wo = words(o)
-            if not wq or not wo:
-                continue
-            jaccard = len(wq & wo) / len(wq | wo)
-            if jaccard >= 0.6:
-                problems.append((round(jaccard, 2), q, o))
-    return problems
-
-cats = {}
-for i, (key, question, options, ci) in enumerate(Q, start=1):
-    name, url = S[key]
-    correct = options[ci]
-    shuffled = list(options)
-    rng.shuffle(shuffled)
-    cats.setdefault(key, {"id": f"ca-{key}", "section": name, "questions": []})
-    cats[key]["questions"].append({
-        "id": i,
-        "question": question,
-        "options": shuffled,
-        "correctIndex": shuffled.index(correct),
-        "answers": [correct],
-        "guideSection": name,
-        "guideUrl": url,
-    })
+cats = build_categories(
+    Q, S,
+    order=["rights", "govern", "elections", "symbols", "history", "regions", "justice", "oath"],
+    seed=20260908, id_prefix="ca-",
+)
 
 pack = {
   "version": "2026-09-08",
@@ -413,26 +360,17 @@ pack = {
       "Point users to the free official guide as their primary resource, as IRCC asks.",
     ],
   },
-  "categories": [cats[k] for k in ["rights", "govern", "elections", "symbols", "history", "regions", "justice", "oath"] if k in cats],
+  "categories": cats,
 }
 
 offline = "--offline" in sys.argv
-official = official_study_questions(offline)
-problems = check_originality([q for _, q, _, _ in Q], official)
-if problems:
-    print(f"{len(problems)} question(s) too close to IRCC's own wording:", file=sys.stderr)
-    for j, mine, theirs in problems:
-        print(f"  jaccard {j}\n    ours:   {mine}\n    theirs: {theirs}", file=sys.stderr)
-    raise SystemExit(1)
-print(f"originality gate: compared {len(Q)} questions against "
-      f"{len(official)} official study questions, no collisions"
-      + (" (SKIPPED - offline)" if offline else ""))
-
-root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-out = os.path.join(root, "apps/us-citizenship/content/ca/practice-questions.json")
-with open(out, "w", encoding="utf-8") as f:
-    json.dump(pack, f, ensure_ascii=False, indent=1)
-    f.write("\n")
+enforce_originality(
+    [q for _, q, _, _ in Q],
+    fetch_published_questions(f"{BASE}/study-questions.html", offline),
+    offline,
+    "IRCC",
+)
+out = write_pack("apps/us-citizenship/content/ca/practice-questions.json", pack)
 print(f"wrote {out}")
 print(f"  {len(Q)} questions in {len(pack['categories'])} sections")
 for c in pack["categories"]:

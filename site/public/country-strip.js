@@ -62,9 +62,15 @@
   // correct US English, and this is the US English page.
   const isAre = live.length === 1 ? 'is' : 'are';
 
+  // "a different set of official questions" was true while the only tests here published
+  // their pools. It is not true of Canada or Australia, whose governments publish a study
+  // guide and never the questions - those sets are ours, written from the official guide.
+  // Saying "official" on the home page and "these are not the official questions" on the
+  // study screen would be the site contradicting itself, so the promise is the thing that
+  // is actually common to all of them: one app, one account.
   const head = `<strong>${upper(list(live))} ${isAre} ready today.</strong>`;
   const tail = soon.length
-    ? ` ${upper(list(soon))} ${soon.length === 1 ? 'is' : 'are'} next — the same app with a different set of official questions, not a different website to learn.`
-    : ' Each one is a set of official questions, not a different website to learn.';
+    ? ` ${upper(list(soon))} ${soon.length === 1 ? 'is' : 'are'} next — the same app with a different set of questions, not a different website to learn.`
+    : ' Each one is a different set of questions in the same app, not a different website to learn.';
   line.innerHTML = head + tail;
 })();

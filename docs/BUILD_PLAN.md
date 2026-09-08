@@ -2169,3 +2169,163 @@ so the one option a learner never scrolls to was as likely as not the right one.
 - `InterviewDateField` formats dates as `en-US` regardless of country.
 - Only the study, practice, settings and tab chrome are translated. Home, the read-aloud
   mode and the paywall are still English.
+
+## v36 — Canada and Australia: our own questions, and why that is the honest route (2026-09-08)
+
+Four countries are now live-ready on the website. Two of them carry questions we wrote.
+
+### The reason there was nothing to license
+
+The user's instinct — "we don't need permission, see how competitors do it" — turned out to
+be right, and the reason matters more than the conclusion. **Neither Canada nor the United
+Kingdom publishes its question pool.** There is no official set to license, and no product
+in either market has the real questions. TSO's *official* Life in the UK app says its
+questions are "based on the style and structure of official questions"; Canadian apps ship
+hundreds "based on *Discover Canada*" behind an IRCC non-affiliation notice.
+
+So the route is the one the whole market takes, and it is lawful for the same reason it is
+lawful for them: questions we write, testing facts from the free official study guide.
+Facts are not copyrightable; the guide's expression of them is. What we will not do is copy
+a competitor's question bank — that infringes a different owner, and several of them sell
+those banks.
+
+Three of the four licence-enquiry emails are therefore superseded. **Spain's still stands**,
+and the distinction is exact: Spain *does* publish its 300 CCSE questions and expressly
+forbids reproducing them, which is why that pack sits in `legal-hold/`.
+
+### The schema could not say "these are ours"
+
+Which meant such a pack could only be labelled as something it was not. `contentType:
+"authored-practice"` now requires `basedOn` (the official material, with its URL) and
+`nonAffiliation` (in plain words: not official, not the real questions), and **refuses any
+question carrying `officialNumber`** — that field belongs only to a genuine official
+question, so its presence means either the label or the content is wrong. Verified by
+validating four deliberately broken packs.
+
+### Canada: 76 questions
+
+A useful find in IRCC's own material: it publishes a notice *about third-party study
+guides*, saying *Discover Canada* "is the only official study guide", should be a
+candidate's "primary resource", and that other material is used "at your own risk". Our
+screen says exactly that and links every chapter — a better position than the bare "not
+affiliated" the competitors carry.
+
+**The guide is stale wherever anything has moved since 2012**, and inconsistently so: the
+Oath chapter has been updated to King Charles the Third, while Symbols still has the 2012
+Diamond Jubilee and Elections still says 308 electoral districts, untrue since 2015. The
+monarch comes from the updated chapter and every time-sensitive fact is left out — no
+question about seat counts, the current Prime Minister, or how many parties sit in the
+House. One fewer question beats a confidently wrong one.
+
+**Fact audit: 46 of 46 confirmed verbatim.** Two apparent misses were the checking script,
+not the content — Canada.ca uses non-breaking spaces, so "serve until age 75" and
+"July 1, 1867" failed a naive search until whitespace was normalised.
+
+### Australia: 75 questions, and the licence verified at last
+
+The CC BY claim recorded earlier was flagged as **unverified** because the pages 404'd on
+re-check. It is now verified from the document itself: page 1 of the testable PDF carries
+`© Commonwealth of Australia 2020` and CC BY 4.0, excepting the Coat of Arms. That permits
+commercial use and adaptation with attribution, making Australia the best-licensed country
+here — we would be entitled to reproduce the booklet's wording. We write our own anyway,
+and the attribution is on screen, because CC BY is not satisfied by an attribution nobody
+can see.
+
+**The values rule is the thing a product must not get wrong.** Home Affairs' own practice
+test states it: 20 questions in 45 minutes, at least 15/20 — *and* 5/5 on the Australian
+values questions. It is not part of the 75%. Miss one and you have not passed, whatever the
+overall mark. Carried as `valuesRule`, twelve questions flagged, and printed on screen.
+
+**Fact audit: 68 of 68 confirmed verbatim.** The one apparent miss was again my search
+string: the booklet says "This includes government, community and religious leaders", and
+I had searched for "including government".
+
+The 20 genuinely official *sample* questions stay held back — the practice-test subdomain
+carries no copyright footer of its own while the department's notice speaks of "this
+website", and that ambiguity is unresolved. `sync-content.sh` deletes them from the site on
+every sync. They are not wasted: they are the originality reference the authored pack is
+checked against.
+
+### The originality gate, which earned its place twice
+
+Our whole position is that the questions are ours and only the facts are theirs. A question
+that has drifted into being one of theirs gives that up, and **nobody would notice by
+reading the file**. So every build compares our questions against whatever the government
+does publish, and refuses to write the pack on a collision. It caught:
+
+- Canada: "What does it mean that Canada is a constitutional monarchy?" — word for word
+  IRCC's own study question.
+- Australia: "What is Australia's capital city?" — word for word one of Home Affairs'
+  twenty; and "What do the colours of the Australian Aboriginal Flag represent?" against
+  their "What are the colours of the Australian Aboriginal Flag?", the same question with a
+  synonym.
+
+It is **two-tier**, because one threshold cannot tell a collision from a coincidence:
+"What is the capital city of Victoria?" scores 0.6 against "What is Australia's capital
+city?" and is a perfectly good different question — short factual questions share most of
+their significant words by construction. So 0.8+ fails the build; the 0.6–0.8 band is
+printed once for a human. The government's own questions are downloaded for the comparison
+and **never committed**: they are its expression, not ours to hold.
+
+Two mistakes of mine were caught by machinery rather than by reading: the answer was
+authored first in every question and would have shipped as option 1 every time (the apps
+deliberately never shuffle a pack's printed options, because Germany's four are official
+and reordering them breaks their alignment with the pictures) — so the builder distributes
+it with a fixed seed; and Australia's gold-rush question shipped "1788" as two different
+options, which the validator caught.
+
+### The home page was making a claim that is no longer true
+
+Four things said "official questions" about all of them:
+
+- the hero subhead, the free-tier heading, the free-tier JSON-LD and the meta/social
+  descriptions;
+- the generated country sentence — "Each one is a set of official questions";
+- the FAQ answer "The official questions are public government material", in both the
+  visible copy and the JSON-LD;
+- and the Countries section still said we *don't have* Canada or Australia and "won't
+  invent questions and call them official".
+
+Saying "official" on the home page and "these are not the official questions" on the study
+screen would be the site contradicting itself. The Countries section now explains the two
+kinds of pack in plain words, and the FAQ names which countries are which. Canada and
+Australia are back on the country strip — removed when they had no pack, restored now that
+they do, and still written as "coming" in the static HTML so only the manifest can promote
+them.
+
+`app.js` also had to learn two things: it never rendered `nonAffiliation` at all, so the
+pack declared it and the screen never showed it; and its licence line produced *"Official
+material from Facts drawn from … reproduced under Our own questions; facts drawn from a
+Crown-copyright publication"*, because that template assumes official material reproduced
+under a licence — precisely what an authored pack is not.
+
+### Tests
+
+New: `ca-verify` 12/12, `au-verify` 17/17. Existing: `multicountry` 81/81,
+`homecountries` 25/25, `pages-check` 30/30, `auth-flow` 27/27.
+
+Eight assertions across two suites had hard-coded a two-country world — `['de','us']`,
+"Canada must not be selectable", "exactly 2 enabled", "the sentence must not name Canada".
+Each was a snapshot of last night rather than the rule it meant, so they now read the
+expected set from `content/packs.json`. The multi-country suite then absorbed the fourth
+country with no edit at all, which is the test the fix was for.
+
+Two failures in my own new checks were the checks, not the code: `au-verify` asserted
+Canada's exact non-affiliation wording, and counted its own deliberate 404 probe of the
+held-back sample as a page error.
+
+A run of suites also exhausted the local sign-up rate limit and every later suite came back
+429, which reads exactly like a broken test. `scratchpad/rl-clear.sh` between suites.
+
+### Still open
+
+- **The United Kingdom needs the handbook bought** (~£12, TSO). It is the only country
+  whose study material is not free, and writing questions without it would mean writing
+  them from competitors' questions, which is the one thing ruled out.
+- **Canada needs French.** IRCC publishes both the guide and the test in French and
+  candidates may sit it in either language, so 76 English questions is not a finished
+  Canadian product.
+- Australia's 20 official sample questions stay held back pending the subdomain licence
+  question.
+- Neither Canada nor Australia is wired into the **iPhone app** — that work is on its own
+  branch and paused.
