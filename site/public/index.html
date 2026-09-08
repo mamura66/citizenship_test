@@ -215,9 +215,20 @@
       </div>
       <!-- The app went live on the App Store on 8 September 2026, so "on the way" stopped
            being true. It is the US civics test only, which is why this names the test
-           rather than just saying "get the app". -->
-      <p class="note">Works in your browser, on a phone or a computer. There's also an
-        <a href="https://apps.apple.com/app/us-citizenship-test-2026-pulse/id6808512010" rel="noopener">iPhone app</a> for the US test.</p>
+           rather than just saying "get the app".
+           
+           The badge is Apple's own artwork, downloaded from Apple's marketing toolbox and
+           served from our own domain. Both are required: Apple's marketing guidelines say
+           to use the badge they provide rather than recreate it or draw the Apple logo,
+           and to host it yourself rather than hotlink theirs. So do not "tidy" this into a
+           hand-drawn SVG icon - that would breach the guidelines for the app we just got
+           approved. -->
+      <p class="note">Works in your browser, on a phone or a computer — and there's an
+        iPhone app for the US test.</p>
+      <a class="app-badge" href="https://apps.apple.com/app/us-citizenship-test-2026-pulse/id6808512010" rel="noopener"
+         aria-label="Download Prepare for Citizenship on the App Store">
+        <img src="/app-store-badge.svg" alt="Download on the App Store" width="120" height="40">
+      </a>
     </div>
     <div>
       <!-- The app's own home screen, captured from the running app. Every figure on it was

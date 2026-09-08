@@ -137,6 +137,17 @@ section.hero { padding: 76px 0 92px; }
 }
 
 .cta-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 14px; }
+
+/* Apple's App Store badge.
+ *
+ * Sized by height and left to keep its own aspect ratio, because Apple's guidelines do not
+ * allow the badge to be stretched or recoloured. 44px is comfortably above their minimum
+ * and matches the height of the buttons above it. The margin is the clear space the
+ * guidelines ask for - at least 10% of the badge's height on every side - so nothing
+ * crowds it. No hover effect, no filter, no border radius: the artwork ships as supplied. */
+.app-badge { display: inline-block; margin: 4px 0 0; line-height: 0; }
+.app-badge img { height: 44px; width: auto; display: block; }
+.app-badge:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .btn {
   display: inline-flex;
   align-items: center;
