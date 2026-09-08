@@ -94,11 +94,40 @@ async function packExists(env, path) {
   return ready;
 }
 
+/* Which countries are OFFERED, as opposed to which ones have questions.
+ *
+ * These are two different facts and both have to be true. A pack existing proves we can
+ * teach a test; it does not mean we are ready to sell it, translate its support pages, or
+ * answer its email. `COUNTRIES_OFFERED` is how that second decision is made - a
+ * comma-separated list of codes, and unset means "every country with a pack".
+ *
+ * The important property: this can only ever REMOVE a country, never add one. Readiness is
+ * still proved by the pack file being there, exactly as before, so no value of this var can
+ * make the site offer a test it has no questions for. That was the whole reason readiness
+ * stopped being a hand-edited flag, and it stays true.
+ */
+function isOffered(env, code) {
+  const list = String((env && env.COUNTRIES_OFFERED) || '').trim();
+  if (!list) return true;
+  return list.toLowerCase().split(/[^a-z]+/).filter(Boolean).includes(code);
+}
+
 /** Whether an account may be created against, or locked to, this country code. */
 export async function isReadyCountry(env, code) {
-  const path = COUNTRY_PACKS[String(code || '').toLowerCase()];
+  const c = String(code || '').toLowerCase();
+  const path = COUNTRY_PACKS[c];
   if (!path) return false;
+  // Offered first: it is a cheap string check, and a country we are not offering should be
+  // refused whether or not its pack happens to be deployed.
+  if (!isOffered(env, c)) return false;
   return packExists(env, path);
+}
+
+/** The offered list as the browser needs to see it, or null when everything is offered. */
+export function offeredCountryCodes(env) {
+  const list = String((env && env.COUNTRIES_OFFERED) || '').trim();
+  if (!list) return null;
+  return list.toLowerCase().split(/[^a-z]+/).filter(Boolean);
 }
 
 /** Every code whose pack is actually there. Not used to gate anything - isReadyCountry is

@@ -12,6 +12,7 @@
  * practice test. Both live on the server.
  */
 
+import { offeredCountryCodes } from './lib/countries.js';
 import { clearCookie, cookie, fail } from './lib/http.js';
 import { isOwner, notFound } from './lib/owner.js';
 import { getSession, getUserById } from './lib/store.js';
@@ -138,6 +139,37 @@ async function handle(request, env, ctx) {
      * `/robots.txt` is the only addition to the preview's run_worker_first list. The rest
      * stays byte-identical to production, because which paths reach code is exactly the
      * kind of difference that makes a preview stop predicting production. */
+    /* The content manifest, narrowed to the countries we are actually offering.
+     *
+     * `content/packs.json` is written by tools/sync-content.sh from the pack files that
+     * really got copied, and both the sign-up page and the app read it to decide which
+     * countries to offer. Filtering it here means one answer serves the browser and the
+     * server, and a country switched off cannot appear in the picker at all - rather than
+     * appearing and then being refused, which would look like a broken site.
+     *
+     * Removal only. A code that is not in the manifest cannot be added by this, so the
+     * rule that a country is offered only if its questions exist still holds. */
+    if (url.pathname === '/content/packs.json') {
+      const offered = offeredCountryCodes(env);
+      const res = await env.ASSETS.fetch(request);
+      if (!offered || !res.ok) return res;
+      try {
+        const manifest = await res.json();
+        const packs = {};
+        for (const [code, files] of Object.entries(manifest.packs || {})) {
+          if (offered.includes(code)) packs[code] = files;
+        }
+        return new Response(JSON.stringify({ ...manifest, packs, offered }, null, 1), {
+          headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-cache' },
+        });
+      } catch (err) {
+        // A manifest we cannot parse is not a reason to offer everything: fall back to the
+        // asset as it stands and let the server-side gate refuse anything not offered.
+        console.error('could not narrow packs.json:', err && err.message ? err.message : err);
+        return env.ASSETS.fetch(request);
+      }
+    }
+
     if (isPreview(env) && url.pathname === '/robots.txt') {
       return new Response('User-agent: *\nDisallow: /\n', {
         headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' },

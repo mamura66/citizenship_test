@@ -35,7 +35,11 @@
       // The owner-only analytics page. There is no /insights file in ./public - the Worker
       // builds the page - so without this line the asset router answers it with the 404
       // page and the gate never runs. Same trap as the verification files above.
-      "/insights"
+      "/insights",
+      // So COUNTRIES_OFFERED can narrow the manifest the sign-up page reads. Without this
+      // the CDN would serve the unfiltered file and the picker would offer a country the
+      // server then refuses, which looks like a broken site rather than a decision.
+      "/content/packs.json"
     ]
   },
   // Cloudflare Email Service. Used for one thing: the password reset link. No API key and
@@ -87,6 +91,15 @@
     // addable without a code change - a comma-separated list is accepted. Empty means
     // nobody, which is the right way for a misconfigured deploy to fail.
     "ANALYTICS_OWNER_EMAIL": "sandeep.sandha@gmail.com",
+
+    // Which countries the site OFFERS, as against which ones have questions. Germany,
+    // Canada and Australia have finished, validated packs and are deliberately not on
+    // sale yet - their support pages, email and copy are not ready. Unset would mean
+    // "every country with a pack", which is what the preview site does.
+    //
+    // This can only ever narrow: a code listed here still has to have its pack deployed
+    // before it is offered, so no value of this can conjure up a test we cannot teach.
+    "COUNTRIES_OFFERED": "us",
     "PADDLE_ENVIRONMENT": "production",
     // "true" while Paddle has not finished approving the account, so the paywall says so
     // plainly instead of opening a checkout Paddle will refuse. Set to "false" the day

@@ -70,6 +70,42 @@ worse failure than a preview being crawled.
 Verified: preview `/robots.txt` disallows everything, production's still invites crawlers
 and its sitemap still lists production URLs.
 
+## Which countries each one offers
+
+`COUNTRIES_OFFERED` decides. Production sets `"us"`; the preview sets nothing, which means
+"every country that has a pack" — so the preview is where Germany, Canada and Australia can
+be looked at while production offers the United States only.
+
+The important property is that it can only ever **narrow**. Readiness is still proved by the
+pack file being deployed, exactly as before, so no value of this var can make the site offer
+a test it has no questions for. That is why readiness stopped being a hand-edited flag, and
+it stays true.
+
+It bites in three places, and all three were checked, because one of them failing open is
+how a country nobody meant to sell ends up sold:
+
+1. `/content/packs.json` is filtered by the Worker, so a country that is not offered never
+   reaches the sign-up picker at all — rather than appearing and then being refused, which
+   would look like a broken site.
+2. `isReadyCountry()` refuses it server-side, whatever the browser claims.
+3. The home page's chips and its one generated sentence follow the manifest, so the copy
+   changes itself: "The United States is ready today. Germany, Canada and Australia are
+   next."
+
+### Running the tests
+
+This is why there are two ways to run the local server:
+
+```
+npx wrangler dev                                    # production config: US only
+npx wrangler dev --config wrangler.preview.jsonc    # everything with a pack
+```
+
+`gate-check.js`, `homecountries.js`, `pages-check.js`, `auth-flow.js`, `ui-fixes.js` and
+`api-test.sh` run against the first. The country suites — `ca-verify.js`, `au-verify.js`,
+`ca-fr-verify.js`, `multicountry.js` — need a site that offers those countries, so run them
+against the second. They need no edits either way.
+
 ## Verifying it
 
 `scratchpad/pw/preview-smoke.js` — 9 checks against the deployed preview: four live country

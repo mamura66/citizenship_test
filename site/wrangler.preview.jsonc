@@ -51,7 +51,11 @@
       "/google*",
       "/BingSiteAuth.xml",
       "/insights",
-      // The one and only addition to production's list: the preview answers robots.txt
+      // Kept in step with production so the preview exercises the same routing. The
+      // preview sets no COUNTRIES_OFFERED, so this path passes straight through and the
+      // preview offers every country that has a pack - which is the point of it.
+      "/content/packs.json",
+      // The other addition: the preview answers robots.txt
       // itself with a blanket disallow, because the static file is shared with production
       // and has to keep pointing crawlers at the real site.
       "/robots.txt"
