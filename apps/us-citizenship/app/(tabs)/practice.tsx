@@ -21,6 +21,17 @@ import {
   resolveAnswers,
 } from '../../src/content/loadContent';
 import type { CivicsQuestion } from '../../src/content/types';
+import {
+  attribution,
+  getCountry,
+  isMultipleChoice,
+  packFormat,
+  questionArt,
+  questionsForRegion,
+} from '../../src/content/countries';
+import { langOf, translator } from '../../src/lib/strings';
+import { OptionRow, PictureTile, QuestionFigure } from '../../src/components/QuestionPicture';
+import type { PackImage } from '../../src/content/images.generated';
 import { subsectionLabel, topicGuideFor } from '../../src/content/topics';
 
 function shuffle<T>(arr: T[]): T[] {
@@ -62,9 +73,23 @@ const DISTRACTOR_COUNT = 3;
 interface PreparedQuestion {
   q: CivicsQuestion;
   acceptable: string[]; // every official answer, resolved (governor/capital/dynamic)
-  options: string[]; // expected + DISTRACTOR_COUNT choices, in display order
+  options: string[]; // display order
   correctSet: Set<string>;
   expected: number; // how many the user must pick
+  /**
+   * True when `options` are the test's own printed options, in the official order.
+   *
+   * These must never be shuffled and no distractor may be added to them. Two reasons:
+   * the wrong answers are themselves official, so inventing our own would make it a
+   * different test; and for a picture question `optionImages` is index-aligned with
+   * `options`, so reordering would show each picture against the wrong answer while the
+   * screen still looked perfectly normal.
+   */
+  official?: boolean;
+  /** Index-aligned with `options`. */
+  optionArt?: (PackImage | undefined)[];
+  /** A single figure the question refers to, shown above the options. */
+  figure?: PackImage;
 }
 
 /**
@@ -115,9 +140,13 @@ function optionAccessibilityLabel(
 
 export default function PracticeScreen() {
   const { colors } = useTheme();
-  const { civicsVersion, recordPracticeResult, practiceHistory, homeState, starredIds, toggleStar } = useAppState();
+  const { country, civicsVersion, recordPracticeResult, practiceHistory, homeState, starredIds, toggleStar } = useAppState();
+  const countryDef = getCountry(country);
+  const tr = translator(langOf(countryDef.language));
+  const format = packFormat(country, civicsVersion);
+  const sourceCredit = attribution(country, civicsVersion);
   const { isPro } = usePurchase();
-  const allQuestions = useMemo(() => getAllQuestions(civicsVersion), [civicsVersion]);
+  const allQuestions = useMemo(() => getAllQuestions(country, civicsVersion), [country, civicsVersion]);
 
   // State-specific questions: resolve governor/capital from the user's chosen
   // state or jurisdiction. For D.C. and the territories the official answer is a
@@ -145,9 +174,36 @@ export default function PracticeScreen() {
     return null;
   };
 
-  const testable = useMemo(() => allQuestions.filter((q) => resolveAcceptable(q) !== null), [allQuestions, homeState]);
-  const defaultCount = civicsVersion === '2025' ? 20 : 10;
-  const defaultPass = civicsVersion === '2025' ? 12 : 6;
+  // Nationwide questions plus the one sub-national set that applies to this person. A
+  // German candidate answers their own Bundesland's ten questions and never the other
+  // 150, so a practice test built from all sixteen would ask questions that cannot come
+  // up and then grade against them.
+  const askable = useMemo(
+    () => questionsForRegion(country, civicsVersion, homeState),
+    [country, civicsVersion, homeState]
+  );
+  const testable = useMemo(() => askable.filter((q) => resolveAcceptable(q) !== null), [askable, homeState]);
+
+  /* How long the real test is and what passes it, from the pack - never a guess.
+   *
+   * This used to read `civicsVersion === '2025' ? 20 : 10` and `? 12 : 6`, which are the
+   * American numbers. On the German test that would have offered a 20-question practice
+   * test needing 12 correct when the real paper asks 33 and needs 17 - numbers we would
+   * have invented and shown as fact. When the pack does not state them, the fallback is a
+   * practice-only default and the screen says so rather than claiming a pass mark. */
+  const officialRatio = format.asked && format.passMark ? format.passMark / format.asked : 0.6;
+  const defaultCount = Math.min(format.asked ?? 20, Math.max(1, testable.length));
+  const defaultPass = format.passMark ?? Math.round(defaultCount * officialRatio);
+
+  // Practice lengths to offer: the real test's own length first when it is known, then a
+  // couple of shorter runs, then everything. De-duplicated and clamped to what exists.
+  const countOptions = useMemo(() => {
+    const wanted = [format.asked, 10, 20, testable.length].filter(
+      (n): n is number => typeof n === 'number' && n > 0 && n <= testable.length
+    );
+    return [...new Set(wanted)].sort((a, b) => a - b);
+  }, [format.asked, testable.length]);
+
 
   const [phase, setPhase] = useState<Phase>('setup');
   const [count, setCount] = useState(defaultCount);
@@ -165,7 +221,17 @@ export default function PracticeScreen() {
     setCount(defaultCount);
     setPassThreshold(defaultPass);
     setPhase('setup');
-  }, [civicsVersion]);
+    // Country as well as version: switching country changes the pool, the length and the
+    // pass line, and a test already in progress belongs to the country it started in.
+  }, [country, civicsVersion]);
+  // Pass lines to offer, around the real test's own ratio. These are the user's practice
+  // choice, not a claim about the official mark - that is stated separately, from the pack.
+  const passOptions = useMemo(() => {
+    const around = [officialRatio - 0.1, officialRatio, officialRatio + 0.1]
+      .map((r) => Math.max(1, Math.min(count, Math.round(count * r))));
+    return [...new Set(around)].sort((a, b) => a - b);
+  }, [count, officialRatio]);
+
   const [paywallVisible, setPaywallVisible] = useState(false);
 
   // First full practice test is free for everyone (soft paywall, value-first -
@@ -177,6 +243,34 @@ export default function PracticeScreen() {
   // Build every question's options ONCE per test, so they can't reshuffle mid-question.
   const prepare = (q: CivicsQuestion): PreparedQuestion => {
     const acceptable = resolveAcceptable(q)!;
+
+    /* A test that prints its own options is asked exactly as printed.
+     *
+     * No shuffle and no added distractors. The Einbuergerungstest's three wrong answers
+     * are part of the official question, so replacing them with answers borrowed from
+     * other questions would be a test we made up. And `optionImages` is index-aligned
+     * with `options`: reorder them and every picture sits against the wrong answer, with
+     * nothing on screen looking wrong. */
+    if (isMultipleChoice(q)) {
+      const art = questionArt(country, q);
+      const options = q.options ?? [];
+      const idx =
+        typeof q.correctIndex === 'number' && q.correctIndex >= 0 && q.correctIndex < options.length
+          ? q.correctIndex
+          : options.findIndex((o) => acceptable.includes(o));
+      return {
+        q,
+        acceptable,
+        options,
+        // `answers` stays authoritative; correctIndex only says which option carries it.
+        correctSet: new Set(idx >= 0 ? [options[idx]] : acceptable),
+        expected: 1,
+        official: true,
+        optionArt: art.optionArt,
+        figure: art.figure,
+      };
+    }
+
     const expected = expectedAnswerCount(q, acceptable);
     const correct = shuffle(acceptable).slice(0, expected);
     const t = (q as any).stateSpecificType as string | undefined;
@@ -188,7 +282,7 @@ export default function PracticeScreen() {
     else if (t === 'capital' && STATE_CAPITALS[homeState ?? '']) pool = Object.values(STATE_CAPITALS);
     else {
       // Prefer distractors from the same topic (more plausible), fall back to any.
-      const cat = findCategory(civicsVersion, q.id);
+      const cat = findCategory(country, civicsVersion, q.id);
       const sameTopic = (cat?.questions ?? []).filter((o) => o.id !== q.id).flatMap((o) => resolveAnswers(o.answers));
       const anyTopic = allQuestions.filter((o) => o.id !== q.id).flatMap((o) => resolveAnswers(o.answers));
       pool = [...shuffle(sameTopic), ...shuffle(anyTopic)];
@@ -257,29 +351,32 @@ export default function PracticeScreen() {
     return (
       <TabScrollView>
         <ScreenContainer>
-          <ScreenHeader title="Practice test" subtitle={`Based on the ${civicsVersion} civics test format`} />
+          <ScreenHeader title={tr('practice.title')} subtitle={countryDef.officialTestName} />
           <View style={{ paddingHorizontal: spacing.lg, gap: spacing.md }}>
             <GlassCard>
-              <Text style={[type.headline, { color: colors.textPrimary }]}>Number of questions</Text>
+              <Text style={[type.headline, { color: colors.textPrimary }]}>{tr('practice.numQuestions')}</Text>
               <View style={styles.pillRow}>
-                {[10, 20, testable.length].map((n) => (
+                {/* The real test's own length is offered first when the pack states it, so
+                    the default choice is the true one rather than a round number. */}
+                {countOptions.map((n) => (
                   <Pill
                     key={n}
-                    label={n === testable.length ? 'All' : String(n)}
+                    label={n === testable.length ? tr('practice.all') : String(n)}
                     active={count === n}
                     onPress={() => {
-                      // Keep the pass line in step with the new length (60%, the real test's ratio).
+                      // Keep the pass line in step with the new length, at the real test's
+                      // own ratio rather than a hardcoded 60%.
                       setCount(n);
-                      setPassThreshold(Math.round(n * 0.6));
+                      setPassThreshold(Math.max(1, Math.round(n * officialRatio)));
                     }}
                   />
                 ))}
               </View>
 
               <View style={{ height: spacing.md }} />
-              <Text style={[type.headline, { color: colors.textPrimary }]}>Pass threshold</Text>
+              <Text style={[type.headline, { color: colors.textPrimary }]}>{tr('practice.passThreshold')}</Text>
               <View style={styles.pillRow}>
-                {[Math.round(count * 0.5), Math.round(count * 0.6), Math.round(count * 0.7)].map((n) => (
+                {passOptions.map((n) => (
                   <Pill key={n} label={String(n)} active={passThreshold === n} onPress={() => setPassThreshold(n)} />
                 ))}
               </View>
@@ -287,12 +384,26 @@ export default function PracticeScreen() {
 
             <GlassCard>
               <Text style={[type.callout, { color: colors.textSecondary, lineHeight: 20 }]}>
-                In the real {civicsVersion} interview the officer asks up to{' '}
-                {civicsVersion === '2025' ? '20 questions and you need 12 correct' : '10 questions and you need 6 correct'} to
-                pass. Adjust the settings above to make practice easier or harder than the real thing.
-                {homeState
-                  ? ` Your ${homeState} governor and capital questions are included.`
-                  : ' The governor and capital questions need your state.'}
+                {/* Only what the official document actually says. There is no officer in
+                    the German process - it is a written paper - so the wording is neutral,
+                    and when the pack states no format the screen says that instead of
+                    borrowing another country's numbers. */}
+                {format.asked !== null && format.passMark !== null
+                  ? `${tr('practice.realTest')} ${tr('practice.askedAndPass', {
+                      asked: format.asked,
+                      pass: format.passMark,
+                    })}`
+                  : tr('practice.formatUnknown')}
+                {format.timeLimitMinutes !== null
+                  ? ` ${tr('practice.timeLimit', { minutes: format.timeLimitMinutes })}`
+                  : ''}
+                {' '}
+                {tr('practice.adjust')}
+                {countryDef.regionKind === 'us-jurisdiction'
+                  ? homeState
+                    ? ` Your ${homeState} governor and capital questions are included.`
+                    : ' The governor and capital questions need your state.'
+                  : ''}
               </Text>
               {!homeState ? (
                 <Pressable
@@ -378,6 +489,17 @@ export default function PracticeScreen() {
               </Text>
             </GlassCard>
 
+            {/* A single figure the question refers to - a Bundesland locator map, the
+                specimen ballot papers. The numbers the options name are printed inside the
+                artwork, so it has to be legible, not a thumbnail. */}
+            {current.figure ? (
+              <QuestionFigure
+                source={current.figure}
+                credit={current.q.imageCredit && current.q.imageCredit.includes('©') ? current.q.imageCredit : undefined}
+                label={current.q.imageDescription || current.q.question}
+              />
+            ) : null}
+
             <View style={{ gap: spacing.xs }}>
               {current.options.map((opt, i) => {
                 const picked = selected.includes(opt);
@@ -412,6 +534,12 @@ export default function PracticeScreen() {
                     <View style={[styles.optionNum, { backgroundColor: show && isRight && !picked ? colors.successFill : numBg }]}>
                       <Text style={[type.numSm, { color: show && isRight && !picked ? colors.onFill : numColor }]}>{i + 1}</Text>
                     </View>
+                    {/* For the questions whose options ARE pictures, the text is
+                        "Bild 1".."Bild 4" and says nothing on its own. Index-aligned with
+                        `options`, which is why those are never shuffled. */}
+                    {current.optionArt?.[i] ? (
+                      <PictureTile source={current.optionArt[i]!} size={56} label={opt} />
+                    ) : null}
                     <Text style={[type.body, { color: colors.textPrimary, flex: 1, lineHeight: 22 }]}>{opt}</Text>
                     {show && isRight ? <AppIcon name="checkCircleFill" size={20} color={colors.success} /> : null}
                     {show && picked && !isRight ? <AppIcon name="xCircleFill" size={20} color={colors.danger} /> : null}
@@ -422,6 +550,14 @@ export default function PracticeScreen() {
 
             {graded !== null ? (
               <PrimaryButton title={qIndex + 1 >= deck.length ? 'See results' : 'Next question'} onPress={nextQuestion} />
+            ) : null}
+
+            {/* Naming the source is an obligation for Germany's catalogue (section 63
+                UrhG), so it appears wherever a question does. */}
+            {sourceCredit ? (
+              <Text style={[type.caption, { color: colors.textTertiary, lineHeight: 16 }]}>
+                {tr('source.label')}: {sourceCredit}
+              </Text>
             ) : null}
           </View>
         </ScreenContainer>
@@ -454,7 +590,7 @@ export default function PracticeScreen() {
                 Review the {missed.length} you missed
               </Text>
               {missed.map((m) => {
-                const category = findCategory(civicsVersion, m.q.id);
+                const category = findCategory(country, civicsVersion, m.q.id);
                 const tip = category ? topicGuideFor(category.id) : undefined;
                 return (
                   <GlassCard key={m.q.id}>
@@ -495,7 +631,7 @@ export default function PracticeScreen() {
                       >
                         <AppIcon name="stack" size={15} color={colors.accent} />
                         <Text style={[type.subheadline, { color: colors.accent }]}>
-                          Flashcards: {subsectionLabel(category.subsection)}
+                          Flashcards: {subsectionLabel(category.subsection, category.section)}
                         </Text>
                         <AppIcon name="chevronRight" size={12} color={colors.accent} />
                       </Pressable>

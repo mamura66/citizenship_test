@@ -11,6 +11,7 @@ import { spacing, type } from '../../src/theme/theme';
 import { useAppState } from '../../src/lib/appState';
 import { usePurchase } from '../../src/lib/purchase';
 import { acceptsAnyOne, getAllQuestions, resolveAnswers } from '../../src/content/loadContent';
+import { getCountry } from '../../src/content/countries';
 
 // V1: self-graded spoken-practice mode. The app speaks the question aloud (on-device
 // TTS) and the user answers out loud to themselves, then self-grades by revealing the
@@ -19,9 +20,9 @@ import { acceptsAnyOne, getAllQuestions, resolveAnswers } from '../../src/conten
 // (see docs/LEGAL_REVIEW.md, item 4) until we've built proper consent flows for that.
 export default function InterviewScreen() {
   const { colors } = useTheme();
-  const { civicsVersion, practiceHistory } = useAppState();
+  const { country, civicsVersion, practiceHistory } = useAppState();
   const { isPro } = usePurchase();
-  const questions = useMemo(() => getAllQuestions(civicsVersion), [civicsVersion]);
+  const questions = useMemo(() => getAllQuestions(country, civicsVersion), [country, civicsVersion]);
   const [index, setIndex] = useState(() => Math.floor(Math.random() * questions.length));
   const [revealed, setRevealed] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -56,7 +57,7 @@ export default function InterviewScreen() {
     setRevealed(false);
     setSpeaking(true);
     Speech.speak(current.question, {
-      language: 'en-US',
+      language: getCountry(country).language,
       onDone: () => setSpeaking(false),
       onStopped: () => setSpeaking(false),
       onError: () => setSpeaking(false),

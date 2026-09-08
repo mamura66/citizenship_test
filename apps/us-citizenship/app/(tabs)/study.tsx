@@ -9,7 +9,10 @@ import { useTheme } from '../../src/theme/ThemeProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radii, shadow, spacing, type } from '../../src/theme/theme';
 import { useAppState } from '../../src/lib/appState';
-import { acceptsAnyOne, getAllQuestions, getCategories, resolveAnswers } from '../../src/content/loadContent';
+import { acceptsAnyOne, getAllQuestions, getCategories, getRegionCategories, resolveAnswers } from '../../src/content/loadContent';
+import { attribution, getCountry, isMultipleChoice, questionArt } from '../../src/content/countries';
+import { langOf, translator } from '../../src/lib/strings';
+import { OptionRow, PictureOptionsGrid, QuestionFigure, optionsArePicturesOnly } from '../../src/components/QuestionPicture';
 import { subsectionLabel, titleCaseSection, topicGuideFor } from '../../src/content/topics';
 
 function shuffle<T>(arr: T[]): T[] {
@@ -34,7 +37,10 @@ export default function StudyScreen() {
   const { colors } = useTheme();
   // Plain View root, so the native tabs' automatic insets don't apply - handled here.
   const insets = useSafeAreaInsets();
-  const { civicsVersion, starredIds, toggleStar } = useAppState();
+  const { country, civicsVersion, starredIds, toggleStar } = useAppState();
+  const countryDef = getCountry(country);
+  const tr = translator(langOf(countryDef.language));
+  const sourceCredit = attribution(country, civicsVersion);
   const { category } = useLocalSearchParams<{ category?: string }>();
 
   const [order, setOrder] = useState<'sequential' | 'random'>('sequential');
@@ -45,8 +51,14 @@ export default function StudyScreen() {
   const [revealed, setRevealed] = useState(false);
   const flip = useRef(new Animated.Value(0)).current; // 0 = question face, 1 = answer face
 
-  const categories = useMemo(() => getCategories(civicsVersion), [civicsVersion]);
-  const allQuestions = useMemo(() => getAllQuestions(civicsVersion), [civicsVersion]);
+  // Nationwide sections, then any sub-national ones. Germany's 160 Bundesland questions
+  // live in a separate list the app used to ignore completely, so they were in the "all
+  // topics" pool but reachable by no section at all.
+  const categories = useMemo(
+    () => [...getCategories(country, civicsVersion), ...getRegionCategories(country, civicsVersion)],
+    [country, civicsVersion]
+  );
+  const allQuestions = useMemo(() => getAllQuestions(country, civicsVersion), [country, civicsVersion]);
 
   // Follow a deep link, and drop a topic that doesn't exist in this test version.
   useEffect(() => {
@@ -122,9 +134,11 @@ export default function StudyScreen() {
     if (!current) return;
     Speech.stop();
     if (revealed) {
-      Speech.speak(`${current.question} ... ${resolveAnswers(current.answers).join(', or, ')}`, { language: 'en-US' });
+      Speech.speak(`${current.question} ... ${resolveAnswers(current.answers).join(', or, ')}`, {
+        language: countryDef.language,
+      });
     } else {
-      Speech.speak(current.question, { language: 'en-US' });
+      Speech.speak(current.question, { language: countryDef.language });
     }
   };
 
@@ -139,7 +153,7 @@ export default function StudyScreen() {
       <Pressable
         onPress={() => setTopicPickerOpen(true)}
         accessibilityRole="button"
-        accessibilityLabel="Choose a topic to study"
+        accessibilityLabel={tr('study.chooseTopic')}
         style={({ pressed }) => [
           styles.topicSelect,
           {
@@ -151,20 +165,20 @@ export default function StudyScreen() {
       >
         <AppIcon name="stack" size={16} color={topic ? colors.accent : colors.textSecondary} />
         <Text style={[type.subheadline, { color: colors.textPrimary, flex: 1 }]} numberOfLines={1}>
-          {topic ? subsectionLabel(topic.subsection) : 'All topics'}
+          {topic ? subsectionLabel(topic.subsection, topic.section) : tr('study.allTopics')}
           {!topic ? (
-            <Text style={[type.caption, { color: colors.textTertiary }]}>  ·  tap to pick a topic</Text>
+            <Text style={[type.caption, { color: colors.textTertiary }]}>  ·  {tr('study.pickTopic')}</Text>
           ) : null}
         </Text>
         <AppIcon name="chevronDown" size={13} color={topic ? colors.accent : colors.textTertiary} />
       </Pressable>
 
       <View style={styles.pillRow}>
-        <Pill label="Sequential" active={order === 'sequential'} onPress={() => setOrder('sequential')} />
-        <Pill label="Random" active={order === 'random'} onPress={() => setOrder('random')} />
-        <Pill label="Starred" active={starredOnly} onPress={() => setStarredOnly((s) => !s)} />
+        <Pill label={tr('study.sequential')} active={order === 'sequential'} onPress={() => setOrder('sequential')} />
+        <Pill label={tr('study.random')} active={order === 'random'} onPress={() => setOrder('random')} />
+        <Pill label={tr('study.starred')} active={starredOnly} onPress={() => setStarredOnly((s) => !s)} />
       </View>
-      {topic ? (
+      {topic && topicGuideFor(topic.id) ? (
         <View style={[styles.topicNote, { backgroundColor: colors.accentSoft }]}>
           <Text style={[type.caption, { color: colors.textSecondary, lineHeight: 18 }]} numberOfLines={3}>
             {topicGuideFor(topic.id)}
@@ -231,10 +245,12 @@ export default function StudyScreen() {
                   style={({ pressed }) => [styles.topicRow, { borderBottomColor: colors.separator }, pressed && { opacity: 0.6 }]}
                 >
                   <View style={{ flex: 1 }}>
-                    <Text style={[type.headline, { color: colors.textPrimary }]}>{subsectionLabel(item.subsection)}</Text>
-                    <Text style={[type.caption, { color: colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>
-                      {topicGuideFor(item.id)}
-                    </Text>
+                    <Text style={[type.headline, { color: colors.textPrimary }]}>{subsectionLabel(item.subsection, item.section)}</Text>
+                    {topicGuideFor(item.id) ? (
+                      <Text style={[type.caption, { color: colors.textSecondary, marginTop: 2, lineHeight: 18 }]}>
+                        {topicGuideFor(item.id)}
+                      </Text>
+                    ) : null}
                     {starred > 0 ? (
                       <View style={styles.starredHint}>
                         <AppIcon name="starFill" size={11} color={colors.warning} />
@@ -256,12 +272,12 @@ export default function StudyScreen() {
     return (
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top, paddingBottom: insets.bottom + TAB_BAR_CLEARANCE }]}>
         <ScreenContainer>
-          <ScreenHeader title="Flashcards" />
+          <ScreenHeader title={tr('study.title')} />
           {controls}
           <Text style={[type.body, { color: colors.textSecondary, paddingHorizontal: spacing.lg, lineHeight: 22 }]}>
             {starredOnly
-              ? 'Nothing starred here yet. Tap the star on a card to build a review deck.'
-              : 'No cards match these filters.'}
+              ? tr('study.emptyStarred')
+              : tr('study.emptyFiltered')}
           </Text>
         </ScreenContainer>
         {topicPicker}
@@ -270,6 +286,20 @@ export default function StudyScreen() {
   }
 
   const answers = resolveAnswers(current.answers);
+  const art = questionArt(country, current);
+  // A question is multiple choice only when its own test prints options. The US test is
+  // free recall and has none; nothing here invents distractors for it.
+  const multipleChoice = isMultipleChoice(current);
+  const correctIndex = typeof current.correctIndex === 'number' ? current.correctIndex : -1;
+  const options = current.options ?? [];
+  // "Bild 1".."Bild 4" carry no meaning on their own, so those go in a grid: four stacked
+  // rows push the fourth option off a phone-sized card, and the option a learner never
+  // scrolls to is as likely as not the right one.
+  const picturesOnly = optionsArePicturesOnly(options, art.optionArt);
+  const questionLabel =
+    typeof current.officialNumber === 'number'
+      ? tr('q.official', { n: current.officialNumber })
+      : tr('q.number', { n: current.id });
   const isStarred = starredIds.has(current.id);
   const anyOneCounts = acceptsAnyOne(current.question, answers.length);
   const progress = pool.length ? (index + 1) / pool.length : 0;
@@ -277,7 +307,7 @@ export default function StudyScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top, paddingBottom: insets.bottom + TAB_BAR_CLEARANCE }]}>
       <ScreenContainer>
-        <ScreenHeader title="Flashcards" subtitle={`Card ${index + 1}`} />
+        <ScreenHeader title={tr('study.title')} subtitle={`${index + 1} / ${pool.length}`} />
         {controls}
         <View style={[styles.progressTrack, { backgroundColor: colors.separator }]}>
           <View style={[styles.progressFill, { backgroundColor: colors.accent, width: `${Math.max(2, progress * 100)}%` }]} />
@@ -288,7 +318,7 @@ export default function StudyScreen() {
             style={styles.flipArea}
             onPress={toggleFlip}
             accessibilityRole="button"
-            accessibilityLabel={revealed ? 'Show question' : 'Show answer'}
+            accessibilityLabel={revealed ? tr('study.showQuestion') : tr('study.showAnswer')}
           >
             <Animated.View
               style={[
@@ -297,7 +327,7 @@ export default function StudyScreen() {
               ]}
             >
               <View style={styles.cardTopRow}>
-                <Text style={[type.monoLabel, { color: colors.textSecondary }]}>QUESTION {current.id}</Text>
+                <Text style={[type.monoLabel, { color: colors.textSecondary }]}>{questionLabel.toUpperCase()}</Text>
                 <Pressable
                   onPress={() => toggleStar(current.id)}
                   hitSlop={10}
@@ -306,7 +336,7 @@ export default function StudyScreen() {
                   // makes react-native-web emit a <button> inside a <button>,
                   // which is invalid HTML and logs a hydration error. Pressable
                   // already carries the button trait on iOS and Android.
-                  accessibilityLabel={isStarred ? 'Remove star' : 'Star this question for review'}
+                  accessibilityLabel={isStarred ? tr('study.unstar') : tr('study.star')}
                   accessibilityState={{ selected: isStarred }}
                   aria-selected={isStarred}
                 >
@@ -319,10 +349,39 @@ export default function StudyScreen() {
                 showsVerticalScrollIndicator={false}
               >
                 <Text style={[type.title2, { color: colors.textPrimary, lineHeight: 30, fontSize: 22 }]}>{current.question}</Text>
+
+                {/* A single figure the question refers to - a Bundesland locator map, the
+                    specimen ballot papers. The digits it is asking about are printed
+                    inside the artwork, so it is shown at readable size, not as a thumb. */}
+                {art.figure ? (
+                  <QuestionFigure
+                    source={art.figure}
+                    credit={art.credit}
+                    label={current.imageDescription || current.question}
+                  />
+                ) : null}
+
+                {/* The printed options. For the 19 questions whose options ARE the
+                    pictures, the text alone ("Bild 1".."Bild 4") says nothing, so the
+                    tile beside each one is what makes the question answerable. */}
+                {multipleChoice ? (
+                  <View style={{ gap: 6, marginTop: spacing.md }}>
+                    <Text style={[type.monoLabel, { color: colors.textTertiary }]}>
+                      {tr('study.chooseOne')}
+                    </Text>
+                    {picturesOnly ? (
+                      <PictureOptionsGrid options={options} art={art.optionArt!} />
+                    ) : (
+                      options.map((o, i) => (
+                        <OptionRow key={i} position={i + 1} text={o} picture={art.optionArt?.[i]} />
+                      ))
+                    )}
+                  </View>
+                ) : null}
               </ScrollView>
               <Pressable onPress={toggleFlip} hitSlop={12} style={styles.hintRow}>
                 <AppIcon name="circleHalf" size={14} color={colors.textTertiary} />
-                <Text style={[type.caption, { color: colors.textTertiary }]}>Tap to flip</Text>
+                <Text style={[type.caption, { color: colors.textTertiary }]}>{tr('study.flip')}</Text>
               </Pressable>
             </Animated.View>
 
@@ -334,7 +393,11 @@ export default function StudyScreen() {
             >
               <View style={styles.cardTopRow}>
                 <Text style={[type.monoLabel, { color: colors.accent }]}>
-                  {answers.length > 1 ? `ACCEPTED ANSWERS · ${answers.length}` : 'ANSWER'}
+                  {multipleChoice
+                    ? tr('study.correctAnswer').toUpperCase()
+                    : answers.length > 1
+                      ? `${tr('study.acceptedAnswers').toUpperCase()} · ${answers.length}`
+                      : tr('study.answer').toUpperCase()}
                 </Text>
                 <Pressable
                   onPress={() => toggleStar(current.id)}
@@ -344,7 +407,7 @@ export default function StudyScreen() {
                   // makes react-native-web emit a <button> inside a <button>,
                   // which is invalid HTML and logs a hydration error. Pressable
                   // already carries the button trait on iOS and Android.
-                  accessibilityLabel={isStarred ? 'Remove star' : 'Star this question for review'}
+                  accessibilityLabel={isStarred ? tr('study.unstar') : tr('study.star')}
                   accessibilityState={{ selected: isStarred }}
                   aria-selected={isStarred}
                 >
@@ -366,12 +429,36 @@ export default function StudyScreen() {
                 contentContainerStyle={[styles.faceScroll, { gap: 8 }]}
                 showsVerticalScrollIndicator
               >
-                {answers.map((a, i) => (
-                  <View key={i} style={styles.answerRow}>
-                    <AppIcon name="checkCircleFill" size={18} color={colors.accent} />
-                    <Text style={[type.body, { color: colors.textPrimary, flex: 1, lineHeight: 22 }]}>{a}</Text>
-                  </View>
-                ))}
+                {/* For a picture question the accepted answer is the string "Bild 3",
+                    which on its own tells the learner nothing. So the correct option is
+                    shown the way it was offered - position, picture and text together. */}
+                {multipleChoice && correctIndex >= 0 && correctIndex < options.length ? (
+                  picturesOnly ? (
+                    // All four again, with the right one outlined: for "which of these is
+                    // the Bavarian coat of arms" the useful answer is seeing which picture
+                    // it was among the ones offered, not the label "Bild 2" on its own.
+                    <PictureOptionsGrid
+                      options={options}
+                      art={art.optionArt!}
+                      correctIndex={correctIndex}
+                      reveal
+                    />
+                  ) : (
+                    <OptionRow
+                      position={correctIndex + 1}
+                      text={options[correctIndex]}
+                      picture={art.optionArt?.[correctIndex]}
+                      state="correct"
+                    />
+                  )
+                ) : (
+                  answers.map((a, i) => (
+                    <View key={i} style={styles.answerRow}>
+                      <AppIcon name="checkCircleFill" size={18} color={colors.accent} />
+                      <Text style={[type.body, { color: colors.textPrimary, flex: 1, lineHeight: 22 }]}>{a}</Text>
+                    </View>
+                  ))
+                )}
                 {current.note ? (
                   <Text style={[type.caption, { color: colors.textSecondary, fontStyle: 'italic', marginTop: spacing.xs }]}>
                     {current.note}
@@ -380,7 +467,7 @@ export default function StudyScreen() {
               </ScrollView>
               <Pressable onPress={toggleFlip} hitSlop={12} style={styles.hintRow}>
                 <AppIcon name="circleHalf" size={14} color={colors.textTertiary} />
-                <Text style={[type.caption, { color: colors.textTertiary }]}>Tap to flip back</Text>
+                <Text style={[type.caption, { color: colors.textTertiary }]}>{tr('study.flipBack')}</Text>
               </Pressable>
             </Animated.View>
           </Pressable>
@@ -392,19 +479,30 @@ export default function StudyScreen() {
             >
               <AppIcon name="volume" size={16} color={colors.accent} />
               <Text style={[type.subheadline, { color: colors.accent }]}>
-                {revealed ? 'Read question & answer' : 'Read question'}
+                {revealed ? tr('study.readBoth') : tr('study.readQuestion')}
               </Text>
             </Pressable>
           </View>
+
+          {/* Where the questions came from. Section 63 UrhG makes naming the source an
+              obligation for Germany's official catalogue, so it belongs on the screen that
+              shows the questions - not tucked away in Settings. */}
+          {sourceCredit ? (
+            <Text
+              style={[type.caption, { color: colors.textTertiary, paddingHorizontal: spacing.lg, lineHeight: 16 }]}
+            >
+              {tr('source.label')}: {sourceCredit}
+            </Text>
+          ) : null}
         </View>
 
         <View style={styles.navRow}>
           <Pressable style={styles.navButton} onPress={prev} hitSlop={10}>
             <AppIcon name="chevronLeft" size={18} color={colors.textPrimary} />
-            <Text style={[type.callout, { color: colors.textPrimary }]}>Previous</Text>
+            <Text style={[type.callout, { color: colors.textPrimary }]}>{tr('study.previous')}</Text>
           </Pressable>
           <Pressable style={styles.navButton} onPress={next} hitSlop={10}>
-            <Text style={[type.callout, { color: colors.textPrimary }]}>Next</Text>
+            <Text style={[type.callout, { color: colors.textPrimary }]}>{tr('study.next')}</Text>
             <AppIcon name="chevronRight" size={18} color={colors.textPrimary} />
           </Pressable>
         </View>

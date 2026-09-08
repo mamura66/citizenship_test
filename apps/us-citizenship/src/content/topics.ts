@@ -36,8 +36,13 @@ export const TOPIC_GUIDE: Record<string, string> = {
 };
 
 /** Falls back to a safe, non-factual line for any section without a written guide. */
-export function topicGuideFor(categoryId: string): string {
-  return TOPIC_GUIDE[categoryId] ?? 'Review this section of the official USCIS study materials.';
+/** Study guidance for a section, or null when we have none written for it.
+ *
+ * Null rather than a generic sentence: the old fallback said "the official USCIS study
+ * materials", which is simply untrue of a German Bundesland section, and a confident
+ * wrong pointer is worse than no pointer. Callers omit the line entirely. */
+export function topicGuideFor(categoryId: string): string | null {
+  return TOPIC_GUIDE[categoryId] ?? null;
 }
 
 /** "AMERICAN GOVERNMENT" -> "American Government" for display. */
@@ -49,7 +54,13 @@ export function titleCaseSection(s: string): string {
     .join('');
 }
 
-/** Strips the official "A: " / "B: " prefix from a subsection label. */
-export function subsectionLabel(s: string): string {
+/** Strips the official "A: " / "B: " prefix from a subsection label.
+ *
+ * Takes a fallback because `subsection` is optional: it is a USCIS grouping, and a pack
+ * whose official document publishes no sub-grouping (Germany) simply has none. Without the
+ * fallback this printed the literal word "undefined" as a section name - the same bug the
+ * website had. */
+export function subsectionLabel(s: string | undefined, fallback = ''): string {
+  if (!s) return fallback;
   return s.replace(/^[A-Z]:\s*/, '');
 }

@@ -6,6 +6,7 @@ import nationalDynamic from '../../content/us/officials/national-dynamic.json';
 import governors from '../../content/us/officials/governors.json';
 import stateCapitals from '../../content/us/officials/state-capitals.json';
 import jurisdictionsData from '../../content/us/officials/jurisdictions.json';
+import { askableQuestions, getPack, regionSections, sections } from './countries';
 import type {
   CivicsTestSet,
   NationalDynamicOfficials,
@@ -57,26 +58,47 @@ export function governorAnswerFor(name: string): string | null {
   return j ? (j.governor ?? j.governorAnswer) : null;
 }
 
-export function getCivicsSet(version: '2008' | '2025'): CivicsTestSet {
-  return version === '2025' ? CIVICS_2025 : CIVICS_2008;
+/* Reading a pack.
+ *
+ * These take the country as well as the version now. They delegate to
+ * `content/countries.ts`, which is the one place that knows which packs exist and which
+ * questions may honestly be asked - a question held back over image rights, or one that
+ * needs a picture we do not ship, is filtered out here rather than in each screen.
+ *
+ * For the United States this is a no-op: no US question is held back and none needs a
+ * picture, so the same categories and the same questions come back as before.
+ */
+export function getCivicsSet(country: string, version: string): CivicsTestSet {
+  return getPack(country, version);
 }
 
-export function getAllQuestions(version: '2008' | '2025') {
-  return getCivicsSet(version).categories.flatMap((c) => c.questions);
+/** Every question that may be asked, nationwide plus any sub-national set. */
+export function getAllQuestions(country: string, version: string) {
+  return askableQuestions(country, version);
 }
 
-export function getCategories(version: '2008' | '2025') {
-  return getCivicsSet(version).categories;
+/** The nationwide sections, with unaskable questions already removed. */
+export function getCategories(country: string, version: string) {
+  return sections(country, version);
 }
 
-/** The USCIS section/subsection a question belongs to (used for "what to study" guidance). */
-export function findCategory(version: '2008' | '2025', questionId: number) {
-  return getCategories(version).find((c) => c.questions.some((q) => q.id === questionId));
+/** The sub-national sections - Germany's sixteen Bundesländer. Empty for the US. */
+export function getRegionCategories(country: string, version: string) {
+  return regionSections(country, version);
+}
+
+/** The section a question belongs to (used for "what to study" guidance). */
+export function findCategory(country: string, version: string, questionId: number) {
+  return (
+    getCategories(country, version).find((c) => c.questions.some((q) => q.id === questionId)) ||
+    getRegionCategories(country, version).find((c) => c.questions.some((q) => q.id === questionId))
+  );
 }
 
 /** Questions in a category, e.g. to open Flashcards filtered to one topic. */
-export function getQuestionsInCategory(version: '2008' | '2025', categoryId: string) {
-  return getCategories(version).find((c) => c.id === categoryId)?.questions ?? [];
+export function getQuestionsInCategory(country: string, version: string, categoryId: string) {
+  const all = [...getCategories(country, version), ...getRegionCategories(country, version)];
+  return all.find((c) => c.id === categoryId)?.questions ?? [];
 }
 
 /** Resolves a DYNAMIC:field placeholder answer to the current real value. */

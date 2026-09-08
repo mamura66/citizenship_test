@@ -2053,3 +2053,119 @@ Suites: multicountry 80/80 (new), homecountries 21/21 (new), auth-flow 27/27, ui
 - The app's country picker still badges Canada, UK and Australia "Coming". None has a
   published question pool, so that badge over-promises.
 - Spain remains blocked on its licence and is **named nowhere** on the home page.
+
+## v35 — Germany in the iPhone app (2026-09-08)
+
+The app had **no country concept at all** — no picker, no badges, nothing. Onboarding asked
+for a name and an interview date, and every screen was the USCIS civics test. So this was
+not "wire in a pack": it was building the country dimension. Decision taken with the user:
+**one app with a country picker**, not a second app, so there is one listing, one $9.99
+purchase covering every country, and the existing reviews and ranking carry over.
+
+### Metro cannot resolve a picture by name, and the failure is silent
+
+Germany's questions reference their artwork by string (`"optionImages": ["img/q21-bild1.jpg", …]`).
+React Native cannot use that: Metro bundles an image only where it sees a `require()` with a
+**literal** path, and the versioned Expo docs for SDK 57 document only static paths. A
+dynamic `require()` throws; worse, an unbundled image renders as an empty tile, so the pack
+is valid, the JSON loads, the question renders, and four blank squares appear where the
+answer should be.
+
+`tools/gen-app-image-map.py` therefore writes `src/content/images.generated.ts`, one real
+`require()` per path, looked up by string. `--check` fails when it is stale. Verified by
+exporting an iOS bundle before and after: 57 files → 107.
+
+**Metro deduplicates by content**, which was worth confirming rather than assuming: the 95
+files are only **50 distinct images** (the same coat of arms is a distractor in several
+questions, and questions 21 and 209 share all four pictures), so 53 jpg in the bundle =
+49 distinct German + 4 US official photos. The artwork costs the binary about half what the
+directory listing suggests.
+
+`react-native`'s own `Image` is used, not `expo-image`: it takes the result of `require()`,
+and adding a native module would force a new build for no benefit.
+
+### Progress had to be namespaced per country before Germany could exist
+
+Progress is keyed by question id, and the ids **collide**: USCIS runs 1..128, Germany runs
+1..300 plus 1001.. for the Bundesländer. One shared key would have shown a German user
+their US practice history as their own and starred a German question because a US one with
+the same number was starred. The website prevents this by locking the country to an
+account; the app has no accounts, so the storage is namespaced (`starredIds:de`) and
+switching is allowed instead.
+
+An existing user's data is migrated on first launch: the pre-namespacing keys are read
+once, copied into `:us`, and **left in place**, so the change is reversible. Verified in a
+browser by seeding the old keys and reloading — stars, history, version and home state all
+arrive under `:us`, with the originals intact.
+
+`setCountry` clears progress state *before* loading the new country's, because loading is
+asynchronous and the gap would otherwise render one country's history under another
+country's test.
+
+### What was wrong rather than merely untranslated
+
+- **The practice screen invented a pass mark.** `civicsVersion === '2025' ? 20 : 10` and
+  `? 12 : 6` are American numbers; on the German test that is a 20-question paper needing
+  12, where the real one asks 33 and needs 17. Now from `packFormat()`, which returns
+  **null** when the pack is silent, and the screen says the document does not state it
+  rather than borrowing.
+- **`prepare()` invented distractors and shuffled the options.** For Germany both are
+  wrong: the three wrong answers are themselves official, and `optionImages` is
+  index-aligned with `options`, so a shuffle puts every picture against the wrong answer
+  with nothing on screen looking amiss. A test that prints its own options is now asked
+  exactly as printed.
+- **A practice test would have included all sixteen Bundesländer.** A candidate answers
+  their own ten and never the other 150. `questionsForRegion()` returns nationwide plus the
+  one region that applies, and omits sub-national questions entirely when no region is set.
+- **Speech synthesis was pinned to `en-US`** in three places. A German question read by an
+  English voice is close to unintelligible, so that mode would have been useless.
+- **`topicGuideFor()` fell back to "the official USCIS study materials"** for any section it
+  did not know — which is simply untrue of a Bundesland. It returns null now and the line
+  is omitted; a confident wrong pointer is worse than none.
+- **`subsection` was typed as required**, and making it optional immediately surfaced three
+  call sites that would have printed the literal word "undefined" as a section name — the
+  same bug the website had.
+- The 160 Bundesland questions live in `stateCategories`, **which the app ignored
+  completely**. All sixteen are now sections you can study.
+
+`titleCaseSection()` looked like the same class of bug ("TEIL II" → "Teil Ii") but its one
+call site immediately `.toUpperCase()`s the result, so it was left alone. Checking beat
+fixing.
+
+### Verified in a browser, both languages
+
+Driven through Expo web with Playwright, reading the rendered DOM.
+
+German, 14 checks: Settings names the Einbürgerungstest and hides the 2008/2025 picker;
+the card reads "Lernkarten" and "AUFGABE 21"; the pool is **459, not 460**, so the withheld
+question is gone; all four pictures **decode** (`naturalWidth > 0`, which is what separates
+a working image from an `<img>` that merely exists); the answer face outlines Bild 1, the
+Bundesadler, matching `correctIndex`; the BAMF credit is on the screen with the questions
+per §63 UrhG; no English chrome and no mention of USCIS anywhere.
+
+US regression plus migration, 12 checks: English throughout, "QUESTION n" labels, no
+options list on a free-recall question, no source credit (a federal work needs none), and
+the 2008 pack correctly stating 10 questions and 6 to pass — read from the pack, not from a
+literal.
+
+Picture questions are laid out as a **2×2 grid** rather than four rows: the text is only
+"Bild 1".."Bild 4", and four stacked rows pushed the fourth option off a phone-sized card,
+so the one option a learner never scrolls to was as likely as not the right one.
+
+### Known and not fixed
+
+- **The web preview overlays both faces of the flashcard.** `backfaceVisibility: 'hidden'`
+  is correctly set on both, and react-native-web does not emit the
+  `transform-style: preserve-3d` it needs, so this is very probably preview-only — the same
+  card ships in the live US app. **Not verified on a device**: `xcrun simctl` is unavailable
+  in this environment, so this needs a simulator or TestFlight check before release.
+- **Onboarding is still US-only copy** — a Reagan quote about becoming an American, and no
+  country step. The app defaults to the US so nothing is false, but a German user's first
+  screen is about the wrong country. This wants a country question first, and it interacts
+  with the App Store rename below.
+- **`app.json` still says "US Citizenship Test 2026-Pulse"**, which is the home-screen name
+  and the store listing. Renaming a live app's identity is the user's call, not a
+  side-effect of this work.
+- `InterviewDateField` formats dates as `en-US` regardless of country.
+- Only the study, practice, settings and tab chrome are translated. Home, the read-aloud
+  mode and the paywall are still English.
