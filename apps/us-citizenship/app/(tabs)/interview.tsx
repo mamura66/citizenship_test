@@ -9,6 +9,7 @@ import { Paywall } from '../../src/components/Paywall';
 import { useTheme } from '../../src/theme/ThemeProvider';
 import { spacing, type } from '../../src/theme/theme';
 import { useAppState } from '../../src/lib/appState';
+import { useOfficials } from '../../src/content/officialsStore';
 import { usePurchase } from '../../src/lib/purchase';
 import { acceptsAnyOne, getAllQuestions, resolveAnswers } from '../../src/content/loadContent';
 import { getCountry } from '../../src/content/countries';
@@ -21,6 +22,9 @@ import { getCountry } from '../../src/content/countries';
 export default function InterviewScreen() {
   const { colors } = useTheme();
   const { country, civicsVersion, practiceHistory } = useAppState();
+  // Answers are resolved at render (resolveAnswers reads the live officials), so the only
+  // thing needed here is to re-render when a validated update lands.
+  useOfficials();
   const { isPro } = usePurchase();
   const questions = useMemo(() => getAllQuestions(country, civicsVersion), [country, civicsVersion]);
   const [index, setIndex] = useState(() => Math.floor(Math.random() * questions.length));

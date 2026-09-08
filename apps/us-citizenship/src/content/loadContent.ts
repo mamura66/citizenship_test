@@ -2,11 +2,10 @@ import civics2025 from '../../content/us/civics-2025.json';
 import civics2008 from '../../content/us/civics-2008.json';
 import readingVocab from '../../content/us/reading-vocab.json';
 import writingVocab from '../../content/us/writing-vocab.json';
-import nationalDynamic from '../../content/us/officials/national-dynamic.json';
-import governors from '../../content/us/officials/governors.json';
 import stateCapitals from '../../content/us/officials/state-capitals.json';
 import jurisdictionsData from '../../content/us/officials/jurisdictions.json';
 import { askableQuestions, getPack, regionSections, sections } from './countries';
+import { officials } from './officialsStore';
 import type {
   CivicsTestSet,
   NationalDynamicOfficials,
@@ -21,8 +20,19 @@ export const CIVICS_2025 = civics2025 as unknown as CivicsTestSet;
 export const CIVICS_2008 = civics2008 as unknown as CivicsTestSet;
 export const READING_VOCAB = readingVocab;
 export const WRITING_VOCAB = writingVocab;
-export const NATIONAL_DYNAMIC = nationalDynamic as unknown as NationalDynamicOfficials;
-export const GOVERNORS = governors.governors as Record<string, GovernorEntry>;
+/* The officials are read through the live store, not module constants.
+ *
+ * They used to be `const`s imported straight from the JSON, which meant every consumer
+ * captured the bundled names at import time and a wrong governor could only be fixed by a
+ * release. `officialsStore` seeds itself from the same bundled JSON - so nothing here is
+ * ever empty - and swaps in a validated remote copy when one lands. Read them through the
+ * functions, at the moment of use, not once at the top of a module. */
+export function nationalDynamic(): NationalDynamicOfficials {
+  return officials().national;
+}
+export function governors(): Record<string, GovernorEntry> {
+  return officials().governors;
+}
 export const STATE_CAPITALS = stateCapitals.capitals as Record<string, string>;
 
 /** D.C. and the five inhabited U.S. territories - USCIS's state-specific questions
@@ -53,7 +63,7 @@ export function capitalAnswerFor(name: string): string | null {
 /** What to show for "Who is the governor of your state now?" - null when we have
  *  no verified answer (territory governors), so callers can say so honestly. */
 export function governorAnswerFor(name: string): string | null {
-  if (isState(name)) return GOVERNORS[name]?.name ?? null;
+  if (isState(name)) return governors()[name]?.name ?? null;
   const j = JURISDICTIONS[name];
   return j ? (j.governor ?? j.governorAnswer) : null;
 }
@@ -104,7 +114,7 @@ export function getQuestionsInCategory(country: string, version: string, categor
 /** Resolves a DYNAMIC:field placeholder answer to the current real value. */
 export function resolveDynamicAnswer(placeholder: string): string {
   const field = placeholder.replace('DYNAMIC:', '') as keyof NationalDynamicOfficials;
-  const value = NATIONAL_DYNAMIC[field];
+  const value = nationalDynamic()[field];
   return value !== undefined ? String(value) : placeholder;
 }
 

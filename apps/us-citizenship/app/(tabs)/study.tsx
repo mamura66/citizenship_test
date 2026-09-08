@@ -9,6 +9,7 @@ import { useTheme } from '../../src/theme/ThemeProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radii, shadow, spacing, type } from '../../src/theme/theme';
 import { useAppState } from '../../src/lib/appState';
+import { useOfficials } from '../../src/content/officialsStore';
 import { acceptsAnyOne, getAllQuestions, getCategories, getRegionCategories, resolveAnswers } from '../../src/content/loadContent';
 import { attribution, getCountry, isMultipleChoice, questionArt } from '../../src/content/countries';
 import { langOf, translator } from '../../src/lib/strings';
@@ -38,6 +39,9 @@ export default function StudyScreen() {
   // Plain View root, so the native tabs' automatic insets don't apply - handled here.
   const insets = useSafeAreaInsets();
   const { country, civicsVersion, starredIds, toggleStar } = useAppState();
+  // Answers are resolved at render (resolveAnswers reads the live officials), so the only
+  // thing needed here is to re-render when a validated update lands.
+  useOfficials();
   const countryDef = getCountry(country);
   const tr = translator(langOf(countryDef.language));
   const sourceCredit = attribution(country, civicsVersion);

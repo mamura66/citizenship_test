@@ -9,12 +9,12 @@ import { useAppState } from '../src/lib/appState';
 import {
   ALL_JURISDICTION_NAMES,
   JURISDICTIONS,
-  NATIONAL_DYNAMIC,
   capitalAnswerFor,
   governorAnswerFor,
   isState,
 } from '../src/content/loadContent';
 import { officialPhotos } from '../src/content/officialPhotos';
+import { useOfficials } from '../src/content/officialsStore';
 
 // The 50 states plus D.C. and the five inhabited territories: USCIS's
 // state-specific questions have explicit answers for those residents too.
@@ -46,6 +46,9 @@ function PersonRow({ label, name, photo, initials }: { label: string; name: stri
 export default function LocalScreen() {
   const { colors } = useTheme();
   const { homeState, setHomeState } = useAppState();
+  // Live officials: seeded from the bundled JSON, replaced by a validated remote copy when
+  // one lands, and this screen re-renders when it does.
+  const { national: NATIONAL_DYNAMIC, source: officialsSource } = useOfficials();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const governor = homeState ? governorAnswerFor(homeState) : null;
@@ -116,6 +119,7 @@ export default function LocalScreen() {
               <View style={{ gap: spacing.md }}>
                 <Text style={[type.caption, { color: colors.textSecondary }]}>
                   National officials · verified {NATIONAL_DYNAMIC.lastVerified}
+                  {officialsSource === 'bundled' ? ' · as shipped' : ' · updated'}
                 </Text>
                 <PersonRow label="President" name={NATIONAL_DYNAMIC.president} photo={officialPhotos.president} initials="" />
                 <PersonRow label="Vice President" name={NATIONAL_DYNAMIC.vicePresident} photo={officialPhotos.vicePresident} initials="" />

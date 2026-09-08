@@ -2410,3 +2410,67 @@ the home-page strip, and the Countries section explains the position in words.
 
 `ca-fr-verify` 13/13 (new), `multicountry` 81/81, `ca-verify` 12/12, `au-verify` 17/17,
 `homecountries` 25/25, `auth-flow` 27/27. 9/9 packs validate. Nothing deployed.
+
+## v38 — App Store first: the rating prompt, officials that stay current, and the listing (2026-09-08)
+
+1.0 was approved and is on the App Store. The user's next instruction: get the app to the top
+of search, and do whatever the long-term plan says the app needs. `docs/store/NEXT-RELEASE.md`
+*was* that plan, and it is now the plan for 1.0.1.
+
+### What "top of search" honestly means here
+
+The live listing was read back through the App Store Connect API (`tools/asc/listing.js`,
+read-only) rather than assumed. Name, subtitle, keywords and categories already match the
+copy researched before launch, so there was nothing to gain by rewriting them — and
+**customer reviews: 0.** The competitors have 65,000–104,000. No metadata change closes
+that; only ratings do, and they come from asking at the right moment. So the one code
+change aimed squarely at rank is an in-app rating prompt, and the copy work is about
+converting the people who do find the listing.
+
+### Fixed on the live store today, no release needed
+
+Promotional text said "practise" — the one text field Apple lets you edit on a live
+version. One PATCH, read back and confirmed. The description's `PRACTISE` is version-locked
+and goes with 1.0.1, as do the support URL (still the old `workers.dev` address) and the
+empty marketing URL.
+
+### 1.0.1, built on `feature/app-1.0.1`
+
+**A rating prompt, once, when it is earned.** `expo-store-review` wrapping Apple's own
+sheet. After a *passed* full-length practice test, from the results screen; never on a fail,
+on launch, or from a button, all of which Apple's guidance rules out. Once per version,
+recorded *before* the request so a kill mid-sheet cannot cause a second ask; Apple then caps
+it at three showings a year and decides silently. No "Rate us" button, no "do you like the
+app?" pre-filter — Apple rejects that pattern and it is a dark pattern besides. Every
+failure path is a no-op.
+
+**Officials data that updates without a release** — the NEXT-RELEASE item with a deadline,
+the 3 November midterms. The app fetches the two JSON files the website already serves and
+falls back to the bundled copy on any doubt. A payload is accepted only if complete,
+sourced, exactly fifty governors, and dated **no older than the bundled copy** — so a stale
+CDN object or a rolled-back deploy cannot undo a correction that shipped in the binary. A
+running practice deck stays pinned; the pool refreshes between tests. My State says "as
+shipped" or "updated" so support can tell whether a device ever reached the CDN.
+
+### Verified, not asserted
+
+A node harness (`scratchpad/officials-test/`) compiles the two modules with stubbed native
+imports: 15 planted faults all rejected, two valid newer payloads accepted with the new
+names coming through, no prompt on a fail or a three-question run, one prompt on a full
+pass, exactly one call across repeated passes, and none when storage cannot be read —
+**20/20**, plus the unreadable-storage path run deliberately. The live CDN payloads were
+checked against the same rules and pass, so the feature is not dead on arrival. Metro
+bundles the new modules for iOS; `tsc` is clean.
+
+Worth recording: the harness first reported 19/20 and the failure was the harness. My stubs
+wrapped `default` twice, so the compiled code saw `AsyncStorage.getItem` as undefined and
+correctly took the "cannot tell whether we asked → do not ask" branch. An accidental test of
+the safe path, and a reminder that a failing check is not always the code.
+
+### Needs a person
+
+- **The screenshots.** Slide 3 shows a fake name and the app predicting failure. It can be
+  replaced with no release, but not from this machine — no simulator, and the website's John
+  Doe shot is a 1206×1900 crop. Two-minute phone recipe in NEXT-RELEASE.
+- **The build.** EAS is logged in here, so `eas build` and `eas submit` can run on request.
+  Not run without the say-so: it uploads a build and opens a review.

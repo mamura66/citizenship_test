@@ -127,16 +127,28 @@ not provide legal advice. Official questions and vocabulary lists are U.S. gover
 in the public domain.
 ```
 
-## What's New (first version)
+## What's New (1.0.1)
+```
+• Your state's governor and the national officials now stay current between updates, so a name never goes stale after an election.
+• Small fixes.
+```
+
+## What's New (1.0, shipped)
 ```
 First release.
 ```
 
 ## Support URL — REQUIRED
-Needs a real page. A single page with a contact address is enough.
+```
+https://prepareforcitizenship.com/support
+```
+1.0 shipped with the old `workers.dev` address. Version-locked, so it changes with 1.0.1.
 
 ## Marketing URL — optional
-Leave blank rather than pointing at something unfinished.
+```
+https://prepareforcitizenship.com
+```
+The site is live and carries the App Store badge, so this is no longer unfinished.
 
 ## Privacy Policy URL — REQUIRED
 Host `docs/store/privacy-policy.md` as a web page and paste the URL. Replace the

@@ -11,7 +11,7 @@ import { useAppState } from '../../src/lib/appState';
 import { usePurchase } from '../../src/lib/purchase';
 import {
   acceptsAnyOne,
-  GOVERNORS,
+  governors,
   JURISDICTIONS,
   STATE_CAPITALS,
   capitalAnswerFor,
@@ -30,6 +30,8 @@ import {
   questionsForRegion,
 } from '../../src/content/countries';
 import { langOf, translator } from '../../src/lib/strings';
+import { useOfficials } from '../../src/content/officialsStore';
+import { isReviewWorthyResult, maybeAskForReview } from '../../src/lib/reviewPrompt';
 import { OptionRow, PictureTile, QuestionFigure } from '../../src/components/QuestionPicture';
 import type { PackImage } from '../../src/content/images.generated';
 import { subsectionLabel, topicGuideFor } from '../../src/content/topics';
@@ -144,6 +146,10 @@ export default function PracticeScreen() {
   const countryDef = getCountry(country);
   const tr = translator(langOf(countryDef.language));
   const format = packFormat(country, civicsVersion);
+  // Re-renders when a validated officials update lands. `testable` below depends on the
+  // version so the pool refreshes between tests; a RUNNING deck is built once in
+  // beginTest() and deliberately not touched - options must not change mid-test.
+  const { version: officialsVersion } = useOfficials();
   const sourceCredit = attribution(country, civicsVersion);
   const { isPro } = usePurchase();
   const allQuestions = useMemo(() => getAllQuestions(country, civicsVersion), [country, civicsVersion]);
@@ -182,7 +188,8 @@ export default function PracticeScreen() {
     () => questionsForRegion(country, civicsVersion, homeState),
     [country, civicsVersion, homeState]
   );
-  const testable = useMemo(() => askable.filter((q) => resolveAcceptable(q) !== null), [askable, homeState]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- officialsVersion: resolveAcceptable reads the live officials
+  const testable = useMemo(() => askable.filter((q) => resolveAcceptable(q) !== null), [askable, homeState, officialsVersion]);
 
   /* How long the real test is and what passes it, from the pack - never a guess.
    *
@@ -278,7 +285,7 @@ export default function PracticeScreen() {
     let pool: string[];
     // Plausible distractors for the state-specific questions: other governors /
     // other capitals. Only used where the answer really is a name or a city.
-    if (t === 'governor' && GOVERNORS[homeState ?? '']) pool = Object.values(GOVERNORS).map((g) => g.name);
+    if (t === 'governor' && governors()[homeState ?? '']) pool = Object.values(governors()).map((g) => g.name);
     else if (t === 'capital' && STATE_CAPITALS[homeState ?? '']) pool = Object.values(STATE_CAPITALS);
     else {
       // Prefer distractors from the same topic (more plausible), fall back to any.
@@ -336,8 +343,14 @@ export default function PracticeScreen() {
   const nextQuestion = () => {
     if (qIndex + 1 >= deck.length) {
       const scorePct = Math.round((correctCount / deck.length) * 100);
-      recordPracticeResult(scorePct, correctCount >= passThreshold);
+      const passedTest = correctCount >= passThreshold;
+      recordPracticeResult(scorePct, passedTest);
       setPhase('results');
+      // Ask for a rating only here: after a PASS, on a full-length test, once per version.
+      // Never on a fail, never on launch, never from a button. See reviewPrompt.ts.
+      if (isReviewWorthyResult(passedTest, deck.length, format.asked ?? 20)) {
+        void maybeAskForReview();
+      }
     } else {
       setQIndex((i) => i + 1);
       setSelected([]);
