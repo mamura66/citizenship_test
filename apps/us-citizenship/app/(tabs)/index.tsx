@@ -47,7 +47,13 @@ export default function HomeScreen() {
   const recent = practiceHistory.slice(-7);
   const hasSessions = recent.length > 0;
   const avgScore = hasSessions ? Math.round(recent.reduce((s, r) => s + r.scorePct, 0) / recent.length) : 0;
-  const trendingUp = recent.length >= 2 && recent[recent.length - 1].scorePct >= recent[0].scorePct;
+  // A trend needs two points. With one session there is nothing to compare, and the old
+  // code fell through to "trending down" - which is what the first App Store screenshot
+  // attempt showed, under a green 80% gauge. Three honest states instead of two.
+  const trend: 'none' | 'first' | 'up' | 'down' =
+    recent.length === 0 ? 'none'
+      : recent.length === 1 ? 'first'
+        : recent[recent.length - 1].scorePct >= recent[0].scorePct ? 'up' : 'down';
 
   const sessionsDisplay = useCountUp(practiceHistory.length, 700, 500);
   const scoreDisplay = useCountUp(avgScore, 700, 580);
@@ -108,7 +114,9 @@ export default function HomeScreen() {
                 {hasSessions ? `Last ${recent.length} session${recent.length === 1 ? '' : 's'}` : 'No sessions yet'}
               </Text>
               <Text style={[type.numSm, { color: hasSessions ? colors.accent : colors.textTertiary }]}>
-                {!hasSessions ? 'no data yet' : trendingUp ? '↑ trending up' : '↓ trending down'}
+                {trend === 'none' ? 'no data yet'
+                  : trend === 'first' ? 'first session'
+                    : trend === 'up' ? '↑ trending up' : '↓ trending down'}
               </Text>
             </View>
             <EcgSparkline
@@ -121,7 +129,7 @@ export default function HomeScreen() {
           {/* Tests taken = completed practice tests; Avg score = mean of the last 7;
               Starred = questions the user starred for review in Flashcards / Practice. */}
           <View style={styles.statRow}>
-            <StatTile value={sessionsDisplay} label="TESTS" />
+            <StatTile value={sessionsDisplay} label={practiceHistory.length === 1 ? "TEST" : "TESTS"} />
             <StatTile value={scoreDisplay} label="AVG SCORE" suffix="%" />
             <StatTile value={starredDisplay} label="STARRED" />
           </View>
