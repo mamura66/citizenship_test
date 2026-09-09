@@ -44,7 +44,7 @@ export async function getOverview(env, days = DEFAULT_RANGE) {
   const { from, to } = window(days);
   const db = env.ANALYTICS_DB;
 
-  const [byDay, byCountry, byPath, counters] = await Promise.all([
+  const [byDay, byCountry, byPath, counters, byHour, untimed] = await Promise.all([
     db.prepare(
       `SELECT day, SUM(views) AS views FROM analytics_pageviews
         WHERE day >= ? AND day <= ? GROUP BY day ORDER BY day ASC`
@@ -61,6 +61,20 @@ export async function getOverview(env, days = DEFAULT_RANGE) {
       `SELECT event, country, SUM(count) AS count FROM analytics_counters
         WHERE day >= ? AND day <= ? GROUP BY event, country`
     ).bind(from, to).all(),
+    // The most recent hours with any views, newest first. Capped: this is a "what happened
+    // lately" list, not an export, and 200 rows is more than a screen can usefully show.
+    db.prepare(
+      `SELECT day, hour, path, country, views FROM analytics_pageviews
+        WHERE day >= ? AND day <= ? AND hour >= 0
+        ORDER BY day DESC, hour DESC, views DESC LIMIT 200`
+    ).bind(from, to).all(),
+    // Views counted before migration 0002 have no hour. They are in every total above and
+    // in the per-day chart; they are simply absent from the hourly list, and the dashboard
+    // says how many, rather than letting the list look like the whole story.
+    db.prepare(
+      `SELECT COALESCE(SUM(views), 0) AS views FROM analytics_pageviews
+        WHERE day >= ? AND day <= ? AND hour < 0`
+    ).bind(from, to).first(),
   ]);
 
   const eventTotal = (name) =>
@@ -93,6 +107,15 @@ export async function getOverview(env, days = DEFAULT_RANGE) {
   }
 
   const pages = byPath.results.map((r) => ({ path: r.path, views: num(r.views) }));
+
+  // One ISO instant per row - the start of the hour, in UTC - so a browser can show it in
+  // the owner's own time zone without anything here guessing what that zone is.
+  const recent = byHour.results.map((r) => ({
+    at: `${r.day}T${String(num(r.hour)).padStart(2, '0')}:00:00Z`,
+    path: r.path,
+    country: r.country || '',
+    views: num(r.views),
+  }));
   const views = byCountry.results.reduce((sum, r) => sum + num(r.views), 0);
 
   return {
@@ -111,6 +134,8 @@ export async function getOverview(env, days = DEFAULT_RANGE) {
     },
     series,
     pages,
+    recent,
+    untimedViews: num(untimed && untimed.views),
     countries: [...perCountry.values()]
       .filter((c) => c.views || c.accounts || c.checkouts)
       .sort((a, b) => b.views - a.views || b.accounts - a.accounts),

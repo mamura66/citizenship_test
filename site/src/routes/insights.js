@@ -332,6 +332,26 @@ function pagesCard(data) {
 </section>`;
 }
 
+/** Page views by hour, newest first. UTC, because this page is rendered on the server and
+ *  the app's copy of the same list (public/app.js recentViewsPanel) is where the owner's
+ *  own time zone is known. Rows from before migration 0002 have no hour and are counted
+ *  in a line underneath instead of being given one. */
+function recentCard(data) {
+  const rows = data.recent || [];
+  const untimed = data.untimedViews || 0;
+  const body = rows.length
+    ? `<table class="ins-table"><thead><tr><th>Hour (UTC)</th><th>Page</th><th>Country</th><th class="num">Views</th></tr></thead><tbody>${
+        rows.slice(0, 60).map((r) => `<tr><td>${esc(r.at.slice(0, 10))} ${esc(r.at.slice(11, 16))}</td><td><code>${esc(r.path)}</code></td><td>${esc(countryName(r.country))}</td><td class="num">${nf.format(r.views)}</td></tr>`).join('')
+      }</tbody></table>`
+    : `<p class="ins-empty">No views with a time yet. Hours have been kept since 9 September 2026.</p>`;
+  return `<section class="ins-card">
+  <h2>Recent views, by hour</h2>
+  <p class="ins-note">One row per hour, page and country. Still counts, not visitors.</p>
+  ${body}
+  ${untimed ? `<p class="ins-note" style="margin-top:14px">${nf.format(untimed)} earlier view${untimed === 1 ? '' : 's'} in this window were counted before times were kept and appear by day only.</p>` : ''}
+</section>`;
+}
+
 /** GET /insights. Reached only when src/worker.js has established this is the owner. */
 export async function insightsPage(request, env) {
   const range = cleanRange(new URL(request.url).searchParams.get('days'));
@@ -339,7 +359,7 @@ export async function insightsPage(request, env) {
   let html = HEAD(range);
   try {
     const data = await getOverview(env, range);
-    html += countriesCard(data) + funnelCard(data) + dailyCard(data) + pagesCard(data);
+    html += countriesCard(data) + funnelCard(data) + dailyCard(data) + recentCard(data) + pagesCard(data);
   } catch (err) {
     html += setupCard(err && err.message ? err.message : String(err));
   }

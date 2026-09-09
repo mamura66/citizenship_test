@@ -296,6 +296,11 @@ const STRINGS = {
     'ins.dontCount': "Don't count my visits",
     'ins.excludedOn': 'Your visits in this browser are not counted, and Google Analytics is switched off here too. Other browsers and devices are still counted separately.',
     'ins.excludedOff': 'Your own visits are being counted, which will flatter the numbers while traffic is low.',
+    'ins.recent': 'Recent views, by hour',
+    'ins.recentNote': 'Each row is one hour, shown as the hour it began in {tz}. Still counts, not visitors: three rows can be one person.',
+    'ins.noRecent': 'No views with a time yet. Hours have been kept since September 9, 2026.',
+    'ins.untimed.one': '{n} earlier view was counted before times were kept and appears by day only.',
+    'ins.untimed.other': '{n} earlier views were counted before times were kept and appear by day only.',
   },
 
   /* ------------------------------------------------------------------ German */

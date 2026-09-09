@@ -28,6 +28,8 @@ export const EVENTS = new Set([
 
 /** UTC day key. The dashboard groups on this, so it has to be the same string everywhere. */
 export const utcDay = (date = new Date()) => date.toISOString().slice(0, 10);
+/** UTC hour, 0-23. The finest grain a page view is kept at - see migrations/0002. */
+export const utcHour = (date = new Date()) => date.getUTCHours();
 
 /**
  * The public pages, and the only path values that ever reach the table.
@@ -42,7 +44,7 @@ export const utcDay = (date = new Date()) => date.toISOString().slice(0, 10);
  * this beacon; what somebody studies is theirs, and the privacy policy says so.
  */
 const PUBLIC_PATHS = new Set([
-  '/', '/support', '/terms', '/refunds', '/privacy', '/privacy-web',
+  '/', '/which-test', '/support', '/terms', '/refunds', '/privacy', '/privacy-web',
   '/login', '/signup', '/forgot', '/reset',
 ]);
 
@@ -123,21 +125,23 @@ const bound = (env) => !!(env && env.ANALYTICS_DB);
 /**
  * Count one page view.
  *
- * The UPSERT is the whole design: two visitors on the same page from the same country on
- * the same day are one row and one write, so the table stays small and there is nothing
+ * The UPSERT is the whole design: two visitors on the same page from the same country in
+ * the same hour are one row and one write, so the table stays small and there is nothing
  * to roll up later.
  */
 export function recordPageview(env, ctx, request, rawPath) {
   if (!bound(env)) return;
   const path = normalizePath(rawPath);
   if (!path) return;
-  const day = utcDay();
+  const now = new Date();
+  const day = utcDay(now);
+  const hour = utcHour(now);
   const country = countryOf(request);
   detach(ctx, () =>
     env.ANALYTICS_DB.prepare(
-      `INSERT INTO analytics_pageviews (day, path, country, views) VALUES (?, ?, ?, 1)
-         ON CONFLICT (day, path, country) DO UPDATE SET views = views + 1`
-    ).bind(day, path, country).run()
+      `INSERT INTO analytics_pageviews (day, hour, path, country, views) VALUES (?, ?, ?, ?, 1)
+         ON CONFLICT (day, hour, path, country) DO UPDATE SET views = views + 1`
+    ).bind(day, hour, path, country).run()
   );
 }
 

@@ -90,6 +90,11 @@ nothing. So:
   screenshot. A transaction being recorded is **not** the same as an entitlement being
   granted.
 - A stub must say it is a stub, on screen.
+- Automated checks against production are **not counted** in site analytics, by two
+  independent guards: `analytics.js` sends no beacon when `navigator.webdriver` is set
+  (Playwright), and `/api/pulse` rejects `HeadlessChrome`, `curl` and the like by
+  user-agent. Confirmed 2026-09-09 by a Playwright visit that left the total unchanged.
+  Do not add a test-only switch for this; the guards already hold.
 
 ## The website backend (`site/`)
 

@@ -1777,7 +1777,37 @@ function drawInsights(body, d) {
 
   body.appendChild(cols);
 
+  body.appendChild(recentViewsPanel(d));
   body.appendChild(excludeMeControl());
+}
+
+/** Page views by hour, newest first, in the owner's own time zone.
+ *
+ *  Each row is one hour on one page from one country - still a count, not a visit log.
+ *  Rows counted before 2026-09-09 have no hour (migration 0002) and are left out here,
+ *  with a line saying how many, so the list never quietly claims to be complete. */
+function recentViewsPanel(d) {
+  const box = el('div', 'panel');
+  const rows = d.recent || [];
+  const untimed = d.untimedViews || 0;
+  box.innerHTML = `<p class="label">${esc(t('ins.recent'))}</p>`;
+  if (!rows.length) {
+    box.innerHTML += `<p class="panel-note">${esc(t('ins.noRecent'))}</p>`;
+  } else {
+    const fmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    let tz = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { tz = ''; }
+    box.innerHTML += `<div class="ins-table ins-recent">${rows.slice(0, 60).map((r) => `
+      <div class="ins-row four">
+        <span class="ins-k mono">${esc(fmt.format(new Date(r.at)))}</span>
+        <span class="ins-k mono">${esc(r.path)}</span>
+        <span class="ins-k">${esc(countryName(r.country))}</span>
+        <b class="mono">${r.views}</b>
+      </div>`).join('')}</div>
+      <p class="panel-note dim">${esc(t('ins.recentNote', { tz: tz || 'your time zone' }))}</p>`;
+  }
+  if (untimed) box.innerHTML += `<p class="panel-note dim">${esc(tn('ins.untimed', untimed, { n: untimed }))}</p>`;
+  return box;
 }
 
 const OPT_OUT_KEY = 'pfc.noanalytics';
