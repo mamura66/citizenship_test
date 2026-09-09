@@ -10,8 +10,8 @@
 | Open Graph + Twitter card | every public page | live |
 | Share image | `/og.png`, 1200×630 | live |
 | Structured data | home page | Organization, WebSite, WebApplication, FAQPage |
-| Google verification | `/google<token>.html` | waiting for a token |
-| Bing verification | `/BingSiteAuth.xml` | waiting for a token |
+| Google verification | Search Console | **verified 2026-09 by Sandeep** (his own account; `GOOGLE_SITE_VERIFICATION` stays empty and is not needed) |
+| Bing verification | Import from Google Search Console | pending Sandeep |
 | Analytics | — | **off, and needs a decision — see below** |
 
 The app, sign-in, sign-up and password-reset pages are excluded from both `robots.txt` and
@@ -78,9 +78,9 @@ and quietly breaking it is worse than having no analytics.
 
 ## Things worth doing next, in order
 
-1. Verify both consoles and submit the sitemap (above).
+1. ~~Verify Google~~ done. Submit `sitemap.xml` in Search Console; import into Bing.
 2. Turn on Cloudflare Web Analytics — one token, no policy change.
-3. Write a page per country as the packs ship (`/united-states`, `/canada`), each targeting
+3. `/which-test` (2008 vs 2025, live 2026-09-09) is the first search-intent page. Write a page per country as the packs ship (`/united-states`, `/canada`), each targeting
    how people actually search: "US citizenship test practice", "civics test questions".
    The home page cannot rank for every country at once.
 4. Once the iPhone app is public, add its App Store link to the structured data and the
