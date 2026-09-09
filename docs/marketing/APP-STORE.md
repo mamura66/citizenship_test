@@ -125,7 +125,7 @@ for premieres, challenges, new seasons — **not** for routine content or price 
 |---|---|---|---|
 | 1 | Restore the blank promotional text on 1.0.1 | Sandeep approves; script ready | today |
 | 2 | Smart App Banner on the website | me | today |
-| 3 | Apple Ads Basic, $100 credit, $5/day | Sandeep | this week |
+| 3 | ~~Apple Ads Basic~~ — on hold: needs GST registration in India, which we don't have and won't get just for a $5/day test | — | on hold |
 | 4 | Answer every review within a day | Sandeep (or me via API, read-only for now) | ongoing |
 | 5 | 1.0.2: 8–10 captioned screenshots, 6.9" size, 30-sec video | Sandeep films; me | next 2 weeks |
 | 6 | 1.0.2: Spanish listing (+ app UI in Spanish) | me | next 2 weeks |
@@ -160,6 +160,14 @@ competitors' screenshots, fake "limited time" prices, or resetting ratings.
   `null`, confirmed via the API before and after the fix). Smart App Banner added to all
   15 public pages, verified present on marketing pages and absent on `/login`, `/signup`,
   `/forgot`, `/app` (preview, then production). Both live.
+- **2026-09-09:** Apple Ads Basic put on hold. Apple's Terms of Service make GST
+  registration a condition for any India-based advertiser (confirmed on their own tax
+  page, not assumed). MAT has no GSTIN for this app, and India's mandatory threshold
+  (₹20 lakh/year for services) is well above what a $5/day test would ever spend, so
+  registering just to run ads isn't worth it. Not attempting to work around this by
+  entering a different country on the account — that would misstate where the advertiser
+  actually is, which is exactly what the requirement is tied to. Revisit only if MAT
+  already holds a GSTIN through other work.
 
 ## Ready-to-submit: the featuring nomination for 1.0.2
 
@@ -233,3 +241,50 @@ before that work starts:
    worth scoping as its own piece before folding it into 1.0.2.
 
 Tell me when to start either, and I will scope it properly rather than guess at size here.
+
+## Item 7, code side — done 2026-09-09
+
+`addShouldPurchasePromoProductListener` is wired (`apps/us-citizenship/src/lib/purchase.tsx`
++ new `src/components/PromoPurchaseBanner.tsx`). If Apple hands the app a promoted purchase,
+it now completes it and shows the outcome — before today it would have gone nowhere.
+Verified with `tsc --noEmit` (clean) and `expo export --platform web` (bundles clean).
+
+**Still blocked, and it's a design task, not code:** the 1024×1024 promotional image App
+Store Connect needs before promotion can be turned on. Apple's rule: no text in the bottom-
+left corner (the app icon goes there automatically), avoid text overlay generally. I don't
+have image-generation tooling in this session to produce one responsibly — this needs
+either a designer's five minutes or Sandeep's sign-off on a direction (e.g., the green mark
+from the website on a plain ground, or a screenshot-style crop of the readiness gauge).
+Say which and I'll get it made or commission it.
+
+## Item 5, shot list — ready whenever Sandeep can hold the phone
+
+Apple's rule: the first 1–3 screenshots are what shows in search results, so lead with the
+result, not the setup. 8 slides, 1290×2796 (iPhone 6.9"). Each needs the phone in light
+mode unless noted; use the "John Doe, 6-10 weeks out, green gauge above pass line" state
+from `docs/store/NEXT-RELEASE.md` for every slide that shows a name or a score.
+
+| # | Screen | Caption (overlay text, ≤6 words) |
+|---|---|---|
+| 1 | Home, green gauge above the pass line | "Know exactly where you stand" |
+| 2 | Study by topic, section list | "Every official question, free" |
+| 3 | A flashcard, flipped to show the answer | "See every accepted answer" |
+| 4 | Practice test in progress, real format | "The real test format, practiced" |
+| 5 | Mock interview screen, question being read | "Hear the questions out loud" |
+| 6 | My State screen, governor/senator answers filled in | "Your state's answers, ready" |
+| 7 | Which-test-applies moment (Settings interview-date + version) | "Both tests. We tell you which" |
+| 8 | Pricing card ($9.99 once, vs. weekly competitors) | "$9.99 once. Never a subscription" |
+
+One dark-mode shot (slide 1 again, dark) as a 9th if there's a 10-slide budget — none of
+the competitors show dark mode and the app supports it.
+
+**How to take them:** Settings → Personal → name "John Doe", interview date ~8 weeks out;
+play practice tests until Home is green and above 60%; star a few flashcards. Screenshot
+each screen at 1290×2796 (iPhone 16 Pro Max class). Apple strips alpha channels itself now
+in most cases, but flatten to RGB first if unsure (`replace-screenshot.js` already checks
+for this and refuses an RGBA file).
+
+Captions are overlaid text, not native UI — that's a design pass on top of the raw
+screenshots (a template with the phone frame + caption band), which is the same kind of
+work as the App Store badge artwork already on the website. I can build that template once
+the raw screenshots exist.
