@@ -426,6 +426,10 @@ footer a:hover { color: var(--ink); }
 .doc ul { padding-left: 20px; margin: 0 0 16px; }
 .doc li { margin-bottom: 7px; }
 .doc a { color: var(--accent-ink); }
+/* `.doc a` outranks `.btn` on specificity, so a button inside a document page lost its white
+   text - found on /which-test, where the primary button rendered as a blank green block. */
+.doc a.btn { color: #fff; }
+.doc a.btn.ghost { color: var(--accent-ink); }
 .doc .callout {
   background: var(--tint); border: 1px solid var(--line); border-radius: 14px;
   padding: 20px 22px; margin: 26px 0 30px;
