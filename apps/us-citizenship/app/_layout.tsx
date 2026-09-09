@@ -20,6 +20,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider';
 import { AppStateProvider, useAppState } from '../src/lib/appState';
 import { PurchaseProvider } from '../src/lib/purchase';
+import { PromoPurchaseBanner } from '../src/components/PromoPurchaseBanner';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -41,6 +42,7 @@ function ThemedStack({ fontsReady }: { fontsReady: boolean }) {
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+      <PromoPurchaseBanner />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.background },

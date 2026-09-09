@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Purchases, { LOG_LEVEL, type CustomerInfo } from 'react-native-purchases';
+import Purchases, { LOG_LEVEL, type CustomerInfo, type MakePurchaseResult } from 'react-native-purchases';
 
 // ============================================================================
 // PURCHASE ABSTRACTION - real RevenueCat on iOS and Android. The only other
@@ -110,6 +110,17 @@ interface PurchaseContextValue {
   usingMockBackend: boolean;
   purchaseLifetime: () => Promise<{ success: boolean; error?: string }>;
   restorePurchases: () => Promise<RestoreResult>;
+  /**
+   * State of a purchase Apple itself initiated - the promoted in-app purchase shown in
+   * App Store search results and on the product page (App Store Connect > lifetime_access
+   * > Promote). RevenueCat hands us a deferred purchase function when this happens; we run
+   * it immediately rather than routing to a screen, per Apple's own guidance ("present the
+   * payment sheet immediately... avoid unnecessary interstitials"). A global banner
+   * (src/components/PromoPurchaseBanner.tsx) reads this so the outcome is visible whatever
+   * screen the app happens to be on when Apple hands us the callback.
+   */
+  promoPurchase: { status: 'idle' } | { status: 'pending' } | { status: 'success' } | { status: 'error'; message: string };
+  dismissPromoPurchase: () => void;
 }
 
 const PurchaseContext = createContext<PurchaseContextValue | null>(null);
@@ -118,6 +129,8 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
   const [entitled, setIsPro] = useState(false);
   const [loading, setLoading] = useState(true);
   const configured = useRef(false);
+  const [promoPurchase, setPromoPurchase] = useState<PurchaseContextValue['promoPurchase']>({ status: 'idle' });
+  const dismissPromoPurchase = () => setPromoPurchase({ status: 'idle' });
 
   useEffect(() => {
     if (USE_REAL_REVENUECAT) {
@@ -142,6 +155,24 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
         // Warm the offerings cache at launch so the paywall doesn't pay for the
         // slow first StoreKit round-trip when the user actually taps Unlock.
         Purchases.getOfferings().catch(() => {});
+        // Apple can send someone here from a purchase they started on the App Store
+        // itself - the promoted-purchase card in search results or on the product
+        // page - rather than from our own Unlock button. iOS only; harmless to
+        // register everywhere since the native side never fires it on Android.
+        Purchases.addShouldPurchasePromoProductListener(async (deferredPurchase: () => Promise<MakePurchaseResult>) => {
+          setPromoPurchase({ status: 'pending' });
+          try {
+            const { customerInfo } = await deferredPurchase();
+            onCustomerInfoUpdate(customerInfo);
+            setPromoPurchase({ status: 'success' });
+          } catch (e: any) {
+            if (e?.userCancelled) {
+              setPromoPurchase({ status: 'idle' });
+              return;
+            }
+            setPromoPurchase({ status: 'error', message: e?.message ?? 'Purchase failed' });
+          }
+        });
       }
       Purchases.getCustomerInfo()
         .then(onCustomerInfoUpdate)
@@ -243,8 +274,10 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
       usingMockBackend: USE_MOCK_PURCHASES,
       purchaseLifetime,
       restorePurchases,
+      promoPurchase,
+      dismissPromoPurchase,
     }),
-    [entitled, loading]
+    [entitled, loading, promoPurchase]
   );
 
   return <PurchaseContext.Provider value={value}>{children}</PurchaseContext.Provider>;
