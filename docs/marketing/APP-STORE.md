@@ -151,3 +151,85 @@ competitors' screenshots, fake "limited time" prices, or resetting ratings.
 - Apple, [Nominate your app for featuring](https://developer.apple.com/help/app-store-connect/manage-featuring-nominations/nominate-your-app-for-featuring/)
 - USCIS, [Naturalization statistics, FY2024](https://www.uscis.gov/citizenship-resource-center/naturalization-statistics)
 - iTunes Search API, top results for "us citizenship test", US storefront, 2026-09-09
+
+---
+
+## Progress log
+
+- **2026-09-09:** promotional text restored on the live 1.0.1 listing (was blank —
+  `null`, confirmed via the API before and after the fix). Smart App Banner added to all
+  15 public pages, verified present on marketing pages and absent on `/login`, `/signup`,
+  `/forgot`, `/app` (preview, then production). Both live.
+
+## Ready-to-submit: the featuring nomination for 1.0.2
+
+Drafted now so it is ready the moment 1.0.2 has a submission date — nominations are due
+**3+ weeks before** that date, and 1.0.2 does not exist yet, so this cannot be submitted
+today. Fill in the two dates and submit from App Store Connect → Featuring → Nominations.
+
+- **Related app:** US Citizenship Test 2026-Pulse (id6808512010)
+- **Nomination type:** App Enhancements
+- **Nomination name (≤60):** `Self-updating civics answers + the 2025 test, done right`
+- **Publish date (start):** ← *the day 1.0.2 goes live, once known*
+- **Countries:** USA
+- **Platforms:** iOS (iPhone)
+- **Nomination description (≤1,000):**
+  > The US civics test changed on October 20, 2025 — 128 questions instead of 100, 20 asked
+  > instead of 10 — and most study apps in the category still only cover the old one. We
+  > support both, and the app tells each applicant which one applies to them from their
+  > filing date, in plain language, before they study a single card.
+  >
+  > The questions themselves are public domain — USCIS publishes them — yet several
+  > competitors charge a weekly subscription for them. Every official question is free
+  > here, permanently, with no account needed in the app. The one paid feature is unlimited
+  > practice tests and the full mock interview, a single $9.99 purchase, never recurring.
+  >
+  > The detail we are proudest of: four questions on the test depend on where the applicant
+  > lives — their governor, their senators — and those names change in bulk after an
+  > election. Rather than shipping a wrong name until the next release, the app now checks
+  > for updates from our server and only accepts a new name if it is dated after the one
+  > already in the app and carries its sources. The U.S. midterms are November 3, 2026;
+  > every governor's office up that night is corrected within a day, with no update needed
+  > from the App Store.
+- **Helpful details (≤500):**
+  > Built by a small, independent team, not a test-prep company — the reason to keep the
+  > core material free is that it is public domain and it felt wrong to charge for it.
+  > No ads, no tracking, no account required in the app; your name, scores and interview
+  > date never leave your phone.
+- **Supplemental materials:** link to `prepareforcitizenship.com/which-test` and to the
+  App Store listing.
+
+## Apple Ads Basic — steps for Sandeep (20 minutes, needs his Apple ID)
+
+1. Go to **ads.apple.com** → Sign in with the Apple ID that owns the App Store Connect
+   account (the same one used for `tools/asc/`) → choose **Apple Ads Basic**.
+2. It should offer a **$100 credit** automatically for a new advertiser account — confirm
+   the offer is shown before paying anything in.
+3. Create a campaign for **US Citizenship Test 2026-Pulse**. Basic asks for:
+   - **Daily budget:** set **$5/day**. At $100 credit that is 20 days of runway before any
+     of Sandeep's own money is spent.
+   - **Countries:** United States only, to start.
+   - **Keywords:** Basic matches automatically from the app's own metadata — nothing to
+     type in.
+4. Let it run **two full weeks** before judging it. Read the result in App Store Connect
+   → **App Analytics** → Acquisition, filtered to "Apple Ads" as the source: impressions,
+   installs, and — the number that actually matters — whether those installs went on to
+   rate the app or buy `lifetime_access` (compare against organic in the same window).
+5. Tell me the numbers when you have them; I'll write up whether it is worth moving to
+   Advanced (keyword control, no $10k/month cap) or turning off.
+
+## What's still waiting on 1.0.2 (a real release, not a copy change)
+
+Items 5–9 from the list above (better screenshots + video, Spanish listing, promoted IAP,
+featuring nomination, custom product pages) all attach to a version that does not exist
+yet. None of them are copy-only changes Apple lets through without review. Two decisions
+before that work starts:
+
+1. **Screenshots + video** need Sandeep on the phone again, the way the John Doe shot was
+   done for 1.0.1 — this time 8–10 slides and a short screen recording. I can write the
+   shot list and captions; I cannot hold the phone.
+2. **Spanish** means the app's own screens, not just the store listing — the web app has
+   Spanish strings already; the iPhone app does not yet. That is real development work,
+   worth scoping as its own piece before folding it into 1.0.2.
+
+Tell me when to start either, and I will scope it properly rather than guess at size here.
