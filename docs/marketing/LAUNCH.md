@@ -111,9 +111,9 @@ Drafts (each under 280 characters):
    > right one. prepareforcitizenship.com #N400
 
 3. **State answers**
-   > "Who is the governor of your state?" is on the civics test. If you live in DC, Puerto
-   > Rico or Guam, the official answer is "we don't have one" — and yes, that counts. The app
-   > gives you the answer for where YOU live. #USCIS
+   > "Who is the governor of your state?" is on the civics test. Live in DC? The official
+   > answer is "DC doesn't have one" — and it counts. Puerto Rico or Guam? You have a
+   > governor but no US senators, and that's the answer too. The app knows where YOU live. #USCIS
 
 4. **Readiness (with the Home screenshot)**
    > Your readiness score comes from tests you actually took — never a guess. Green means
