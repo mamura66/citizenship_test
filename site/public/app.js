@@ -680,21 +680,10 @@ function renderRail() {
   const lock = document.querySelector('[data-lockicon]');
   if (lock) lock.hidden = isPro();
 
-  const topics = $('#topics');
-  topics.innerHTML = '';
-  $('#topicsBlock').hidden = state.mode !== 'study';
-  const all = el('button', 'topic');
-  all.innerHTML = esc(t('rail.allSections'));
-  all.setAttribute('aria-current', String(!state.topicId));
-  all.onclick = () => { state.topicId = null; state.cardIndex = 0; state.revealed = false; renderRail(); render(); };
-  topics.appendChild(all);
-  studyCategories().forEach((cat) => {
-    const b = el('button', 'topic');
-    b.innerHTML = esc(sectionLabel(cat));
-    b.setAttribute('aria-current', String(state.topicId === cat.id));
-    b.onclick = () => { state.topicId = cat.id; state.cardIndex = 0; state.revealed = false; renderRail(); render(); };
-    topics.appendChild(b);
-  });
+  // The section picker used to live here, as a stack of buttons under Mode. Seven long
+  // section names in a 236px rail wrapped onto two and three lines each and read as
+  // clutter (owner's report, 2026-09-10). It is now a <select> at the top of the study
+  // pane - see sectionPicker() - which is also where the choice takes effect.
 
   // Who is signed in, and the country they are locked to. Shown rather than hidden in a
   // menu: on a shared computer it should be obvious whose progress is on screen.
@@ -932,10 +921,44 @@ function optionList(options, correct, q) {
   }).join('')}</ul>`;
 }
 
+/** The section picker: a labelled <select> at the top of the study pane. A native select
+ *  rather than a custom menu because it is one choice among a handful, it has to work with a
+ *  keyboard and a screen reader without any extra code, and on a phone it opens the
+ *  platform's own picker, which is the one control everyone already knows. */
+function sectionPicker() {
+  const wrap = el('div', 'section-pick');
+  const id = 'sectionSelect';
+  const label = el('label', null, esc(t('rail.sections')));
+  label.setAttribute('for', id);
+  const sel = document.createElement('select');
+  sel.id = id;
+  const all = document.createElement('option');
+  all.value = '';
+  all.textContent = t('rail.allSections');
+  sel.appendChild(all);
+  studyCategories().forEach((cat) => {
+    const o = document.createElement('option');
+    o.value = cat.id;
+    o.textContent = sectionLabel(cat);
+    sel.appendChild(o);
+  });
+  sel.value = state.topicId || '';
+  sel.onchange = () => {
+    state.topicId = sel.value || null;
+    state.cardIndex = 0;
+    state.revealed = false;
+    render();
+    refocus('#' + id);
+  };
+  wrap.append(label, sel);
+  return wrap;
+}
+
 function renderStudy(pane) {
   const cat = studyCategories().find((c) => c.id === state.topicId);
   const pool = cat ? cat.questions : allQuestions();
   crumb(pane, cat ? sectionCrumb(cat) : t('study.crumbAll'));
+  pane.appendChild(sectionPicker());
   pane.appendChild(el('h2', null, cat ? esc(sectionLabel(cat)) : esc(t('study.title'))));
   pane.appendChild(el('p', 'sub', esc(isSubsetPack() ? t('study.subSubset') : t('study.sub'))));
   packNotice(pane);

@@ -149,10 +149,20 @@ button { font: inherit; cursor: pointer; }
 .mode[aria-current="true"] { background: var(--accent-ink); color: var(--on-accent); font-weight: 500; }
 .mode .lock { margin-left: auto; font-size: 10.5px; opacity: 0.75; }
 
-.topics { display: grid; gap: 1px; }
-.topic { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left; background: transparent; border: 0; border-radius: 7px; padding: 6px 10px; color: var(--ink-2); font-size: 13px; }
-.topic:hover { background: var(--accent-soft); color: var(--ink); }
-.topic[aria-current="true"] { background: var(--card); color: var(--ink); font-weight: 500; box-shadow: inset 0 0 0 1px var(--line); }
+/* The section picker sits at the top of the study pane (it was a stack of buttons in the
+   rail; seven long names in 236px wrapped to three lines each). A native select, styled to
+   the card vocabulary, with its own chevron because the browser's is not themeable. */
+.section-pick { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; }
+.section-pick label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); flex: none; }
+.section-pick select {
+  appearance: none; -webkit-appearance: none;
+  min-width: 0; max-width: 100%; width: min(100%, 420px);
+  background: var(--card) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230a7548' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>") no-repeat right 12px center;
+  border: 1px solid var(--line); border-radius: 10px; padding: 9px 36px 9px 12px;
+  color: var(--ink); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+}
+.section-pick select:hover { border-color: var(--accent); }
+.section-pick select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .rail-foot { margin-top: auto; display: grid; gap: 8px; }
 .rail-foot a { color: var(--ink-3); font-size: 12.5px; text-decoration: none; }
 .rail-foot a:hover { color: var(--ink); }
@@ -306,7 +316,6 @@ button { font: inherit; cursor: pointer; }
 @media (max-width: 800px) {
   .shell { grid-template-columns: 1fr; }
   .rail { border-right: 0; border-bottom: 1px solid var(--line); }
-  .topics { grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; gap: 4px; padding-bottom: 4px; }
   .modes { grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; }
   .mode { justify-content: center; }
   .mode .lock { margin-left: 4px; }
