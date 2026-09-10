@@ -100,7 +100,7 @@ WHICH_TEST_CARD = {
     "title": "Which US civics test will I take, the 2008 or the 2025 version?",
     "excerpt": "It depends on the date USCIS received your N-400, not on your interview date. "
                "The two versions side by side, with the pass rules for each.",
-    "image": "/guides/img/which-test.png",
+    "image": "/guides/img/card/which-test.png",
 }
 
 GUIDES: list[dict] = [
@@ -1246,8 +1246,14 @@ def render_index() -> str:
     ordered = sorted(GUIDES, key=lambda x: x.get("published_iso", CHECKED_ISO), reverse=True)
     cards = [{
         "href": f"/guides/{g['slug']}", "category": g["category"], "title": g["title"],
-        "excerpt": g["excerpt"], "image": f"/guides/img/{g['slug']}.png",
-    } for g in ordered] + [WHICH_TEST_CARD]
+        "excerpt": g["excerpt"], "image": f"/guides/img/card/{g['slug']}.png",
+    } for g in ordered]
+    # which-test is the most-searched page, so it leads its publication day rather than
+    # trailing the list; the cards carry title-free thumbnails (img/card/) because the
+    # full hero repeats the card's own title, which read as a duplicate on the index.
+    first_old = next(i for i, c in enumerate(cards) if c["href"].endswith(tuple(
+        g["slug"] for g in GUIDES if g.get("published_iso", CHECKED_ISO) == CHECKED_ISO)))
+    cards.insert(first_old, WHICH_TEST_CARD)
     ld = [{
         "@context": "https://schema.org",
         "@type": "CollectionPage",
