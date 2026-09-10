@@ -63,6 +63,12 @@ SRC = {
     "senate": ("United States Senate: senators", "https://www.senate.gov/senators/"),
     "house": ("U.S. House of Representatives: find your representative",
               "https://www.house.gov/representatives/find-your-representative"),
+    "ceremonies": ("USCIS: Naturalization Ceremonies",
+                   "https://www.uscis.gov/citizenship/learn-about-citizenship/naturalization-ceremonies"),
+    "pmj5": ("USCIS Policy Manual, Vol. 12, Part J, Ch. 5: Administrative Naturalization Ceremonies",
+             "https://www.uscis.gov/policy-manual/volume-12-part-j-chapter-5"),
+    "whitehouse": ("The White House: the administration", "https://www.whitehouse.gov/administration/"),
+    "speaker": ("U.S. House of Representatives: leadership", "https://www.house.gov/leadership"),
 }
 
 # ---------------------------------------------------------------------------------
@@ -635,6 +641,374 @@ GUIDES: list[dict] = [
     },
 ]
 
+
+D2 = dict(published="September 10, 2026", published_iso="2026-09-10", checked="September 10, 2026")
+
+GUIDES += [
+    {
+        **D2,
+        "slug": "oath-ceremony",
+        "category": "The oath ceremony",
+        "title": "You passed. Here is what happens at the oath ceremony.",
+        "excerpt": "The N-445 notice, the questionnaire on the back, what you hand in, what you get, and "
+                   "the three things to do in the week after.",
+        "lead": "Passing the interview is not the end. You are not a US citizen until you take the Oath "
+                "of Allegiance at a naturalization ceremony, and the ceremony has its own paperwork, its own "
+                "order of events and a few traps. Here is the whole thing, from the notice to the passport.",
+        "sections": [
+            ("The notice", [
+                p("Some offices can swear you in the same day as your interview. If not, USCIS mails Form "
+                  "N-445, Notice of Naturalization Oath Ceremony, with the date, time and place. On the back is "
+                  "a short questionnaire about what has happened since your interview: travel outside the "
+                  "country, arrests, changes in marital status and the like. Fill it in before you arrive, "
+                  "truthfully. An officer reviews your answers at check-in."),
+                p("If you cannot attend, return the N-445 to your local USCIS office with a letter asking for a "
+                  "new date and explaining why. Do not simply skip it."),
+            ]),
+            ("Two kinds of ceremony", [
+                p("In an administrative ceremony, USCIS itself administers the oath. In a judicial ceremony, a "
+                  "court does. Which one you get depends on your district. The oath and the certificate are "
+                  "the same either way."),
+            ]),
+            ("What to bring, what you hand in", [
+                p("Bring the N-445 and your green card. You must return your Permanent Resident Card to USCIS "
+                  "when you check in. You will not need it again, because you leave with a Certificate of "
+                  "Naturalization instead. Dress as you would for something that matters."),
+            ]),
+            ("The order of events", [
+                p("USCIS standardizes administrative ceremonies, so most follow the same program: a short "
+                  "film, the national anthem, welcoming remarks, the call of countries, where each country "
+                  "represented in the room is named and its new citizens stand, then the Oath of Allegiance "
+                  "itself. After the oath come remarks from USCIS leadership or a guest, a recorded "
+                  "congratulatory message, the Pledge of Allegiance, and the presentation of certificates."),
+                p("You will have the text of the oath and the pledge in front of you to repeat. Nobody expects "
+                  "you to know them by heart."),
+            ]),
+            ("The certificate", [
+                p("The Certificate of Naturalization, Form N-550, is your proof of citizenship. Check it "
+                  "before you leave the room: name, date of birth, spelling. USCIS asks you to report any "
+                  "error before leaving the ceremony, because fixing it later is a separate application. If "
+                  "you ever lose it, the replacement is Form N-565, and it is slow, so store the original "
+                  "somewhere safe and keep copies."),
+            ]),
+            ("The week after", [
+                ol("<strong>Passport.</strong> You receive a US passport application at the ceremony. Your "
+                   "certificate is the proof of citizenship it needs. Leave enough time between the ceremony "
+                   "and any planned travel to get the passport back.",
+                   "<strong>Vote.</strong> Voter registration applications are handed out at the ceremony after "
+                   "the oath. Registering is the first thing citizenship lets you do that a green card did not.",
+                   "<strong>Social Security.</strong> Update your record with the Social Security Administration "
+                   "using Form SS-5, by mail or in person. USCIS says to wait at least ten days after the "
+                   "ceremony so its records have reached SSA."),
+            ]),
+        ],
+        "faq": [
+            ("Am I a US citizen as soon as my N-400 is approved?",
+             "No. You become a citizen when you take the Oath of Allegiance at a naturalization ceremony. Until "
+             "then you are still a permanent resident."),
+            ("Do I have to give up my green card at the oath ceremony?",
+             "Yes. You must return your Permanent Resident Card to USCIS when you check in for the ceremony. "
+             "You receive a Certificate of Naturalization after the oath."),
+            ("What should I do if my Certificate of Naturalization has a mistake?",
+             "Tell USCIS before you leave the ceremony. Fixing an error afterward requires a separate "
+             "application, Form N-565."),
+        ],
+        "sources": ["ceremonies", "pmj5", "interview"],
+        "related": ["naturalization-interview", "if-you-fail", "which-test"],
+    },
+    {
+        **D2,
+        "slug": "if-you-fail",
+        "category": "If you fail",
+        "title": "Failed part of the test? Exactly what happens next.",
+        "excerpt": "Two chances, a second interview 60 to 90 days later, only the part you missed, and what a "
+                   "second failure means, all from USCIS's own policy.",
+        "lead": "Failing a part of the naturalization test feels final in the room. It is not. USCIS policy "
+                "gives every applicant two attempts, and the rules for the second one are written down. Here "
+                "they are, without the folklore.",
+        "sections": [
+            ("You get two attempts", [
+                p("USCIS's Policy Manual is plain about it: an applicant has two opportunities to pass the "
+                  "English and civics tests, the initial examination and a re-examination. Failing any part "
+                  "at the first interview does not end your application."),
+            ]),
+            ("The second interview is 60 to 90 days later", [
+                p("If you fail any portion of the English test, the civics test, or all of them, USCIS "
+                  "schedules a second examination between 60 and 90 days after the first. You get a new "
+                  "appointment notice. Treat the gap as study time, not waiting time."),
+            ]),
+            ("You retake only what you failed", [
+                p("The re-examining officer tests only the portion you did not pass. Pass the reading, "
+                  "speaking and civics tests but miss the writing? At the second interview you take only the "
+                  "writing test. Pass English but fail civics? Only civics, on the same test version as the "
+                  "first time, with a different set of questions. USCIS requires the officer to use different "
+                  "test forms from the first interview, so memorizing the specific questions you were asked "
+                  "does not help; learning the topic does."),
+            ]),
+            ("Do not miss the second appointment", [
+                p("Unless USCIS excuses it, failing to appear for the re-examination, or declining to take the "
+                  "test at it, counts as a failed attempt. If you cannot make the date, contact USCIS before "
+                  "it, not after."),
+            ]),
+            ("What a second failure means", [
+                p("If you fail any portion of the tests after two attempts, USCIS denies the naturalization "
+                  "application. That is a denial of the application, not a permanent bar: you can file a new "
+                  "N-400, with a new fee, and start again. You can also request a hearing on the denial, and "
+                  "at that hearing an officer administers the failed portion of the test again. Which route "
+                  "makes sense for you is a question for your lawyer, and this guide stops there."),
+            ]),
+            ("What you leave the room with", [
+                p("At the end of every interview the officer hands you Form N-652, Naturalization Interview "
+                  "Results. It states which tests you passed and failed and whether the case is approved, "
+                  "continued or denied. Read it before you leave. It is the document that tells you exactly "
+                  "what you need to study."),
+            ]),
+            ("How to use the 60 days", [
+                p("Failed civics? Take timed practice tests in the real format, with the real question count "
+                  "and pass line for your version, and answer out loud. Look at which topics you miss and study "
+                  "those. Failed reading or writing? Print USCIS's vocabulary lists, read every word aloud and "
+                  "have someone dictate sentences built from the writing list. Failed speaking? Practice "
+                  "answering the N-400 questions about your own life in English, out loud, with someone who "
+                  "will not help you."),
+            ]),
+        ],
+        "faq": [
+            ("How many times can you take the US citizenship test?",
+             "Two. USCIS gives every applicant an initial examination and one re-examination. Failing any "
+             "portion after both attempts results in denial of the N-400, after which you can file a new "
+             "application."),
+            ("How long after failing the citizenship test is the retest?",
+             "USCIS schedules the second examination between 60 and 90 days after the first."),
+            ("Do I retake the whole test if I fail one part?",
+             "No. The officer retests only the portion you failed. Parts you passed the first time stand."),
+        ],
+        "sources": ["policy", "interview", "scoring", "study"],
+        "related": ["naturalization-interview", "english-test", "how-to-study"],
+    },
+    {
+        **D2,
+        "slug": "numbers-and-dates",
+        "category": "Numbers and dates",
+        "title": "Every number and date on the civics test, on one page",
+        "excerpt": "Twenty-four questions on the 2025 test have a number or a year in the answer. Here they "
+                   "all are, grouped so they stick.",
+        "lead": "Numbers are where memory slips under pressure. Six or two? Nine or five? 1870 or 1920? On "
+                "the 2025 civics test, 24 of the 128 questions have a number or a date somewhere in the "
+                "accepted answer. Here they are in one place, grouped the way they connect, so you learn a "
+                "pattern instead of a list.",
+        "sections": [
+            ("Congress", [
+                table(["Question", "Answer"], [
+                    ["How many U.S. senators are there?", "100"],
+                    ["How many senators does each state have?", "2"],
+                    ["How long is a term for a U.S. senator?", "6 years"],
+                    ["How many voting members are in the House of Representatives?", "435"],
+                    ["How long is a term for a member of the House?", "2 years"],
+                ]),
+                p("The pattern: the Senate is the small, slow chamber. Two per state, one hundred in all, "
+                  "six-year terms. The House is the big, fast one. 435 seats by population, two-year terms."),
+            ]),
+            ("The president and the courts", [
+                table(["Question", "Answer"], [
+                    ["The President is elected for how many years?", "4 years"],
+                    ["The President can serve only two terms. Why?", "The 22nd Amendment"],
+                    ["How many seats are on the Supreme Court?", "9"],
+                    ["How many justices are usually needed to decide a case?", "5"],
+                ]),
+                p("Nine justices, so five is a majority. Four-year terms, two of them at most, because of "
+                  "the 22nd Amendment."),
+            ]),
+            ("The Constitution and its amendments", [
+                table(["Question", "Answer"], [
+                    ["How many amendments does the Constitution have?", "27"],
+                    ["Which amendment says people born or naturalized here are citizens?", "The 14th"],
+                    ["When did all men get the right to vote?", "1870, the 15th Amendment, after the Civil War"],
+                    ["When did all women get the right to vote?", "1920, the 19th Amendment, after World War I"],
+                    ["Why is it important to pay federal taxes?", "Required by law, and by the 16th Amendment"],
+                    ["Describe one amendment about who can vote.", "Citizens 18 and older can vote, among others"],
+                ]),
+                p("The voting amendments run in order of history: 15th for men of any race after the Civil "
+                  "War, 19th for women after World War I, and then the voting age of 18."),
+            ]),
+            ("Dates in history", [
+                table(["Question", "Answer"], [
+                    ["When was the Declaration of Independence adopted?", "July 4, 1776"],
+                    ["Name one war fought by the United States in the 1800s.", "War of 1812, Mexican-American War, Civil War or Spanish-American War"],
+                    ["When did the Great Depression start?", "1929, the stock market crash"],
+                    ["What major event happened on September 11, 2001?", "Terrorists attacked the United States"],
+                    ["James Madison is famous for many things. Name one.", "Fourth president; president during the War of 1812"],
+                    ["Abraham Lincoln is famous for many things. Name one.", "16th president; freed the slaves; saved the Union"],
+                    ["Dwight Eisenhower is famous for many things. Name one.", "34th president; general in World War II; signed the 1956 Federal-Aid Highway Act"],
+                ]),
+                p("For the \"famous for many things\" questions you need one answer, and it does not have to "
+                  "be the one with a number. \"Freed the slaves\" is a full mark for Lincoln."),
+            ]),
+            ("The flag", [
+                table(["Question", "Answer"], [
+                    ["Why does the flag have 13 stripes?", "The 13 original colonies"],
+                    ["Why does the flag have 50 stars?", "One star for each of the 50 states"],
+                ]),
+            ]),
+            ("How to use this page", [
+                p("Read it once a day for a week, out loud, and the pairs start to hold each other up: 2 and "
+                  "100 and 6 for the Senate, 435 and 2 for the House, 9 and 5 for the Court, 27 amendments, "
+                  "1776 and 1870 and 1920 and 1929. Then take a practice test and see which ones still slip. "
+                  "The 2008 test shares most of these numbers, but it is a different question list, so if your "
+                  "N-400 was received before October 20, 2025, study the 2008 pool."),
+            ]),
+        ],
+        "faq": [
+            ("How many amendments does the US Constitution have?",
+             "Twenty-seven. That is the accepted answer on the civics test."),
+            ("How many voting members are in the House of Representatives?",
+             "Four hundred thirty-five."),
+            ("When did all women get the right to vote in the United States?",
+             "In 1920, with the 19th Amendment, after World War I. Any of those three phrasings is accepted."),
+        ],
+        "sources": ["q128", "q100", "study"],
+        "related": ["one-answer", "how-to-study", "which-test"],
+    },
+    {
+        **D2,
+        "slug": "sixty-five-twenty-questions",
+        "category": "The 65/20 test",
+        "title": "The 20 questions on the 65/20 civics test, and how the shorter test works",
+        "excerpt": "If you are 65 or older with 20 years as a permanent resident, your civics test comes from "
+                   "these 20 questions. All of them, with the accepted answers.",
+        "lead": "Applicants who are 65 or older and have held a green card for 20 years or more get a civics "
+                "test drawn from a marked bank of 20 questions instead of the full pool of 128. The officer "
+                "asks up to 10 of them and you need 6 correct. Here is the whole bank for the 2025 test, with "
+                "the accepted answers, in the order USCIS lists them.",
+        "sections": [
+            ("The rules first", [
+                ul("You qualify if you are 65 or older <em>and</em> have been a lawful permanent resident for "
+                   "20 years or more, both counted on the day USCIS received your N-400.",
+                   "You are also exempt from the English test and may take civics in your own language. USCIS "
+                   "asks you to bring a qualified interpreter.",
+                   "Up to 10 questions are asked. Six correct passes. The officer stops as soon as the result "
+                   "is decided.",
+                   "Which bank you get, 2008 or 2025, follows your N-400 received date. The 20 below are the "
+                   "2025 bank. The 2008 test has its own marked 20."),
+            ]),
+            ("The 20 questions", [
+                ol("<strong>What is the supreme law of the land?</strong> The Constitution.",
+                   "<strong>How many amendments does the U.S. Constitution have?</strong> Twenty-seven.",
+                   "<strong>What is the economic system of the United States?</strong> Capitalism, or a free market economy.",
+                   "<strong>Name one power of the U.S. Congress.</strong> Writes laws; declares war; makes the federal budget.",
+                   "<strong>What is the name of the Speaker of the House of Representatives now?</strong> The current Speaker. Check house.gov the week of your interview.",
+                   "<strong>The President of the United States is elected for how many years?</strong> Four.",
+                   "<strong>What is the name of the President of the United States now?</strong> The current President. Check whitehouse.gov.",
+                   "<strong>What is the name of the Vice President of the United States now?</strong> The current Vice President. Check whitehouse.gov.",
+                   "<strong>Who vetoes bills?</strong> The President.",
+                   "<strong>What is the highest court in the United States?</strong> The Supreme Court.",
+                   "<strong>Who is the governor of your state now?</strong> Your state's governor. DC residents answer that DC does not have a governor.",
+                   "<strong>What do we show loyalty to when we say the Pledge of Allegiance?</strong> The United States, or the flag.",
+                   "<strong>Who lived in America before the Europeans arrived?</strong> American Indians, or Native Americans.",
+                   "<strong>Who wrote the Declaration of Independence?</strong> Thomas Jefferson.",
+                   "<strong>George Washington is famous for many things. Name one.</strong> Father of Our Country; first president; general of the Continental Army.",
+                   "<strong>Abraham Lincoln is famous for many things. Name one.</strong> Freed the slaves; saved the Union; led the country during the Civil War.",
+                   "<strong>Martin Luther King, Jr. is famous for many things. Name one.</strong> Fought for civil rights; worked for equality for all Americans.",
+                   "<strong>What major event happened on September 11, 2001 in the United States?</strong> Terrorists attacked the United States.",
+                   "<strong>Why does the flag have 13 stripes?</strong> Because there were 13 original colonies.",
+                   "<strong>Name three national U.S. holidays.</strong> Any three: New Year's Day, Martin Luther King, Jr. Day, Presidents Day, Memorial Day, Juneteenth, Independence Day, Labor Day, Columbus Day, Veterans Day, Thanksgiving, Christmas."),
+            ]),
+            ("The four that change", [
+                p("Four of the twenty depend on the day and the place: the Speaker, the President, the Vice "
+                  "President and your governor. Do not learn these from a list printed months ago, including "
+                  "this one. Check them the week of the interview on house.gov, whitehouse.gov and the "
+                  "National Governors Association. In our study material they update from our server and are "
+                  "cross-checked against those sources before every release."),
+            ]),
+            ("How to study twenty questions", [
+                p("Twenty questions is a small enough set to learn completely. Pick one answer for each, the "
+                  "one that is easiest to say in the language you will answer in, and practice saying it. Have "
+                  "someone ask the questions in a random order, out loud, ten at a time, and stop at six right. "
+                  "That is the interview."),
+                p("The full age rules, including the 50/20 and 55/15 English exemptions, are in the "
+                  "<a href=\"/guides/age-rules\">age rules guide</a>."),
+            ]),
+        ],
+        "faq": [
+            ("How many questions are on the 65/20 citizenship test?",
+             "The officer asks up to 10 questions from a marked bank of 20. You need 6 correct to pass."),
+            ("Can the 65/20 civics test be taken in my own language?",
+             "Yes. Applicants who qualify for 65/20 are exempt from the English test and may take the civics "
+             "test in the language of their choice with an interpreter."),
+            ("Are the 65/20 questions the same on the 2008 and 2025 tests?",
+             "No. Each version has its own marked bank of 20. Which one you get follows your N-400 received "
+             "date: before October 20, 2025 the 2008 bank, on or after the 2025 bank."),
+        ],
+        "sources": ["q128", "exceptions", "policy", "whitehouse", "speaker", "nga"],
+        "related": ["age-rules", "state-questions", "which-test"],
+    },
+    {
+        **D2,
+        "slug": "why-questions",
+        "category": "The why questions",
+        "title": "The 2025 test asks why. Here are all 17 why-questions and one answer for each.",
+        "excerpt": "Seventeen of the 128 questions ask for a reason, not a fact. They are the ones flashcards "
+                   "handle worst, and each has a short accepted answer.",
+        "lead": "Most civics questions ask for a name, a number or a date. Seventeen questions on the 2025 "
+                "test ask why. Why three branches? Why two senators per state? Why did the United States "
+                "enter World War I? These are the questions people freeze on, because a reason is harder to "
+                "recall than a fact. The good news is that every one has a short accepted answer, and you "
+                "need only one.",
+        "sections": [
+            ("Why they are harder", [
+                p("A fact is either in your memory or not. A reason invites you to explain, and under pressure "
+                  "people explain too much and drift away from the accepted wording. The fix is to treat each "
+                  "why-question exactly like a fact: pick one accepted answer, learn it word for word, and stop "
+                  "talking when you have said it."),
+            ]),
+            ("Government: how it is built", [
+                ol("<strong>There are three branches of government. Why?</strong> So one part does not become too powerful. Also accepted: checks and balances; separation of powers.",
+                   "<strong>Why do U.S. representatives serve shorter terms than U.S. senators?</strong> To more closely follow public opinion.",
+                   "<strong>Why does each state have two senators?</strong> Equal representation for small states. Also accepted: the Great Compromise.",
+                   "<strong>Some states have more representatives than other states. Why?</strong> Because of the state's population.",
+                   "<strong>The President can serve only two terms. Why?</strong> Because of the 22nd Amendment. Also accepted: to keep the president from becoming too powerful.",
+                   "<strong>Why is the Electoral College important?</strong> It decides who is elected president.",
+                   "<strong>Supreme Court justices serve for life. Why?</strong> To be independent of politics.",
+                   "<strong>Why is it important to pay federal taxes?</strong> Required by law. Also accepted: all people pay to fund the federal government; civic duty."),
+            ]),
+            ("The founding documents", [
+                ol("<strong>Why is the Declaration of Independence important?</strong> It says America is free from British control. Also accepted: it says all people are created equal.",
+                   "<strong>Why were the Federalist Papers important?</strong> They helped people understand the Constitution. Also accepted: they supported passing it."),
+            ]),
+            ("The wars", [
+                p("Five why-questions ask why the United States entered a war. Learn them as a set, because "
+                  "two share an answer."),
+                ol("<strong>World War I:</strong> Because Germany attacked U.S. ships.",
+                   "<strong>World War II:</strong> The bombing of Pearl Harbor.",
+                   "<strong>The Korean War:</strong> To stop the spread of communism.",
+                   "<strong>The Vietnam War:</strong> To stop the spread of communism.",
+                   "<strong>The Persian Gulf War:</strong> To force the Iraqi military from Kuwait."),
+            ]),
+            ("The flag", [
+                ol("<strong>Why does the flag have 13 stripes?</strong> Because there were 13 original colonies.",
+                   "<strong>Why does the flag have 50 stars?</strong> One star for each state."),
+            ]),
+            ("How to drill them", [
+                p("Write the 17 questions on one side of a card and your one chosen answer on the other. Say "
+                  "the answer out loud, in full, then stop. If you catch yourself adding a second sentence, "
+                  "start over. The officer accepts any answer on USCIS's list and needs only one, so the "
+                  "shortest correct sentence is the safest one. <a href=\"/guides/one-answer\">How the answer "
+                  "key works.</a>"),
+            ]),
+        ],
+        "faq": [
+            ("Why are there three branches of government, according to the civics test?",
+             "So one part does not become too powerful. Checks and balances and separation of powers are also "
+             "accepted answers."),
+            ("Why does each state have two senators, according to the civics test?",
+             "For equal representation, especially for small states. The Great Compromise is also accepted."),
+            ("Why did the United States enter the Korean War and the Vietnam War?",
+             "To stop the spread of communism. That is the accepted answer for both."),
+        ],
+        "sources": ["q128", "study"],
+        "related": ["one-answer", "numbers-and-dates", "how-to-study"],
+    },
+]
+
 # ---------------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------------
@@ -748,6 +1122,9 @@ def render_guide(g: dict) -> str:
     url = guide_url(g["slug"])
     image = f"/guides/img/{g['slug']}.png"
     minutes = max(1, round(words(g) / 200))
+    published = g.get("published", CHECKED)
+    published_iso = g.get("published_iso", CHECKED_ISO)
+    checked = g.get("checked", CHECKED)
     sources = [SRC[k] for k in g["sources"]]
 
     ld: list[dict] = [{
@@ -757,8 +1134,8 @@ def render_guide(g: dict) -> str:
         "headline": g["title"],
         "description": g["excerpt"],
         "image": ORIGIN + image,
-        "datePublished": CHECKED_ISO,
-        "dateModified": CHECKED_ISO,
+        "datePublished": published_iso,
+        "dateModified": published_iso,
         "author": {"@type": "Organization", "name": "Prepare for Citizenship", "url": ORIGIN},
         "publisher": {"@type": "Organization", "name": "Prepare for Citizenship", "url": ORIGIN},
         "mainEntityOfPage": url,
@@ -813,9 +1190,9 @@ def render_guide(g: dict) -> str:
           <span class="sep">·</span>
           <span>{minutes} min read</span>
           <span class="sep">·</span>
-          <span>Published {CHECKED}</span>
+          <span>Published {published}</span>
           <span class="sep">·</span>
-          <span>Sources checked {CHECKED}</span>
+          <span>Sources checked {checked}</span>
           <span class="sep">·</span>
           <span>{len(sources)} sources</span>
         </p>
@@ -866,10 +1243,11 @@ def render_guide(g: dict) -> str:
 def render_index() -> str:
     e = html.escape
     url = ORIGIN + "/guides"
-    cards = [WHICH_TEST_CARD] + [{
+    ordered = sorted(GUIDES, key=lambda x: x.get("published_iso", CHECKED_ISO), reverse=True)
+    cards = [{
         "href": f"/guides/{g['slug']}", "category": g["category"], "title": g["title"],
         "excerpt": g["excerpt"], "image": f"/guides/img/{g['slug']}.png",
-    } for g in GUIDES]
+    } for g in ordered] + [WHICH_TEST_CARD]
     ld = [{
         "@context": "https://schema.org",
         "@type": "CollectionPage",
