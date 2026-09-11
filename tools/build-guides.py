@@ -1009,6 +1009,323 @@ GUIDES += [
     },
 ]
 
+
+D3 = dict(published="September 11, 2026", published_iso="2026-09-11", checked="September 11, 2026")
+
+GUIDES += [
+    {
+        **D3,
+        "slug": "people-on-the-test",
+        "category": "The people",
+        "title": "Every person named on the civics test, and one thing to say about each",
+        "excerpt": "Fifteen names appear in the 2025 questions. For each one, the shortest accepted "
+                   "answer, so you never have to choose in the room.",
+        "lead": "The history section of the civics test is mostly people. Fifteen names appear across "
+                "the 2025 questions, and for most of them the question is the same: this person is famous "
+                "for many things, name one. You do not need the whole biography. You need one accepted "
+                "answer per name, said with confidence. Here is one for each.",
+        "sections": [
+            ("The founders", [
+                ul("<strong>George Washington.</strong> First president of the United States. Also accepted: Father of Our Country; general of the Continental Army; president of the Constitutional Convention.",
+                   "<strong>Thomas Jefferson.</strong> Wrote the Declaration of Independence. He is also the answer to a second question, who wrote the Declaration of Independence, so this one fact covers two questions. Also accepted: third president; the Louisiana Purchase; first Secretary of State.",
+                   "<strong>Benjamin Franklin.</strong> First Postmaster General of the United States. Also accepted: founded the first free public libraries; helped write the Declaration of Independence; inventor; U.S. diplomat.",
+                   "<strong>James Madison.</strong> Father of the Constitution. Also accepted: fourth president; president during the War of 1812; one of the writers of the Federalist Papers.",
+                   "<strong>Alexander Hamilton.</strong> First Secretary of the Treasury. Also accepted: one of the writers of the Federalist Papers; helped establish the First Bank of the United States; aide to General Washington.",
+                   "<strong>John Jay.</strong> Appears only as one of the writers of the Federalist Papers, alongside Madison and Hamilton. The pen name Publius is also accepted for that question."),
+            ]),
+            ("The 1800s", [
+                ul("<strong>Abraham Lincoln.</strong> Freed the slaves. Also accepted: saved the Union; led the United States during the Civil War; 16th president; delivered the Gettysburg Address.",
+                   "<strong>Leaders of the women's rights movement in the 1800s.</strong> Susan B. Anthony is the accepted answer most people know. Also accepted: Elizabeth Cady Stanton, Sojourner Truth, Harriet Tubman, Lucretia Mott. The question asks for one."),
+            ]),
+            ("The 1900s", [
+                ul("<strong>Franklin Roosevelt.</strong> President during the Great Depression and World War II. That is the whole question, so Roosevelt is the whole answer.",
+                   "<strong>Dwight Eisenhower.</strong> General during World War II. Also accepted: president at the end of the Korean War; 34th president; signed the 1956 Federal-Aid Highway Act.",
+                   "<strong>Martin Luther King, Jr.</strong> Fought for civil rights. Also accepted: worked for equality for all Americans."),
+            ]),
+            ("How to hold fifteen names", [
+                p("Group them the way the test does. Six founders, all tied to two documents: the "
+                  "Declaration of 1776 and the Constitution of 1787. Lincoln and the women's movement in "
+                  "the 1800s. Roosevelt, Eisenhower and King in the 1900s, one each for the Depression and "
+                  "the war, the war and the highways, and civil rights."),
+                p("Then pick your one fact per person and say it out loud until it is automatic. Franklin is "
+                  "the one people stumble on because none of his answers is a presidency. \"First Postmaster "
+                  "General\" is short and accepted. Learn that and move on."),
+                p("The 2008 test names a different set, including Susan B. Anthony as a stand-alone question. "
+                  "If USCIS received your N-400 before October 20, 2025, study <a href=\"/guides/the-2008-test\">"
+                  "the 2008 list</a> instead."),
+            ]),
+        ],
+        "faq": [
+            ("Who wrote the Declaration of Independence, according to the civics test?",
+             "Thomas Jefferson. Jefferson is also an accepted answer for the question about what he is famous for."),
+            ("Who was president during the Great Depression and World War II?",
+             "Franklin Roosevelt."),
+            ("Who are the accepted answers for a leader of the women's rights movement in the 1800s?",
+             "Susan B. Anthony, Elizabeth Cady Stanton, Sojourner Truth, Harriet Tubman or Lucretia Mott. You need one."),
+        ],
+        "sources": ["q128", "study"],
+        "related": ["one-answer", "wars-on-the-test", "numbers-and-dates"],
+    },
+    {
+        **D3,
+        "slug": "wars-on-the-test",
+        "category": "The wars",
+        "title": "Every war on the civics test, in order, with the one fact the test wants",
+        "excerpt": "From the Revolution to the War on Terror: which wars the 2025 test asks about, what "
+                   "it asks, and the accepted answer for each.",
+        "lead": "American history on the civics test is told largely through its wars. Twelve of the "
+                "2025 questions ask about one, and they follow a straight line from 1776 to 2001. Learn "
+                "the line once and the dates, presidents and reasons hang from it in order.",
+        "sections": [
+            ("1776: the American Revolution", [
+                p("<strong>What war did the Americans fight to win independence from Britain?</strong> The "
+                  "American Revolution, also accepted as the Revolutionary War or the War for Independence."),
+                p("<strong>Name one important event of the American Revolution.</strong> The Declaration of "
+                  "Independence is an accepted answer and the easiest to remember. Also accepted: Bunker "
+                  "Hill, Washington crossing the Delaware, Saratoga, Valley Forge."),
+                p("<strong>Name one reason the Americans declared independence.</strong> Taxation without "
+                  "representation. Also accepted: high taxes, British soldiers quartered in American houses, "
+                  "no self-government, the Boston Massacre."),
+            ]),
+            ("The 1800s: four wars, one that matters most", [
+                p("<strong>Name one war fought by the United States in the 1800s.</strong> Four are accepted: "
+                  "the War of 1812, the Mexican-American War, the Civil War, the Spanish-American War. Say "
+                  "the Civil War, because it is also the answer to two more questions."),
+                p("<strong>Name the U.S. war between the North and the South.</strong> The Civil War."),
+                p("<strong>What U.S. war ended slavery?</strong> The Civil War."),
+                p("<strong>The Civil War had many important events. Name one.</strong> The Emancipation "
+                  "Proclamation is accepted, and it connects to Lincoln's answer too. Also accepted: Fort "
+                  "Sumter, Vicksburg, Gettysburg, Sherman's March."),
+                p("<strong>What did the Emancipation Proclamation do?</strong> Freed the slaves."),
+            ]),
+            ("The 1900s: the world wars", [
+                p("<strong>Name one war fought by the United States in the 1900s.</strong> World War I, World "
+                  "War II, the Korean War, the Vietnam War or the Persian Gulf War."),
+                p("<strong>Why did the United States enter World War I?</strong> Because Germany attacked U.S. "
+                  "ships."),
+                p("<strong>Why did the United States enter World War II?</strong> The bombing of Pearl Harbor."),
+                p("<strong>Who was president during the Great Depression and World War II?</strong> Franklin "
+                  "Roosevelt."),
+            ]),
+            ("The Cold War and its two hot wars", [
+                p("<strong>Who was the United States' main rival during the Cold War?</strong> The Soviet Union."),
+                p("<strong>During the Cold War, what was one main concern of the United States?</strong> "
+                  "Communism. Also accepted: nuclear war."),
+                p("<strong>Why did the United States enter the Korean War?</strong> To stop the spread of "
+                  "communism."),
+                p("<strong>Why did the United States enter the Vietnam War?</strong> To stop the spread of "
+                  "communism. Same answer as Korea, so learn them as a pair."),
+            ]),
+            ("1991 and after", [
+                p("<strong>Why did the United States enter the Persian Gulf War?</strong> To force the Iraqi "
+                  "military from Kuwait."),
+                p("<strong>What major event happened on September 11, 2001?</strong> Terrorists attacked the "
+                  "United States."),
+                p("<strong>Name one U.S. military conflict after the September 11, 2001 attacks.</strong> The "
+                  "War in Afghanistan. Also accepted: the War in Iraq, the War on Terror."),
+            ]),
+            ("The line to memorize", [
+                p("Revolution, 1812, Mexican-American, Civil, Spanish-American, World War I, World War II, "
+                  "Korea, Vietnam, Gulf, Afghanistan. Say it as one sentence a few times a day. Then attach "
+                  "the reasons: ships, Pearl Harbor, communism, communism, Kuwait. That is the entire wars "
+                  "section of the test."),
+            ]),
+        ],
+        "faq": [
+            ("Which war ended slavery, according to the civics test?", "The Civil War."),
+            ("Why did the United States enter World War II?",
+             "The bombing of Pearl Harbor by Japan. Supporting the Allied Powers and opposing the Axis Powers are also accepted."),
+            ("Why did the United States enter the Korean War and the Vietnam War?",
+             "To stop the spread of communism, in both cases."),
+        ],
+        "sources": ["q128", "study"],
+        "related": ["why-questions", "people-on-the-test", "numbers-and-dates"],
+    },
+    {
+        **D3,
+        "slug": "map-of-the-test",
+        "category": "The map",
+        "title": "The map of the 2025 civics test: seven sections, and where your study time should go",
+        "excerpt": "72 questions on government, 44 on history, 12 on symbols and geography. What each "
+                   "section covers and how much of your time it deserves.",
+        "lead": "The 128 questions on the 2025 civics test are not a flat list. USCIS groups them into "
+                "seven sections under three headings, and the sections are very different sizes. Knowing "
+                "the map tells you where to spend your time, and where a few minutes buys a lot.",
+        "sections": [
+            ("The three headings", [
+                table(["Heading", "Questions", "Share of the test"], [
+                    ["American Government", "72", "About 56%"],
+                    ["American History", "44", "About 34%"],
+                    ["Symbols and Holidays / Geography", "12", "About 9%"],
+                ]),
+                p("Over half the test is government. If you have limited time, that is where it goes."),
+            ]),
+            ("The seven sections", [
+                table(["Section", "Questions", "What it covers"], [
+                    ["Principles of American Government", "15", "The Constitution, the Bill of Rights, the Declaration, the rule of law, the economic system"],
+                    ["System of Government", "47", "The three branches, Congress, the president and Cabinet, the courts, federal versus state powers, elections"],
+                    ["Rights and Responsibilities", "10", "Who can vote, rights of citizens and residents, duties like jury service and taxes"],
+                    ["Colonial Period and Independence", "17", "Native Americans, slavery, the Revolution, the founders, the Federalist Papers"],
+                    ["1800s", "10", "The Louisiana Purchase, the wars of the century, Lincoln, emancipation, women's suffrage"],
+                    ["Recent American History", "17", "The world wars, the Depression, the Cold War, civil rights, September 11"],
+                    ["Additional civics", "12", "The flag, the anthem, the capital, the Statue of Liberty, holidays, tribes, innovations"],
+                ]),
+            ]),
+            ("Where the time goes", [
+                p("<strong>System of Government is 47 questions, more than a third of the test.</strong> It is "
+                  "also the section with the most numbers and the most \"why\" questions. Give it the most "
+                  "time and come back to it last, the day before the interview."),
+                p("<strong>Additional civics is 12 questions and almost free.</strong> Thirteen stripes, fifty "
+                  "stars, Washington, D.C., the Star-Spangled Banner, three holidays. An hour covers it. Do "
+                  "it first, so you start with a section you own."),
+                p("<strong>Rights and Responsibilities is 10 questions</strong> but they overlap with the state "
+                  "questions and the voting amendments, so studying it well pays twice."),
+                p("<strong>The three history sections together are 44.</strong> Learn them as a timeline, not "
+                  "as three lists: founders, then the 1800s, then the 1900s. The <a href=\"/guides/wars-on-the-test\">"
+                  "wars</a> and the <a href=\"/guides/people-on-the-test\">people</a> are most of it."),
+            ]),
+            ("A three-week plan by section", [
+                ol("Week one: Additional civics in a day, then Principles of American Government and Rights and Responsibilities.",
+                   "Week two: System of Government, the whole week, with a practice test at the end to find the gaps.",
+                   "Week three: the three history sections as one timeline, then practice tests in the real format every day, studying only the sections you miss."),
+                p("Study by section in our material and the practice tests report results by section, so the "
+                  "map on this page is the same map your results use."),
+            ]),
+        ],
+        "faq": [
+            ("How many questions on the 2025 civics test are about government?",
+             "Seventy-two of the 128, across three sections: Principles of American Government, System of Government, and Rights and Responsibilities."),
+            ("Which section of the civics test has the most questions?",
+             "System of Government, with 47 questions."),
+        ],
+        "sources": ["q128", "study"],
+        "related": ["how-to-study", "which-test", "one-answer"],
+    },
+    {
+        **D3,
+        "slug": "symbols-and-holidays",
+        "category": "Symbols and holidays",
+        "title": "The 12 easiest points on the civics test: symbols, holidays and geography",
+        "excerpt": "The last section of the 2025 test is short and friendly. All twelve questions, with "
+                   "the answers, in an hour.",
+        "lead": "Every test has a section you can own completely. On the 2025 civics test it is the last "
+                "one, Additional civics: twelve questions about the flag, the anthem, the capital, the "
+                "holidays and a few facts about the country. Learn it first, and you walk into the "
+                "interview already sure of something.",
+        "sections": [
+            ("The flag and the anthem", [
+                ul("<strong>Why does the flag have 13 stripes?</strong> Because there were 13 original colonies.",
+                   "<strong>Why does the flag have 50 stars?</strong> One star for each state.",
+                   "<strong>What is the name of the national anthem?</strong> The Star-Spangled Banner.",
+                   "<strong>The Nation's first motto was \"E Pluribus Unum.\" What does it mean?</strong> Out of many, one."),
+            ]),
+            ("Places", [
+                ul("<strong>What is the capital of the United States?</strong> Washington, D.C.",
+                   "<strong>Where is the Statue of Liberty?</strong> New York Harbor. Liberty Island is also accepted."),
+            ]),
+            ("Holidays", [
+                ul("<strong>What is Independence Day?</strong> A holiday to celebrate U.S. independence from Britain. \"The country's birthday\" is also accepted.",
+                   "<strong>What is Memorial Day?</strong> A holiday to honor soldiers who died in military service.",
+                   "<strong>What is Veterans Day?</strong> A holiday to honor people who have served in the U.S. military.",
+                   "<strong>Name three national U.S. holidays.</strong> Any three of eleven: New Year's Day, Martin Luther King, Jr. Day, Presidents Day, Memorial Day, Juneteenth, Independence Day, Labor Day, Columbus Day, Veterans Day, Thanksgiving Day, Christmas Day."),
+                p("Memorial Day and Veterans Day are the pair people mix up. Memorial Day honors those who "
+                  "died. Veterans Day honors everyone who served."),
+            ]),
+            ("The country", [
+                ul("<strong>Name one American Indian tribe in the United States.</strong> Cherokee, Navajo, Sioux, Apache and many others are accepted. Pick the one you can pronounce most easily.",
+                   "<strong>Name one example of an American innovation.</strong> The light bulb. Also accepted: the automobile, skyscrapers, the airplane, the assembly line, and more."),
+            ]),
+            ("Why start here", [
+                p("These twelve are about nine percent of the test, and on interview day the officer may pull "
+                  "one or two of them into your ten or twenty questions. More important, they are the section "
+                  "you can finish. Learn them in an hour, say them out loud once a day, and spend the rest of "
+                  "your time on <a href=\"/guides/map-of-the-test\">the big sections</a>."),
+            ]),
+        ],
+        "faq": [
+            ("What is the name of the U.S. national anthem?", "The Star-Spangled Banner."),
+            ("What does E Pluribus Unum mean?", "Out of many, one."),
+            ("What is the difference between Memorial Day and Veterans Day on the civics test?",
+             "Memorial Day honors soldiers who died in military service. Veterans Day honors people who have served in the U.S. military."),
+        ],
+        "sources": ["q128", "study"],
+        "related": ["map-of-the-test", "numbers-and-dates", "why-questions"],
+    },
+    {
+        **D3,
+        "slug": "the-2008-test",
+        "category": "The 2008 test",
+        "title": "Filed before October 20, 2025? The 2008 civics test, on one page",
+        "excerpt": "If USCIS received your N-400 before the cutover you take the older test: 100 questions, "
+                   "10 asked, 6 to pass, nine sections. The rules and the shape of it.",
+        "lead": "Most of what is written about the civics test now describes the 2025 version. If USCIS "
+                "received your N-400 before October 20, 2025, that is not your test. Yours is the 2008 "
+                "test, and it is different enough that studying the wrong one costs real time. Here is the "
+                "2008 test on its own terms.",
+        "sections": [
+            ("The rules", [
+                table(["", "2008 test"], [
+                    ["Who takes it", "N-400 received before October 20, 2025"],
+                    ["Questions in the pool", "100"],
+                    ["Asked at the interview", "Up to 10"],
+                    ["Needed to pass", "6 correct"],
+                    ["When the officer stops", "At 6 right or 5 wrong"],
+                    ["65/20 applicants", "10 questions from a marked bank of 20, 6 to pass"],
+                ]),
+                p("Your received date is on the I-797C receipt notice. Trust that over the day you mailed or "
+                  "clicked submit."),
+            ]),
+            ("The nine sections", [
+                table(["Section", "Questions"], [
+                    ["Principles of American Democracy", "12"],
+                    ["System of Government", "35"],
+                    ["Rights and Responsibilities", "10"],
+                    ["Colonial Period and Independence", "13"],
+                    ["1800s", "7"],
+                    ["Recent American History", "10"],
+                    ["Geography", "8"],
+                    ["Symbols", "3"],
+                    ["Holidays", "2"],
+                ]),
+                p("Fifty-seven of the hundred are government, thirty are history, thirteen are geography, "
+                  "symbols and holidays. The 2008 test has a real geography section: rivers, oceans, states "
+                  "that border Canada and Mexico, U.S. territories. The 2025 test dropped most of that."),
+            ]),
+            ("How it differs from the 2025 test", [
+                ul("<strong>Fewer questions, fewer asked.</strong> 100 in the pool, up to 10 asked, 6 to pass. The 2025 test is 128, up to 20, 12 to pass.",
+                   "<strong>A different list, not a shorter one.</strong> Many topics overlap, but the questions and accepted answers are written differently, and some 2008 questions have no 2025 equivalent, geography above all.",
+                   "<strong>Fewer \"why\" questions.</strong> The 2008 test asks mostly for names, numbers and dates. The 2025 test added many questions that ask for a reason.",
+                   "<strong>Same state questions.</strong> Your governor, one of your senators, your representative and your state capital are asked on both, with the same answers for DC and the territories.",
+                   "<strong>Same English test.</strong> Read one sentence, write one sentence, from the same vocabulary lists."),
+            ]),
+            ("The 65/20 bank", [
+                p("Twenty of the hundred are marked with an asterisk on USCIS's list for applicants who are 65 "
+                  "or older with 20 years as a permanent resident. It is a different twenty from the 2025 "
+                  "bank. Both are marked in our study material, so pick your version once and the right "
+                  "bank follows."),
+            ]),
+            ("How to study it", [
+                p("The method is the same as for the 2025 test: learn by section, fill in your state answers "
+                  "early, pick one answer per question, practice out loud with the real count and pass line, "
+                  "which for you is 10 questions and 6 correct. Ten questions and a pass at six means a strong "
+                  "start ends the test early. Get the first six right and you are done."),
+                p("Both versions are free to study here. Choose the 2008 test once and everything, flashcards, "
+                  "sections, state answers and practice tests, follows that choice."),
+            ]),
+        ],
+        "faq": [
+            ("How many questions are on the 2008 civics test?",
+             "There are 100 questions in the pool. The officer asks up to 10 and you pass with 6 correct."),
+            ("Who takes the 2008 version of the civics test?",
+             "Applicants whose Form N-400 was received by USCIS before October 20, 2025."),
+            ("Does the 2008 test have geography questions?",
+             "Yes. Eight questions cover rivers, oceans, bordering countries and territories. The 2025 test dropped most geography."),
+        ],
+        "sources": ["q100", "study", "updates", "exceptions"],
+        "related": ["which-test", "age-rules", "how-to-study"],
+    },
+]
+
 # ---------------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------------
