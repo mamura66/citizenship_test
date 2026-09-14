@@ -69,6 +69,8 @@ SRC = {
              "https://www.uscis.gov/policy-manual/volume-12-part-j-chapter-5"),
     "whitehouse": ("The White House: the administration", "https://www.whitehouse.gov/administration/"),
     "speaker": ("U.S. House of Representatives: leadership", "https://www.house.gov/leadership"),
+    "scotus": ("Supreme Court of the United States: current justices",
+               "https://www.supremecourt.gov/about/biographies.aspx"),
 }
 
 # ---------------------------------------------------------------------------------
@@ -1323,6 +1325,336 @@ GUIDES += [
         ],
         "sources": ["q100", "study", "updates", "exceptions"],
         "related": ["which-test", "age-rules", "how-to-study"],
+    },
+]
+
+
+D4 = dict(published="September 14, 2026", published_iso="2026-09-14", checked="September 14, 2026")
+
+GUIDES += [
+    {
+        **D4,
+        "slug": "rights-and-responsibilities",
+        "category": "Rights and responsibilities",
+        "title": "Rights and responsibilities: the 10 questions about what citizenship gives and asks",
+        "excerpt": "Who can vote, what everyone in the country is entitled to, what new citizens promise in the "
+                   "oath, and why you pay taxes. The whole section, with the accepted answers.",
+        "lead": "One section of the civics test is about you. Rights and Responsibilities is ten questions "
+                "on what citizenship gives, what it asks in return, and what belongs to everyone living in the "
+                "country whether they are citizens or not. It is short, it overlaps with the oath you will take, "
+                "and it is the section most worth understanding rather than memorizing.",
+        "sections": [
+            ("Who can vote, and who can do what", [
+                p("<strong>Who can vote in federal elections, run for federal office, and serve on a jury?</strong> "
+                  "Citizens. That single word is the accepted answer, and it is the line the section draws: "
+                  "these three things are for citizens only."),
+                p("<strong>There are four amendments about who can vote. Describe one.</strong> Citizens 18 and "
+                  "older can vote. Also accepted: you do not have to pay a poll tax to vote; any citizen can vote, "
+                  "women and men; a male citizen of any race can vote."),
+            ]),
+            ("What belongs to everyone", [
+                p("<strong>What are three rights of everyone living in the United States?</strong> Freedom of "
+                  "speech, freedom of religion, freedom of assembly. Also accepted: freedom of expression, freedom "
+                  "to petition the government, the right to bear arms. Note the wording: everyone living here, not "
+                  "only citizens. You need three, so learn four."),
+            ]),
+            ("Becoming a citizen, and what you promise", [
+                p("<strong>How can people become United States citizens?</strong> Be born in the United States; "
+                  "naturalize; derive citizenship. Naturalize is the one you are doing."),
+                p("<strong>Name two promises that new citizens make in the Oath of Allegiance.</strong> Give up "
+                  "loyalty to other countries; defend the Constitution. Also accepted: obey the laws of the United "
+                  "States; serve in the military if needed; serve the nation if needed; be loyal to the United "
+                  "States. You will say these words at your ceremony, so this is the one question you can study "
+                  "by reading the oath itself."),
+                p("<strong>What do we show loyalty to when we say the Pledge of Allegiance?</strong> The United "
+                  "States, or the flag."),
+            ]),
+            ("What citizenship asks", [
+                p("<strong>What are two examples of civic participation?</strong> Vote; run for office. Also "
+                  "accepted: join a political party, help with a campaign, join a civic or community group, "
+                  "contact elected officials, write to a newspaper."),
+                p("<strong>What is one way Americans can serve their country?</strong> Vote. Also accepted: pay "
+                  "taxes, obey the law, serve in the military, run for office, work for government."),
+                p("<strong>Why is it important to pay federal taxes?</strong> Required by law. Also accepted: all "
+                  "people pay to fund the federal government; required by the 16th Amendment; civic duty."),
+                p("<strong>It is important for all men 18 through 25 to register for the Selective Service. Name "
+                  "one reason why.</strong> Required by law. Also accepted: civic duty; it makes the draft fair "
+                  "if needed."),
+            ]),
+            ("The pattern", [
+                p("Two answers cover half the section. <em>Citizens</em> answers the question about voting, "
+                  "office and juries. <em>Required by law</em> answers both taxes and Selective Service. And "
+                  "<em>vote</em> is accepted for civic participation and for serving the country. Learn those "
+                  "three words first, then the three freedoms, then the oath promises, which you will be saying "
+                  "out loud soon anyway."),
+            ]),
+        ],
+        "faq": [
+            ("Who can vote in federal elections, according to the civics test?", "Citizens of the United States."),
+            ("What are three rights of everyone living in the United States?",
+             "Any three of: freedom of speech, freedom of expression, freedom of religion, freedom of assembly, freedom to petition the government, the right to bear arms."),
+            ("What promises do new citizens make in the Oath of Allegiance?",
+             "Accepted answers include giving up loyalty to other countries, defending the Constitution, obeying U.S. laws, serving in the military if needed, serving the nation if needed, and being loyal to the United States. The question asks for two."),
+        ],
+        "sources": ["q128", "study"],
+        "related": ["oath-ceremony", "map-of-the-test", "one-answer"],
+    },
+    {
+        **D4,
+        "slug": "constitution-basics",
+        "category": "The Constitution",
+        "title": "The Constitution section: 15 questions, 5 ideas",
+        "excerpt": "Supreme law, We the People, the Bill of Rights, the rule of law and why three branches. "
+                   "The first section of the test, and the ideas that make it one story.",
+        "lead": "The civics test opens with fifteen questions under Principles of American Government. They "
+                "look like fifteen facts. They are really five ideas about what the Constitution is and why "
+                "it is shaped the way it is. Learn the ideas and the fifteen answers follow.",
+        "sections": [
+            ("Idea 1: the Constitution is the top of the pile", [
+                p("<strong>What is the supreme law of the land?</strong> The Constitution."),
+                p("<strong>Name one thing the Constitution does.</strong> Forms the government. Also accepted: "
+                  "defines the powers and parts of government; protects the rights of the people."),
+                p("<strong>How are changes made to the Constitution?</strong> Amendments."),
+                p("<strong>How many amendments does it have?</strong> Twenty-seven."),
+                p("<strong>What does the Bill of Rights protect?</strong> The basic rights of Americans, or of "
+                  "people living in the United States."),
+            ]),
+            ("Idea 2: the people are the source of power", [
+                p("<strong>The Constitution starts with \"We the People.\" What does that mean?</strong> "
+                  "Self-government. Also accepted: popular sovereignty; consent of the governed; people should "
+                  "govern themselves; social contract."),
+                p("<strong>What is the form of government of the United States?</strong> Republic. Also "
+                  "accepted: constitution-based federal republic; representative democracy. All three are on "
+                  "the key, so the republic-or-democracy argument is settled by USCIS: both pass."),
+            ]),
+            ("Idea 3: the Declaration came first", [
+                p("<strong>What founding document said the colonies were free from Britain?</strong> The "
+                  "Declaration of Independence."),
+                p("<strong>Why is the Declaration important?</strong> It says America is free from British "
+                  "control. Also accepted: it says all people are created equal; it identifies inherent rights."),
+                p("<strong>\"Life, Liberty, and the pursuit of Happiness\" are in what document?</strong> The "
+                  "Declaration of Independence."),
+                p("<strong>Name two important ideas from the Declaration and the Constitution.</strong> Equality "
+                  "and liberty. Also accepted: social contract, natural rights, limited government, "
+                  "self-government."),
+                p("<strong>Many documents influenced the Constitution. Name one.</strong> The Declaration of "
+                  "Independence. Also accepted: the Articles of Confederation, the Federalist Papers, the "
+                  "Anti-Federalist Papers, the Virginia Declaration of Rights, the Fundamental Orders of "
+                  "Connecticut, the Mayflower Compact, the Iroquois Great Law of Peace."),
+            ]),
+            ("Idea 4: nobody is above the law", [
+                p("<strong>What is the rule of law?</strong> No one is above the law. Also accepted: everyone "
+                  "must follow the law; leaders must obey the law; government must obey the law."),
+                p("<strong>There are three branches of government. Why?</strong> So one part does not become too "
+                  "powerful. Also accepted: checks and balances; separation of powers."),
+            ]),
+            ("Idea 5: the economy is left to the market", [
+                p("<strong>What is the economic system of the United States?</strong> Capitalism, or a free "
+                  "market economy."),
+            ]),
+            ("Why this section first", [
+                p("Everything later in the test hangs off these fifteen. The three branches section is idea 4 "
+                  "worked out in detail. Rights and Responsibilities is the Bill of Rights in practice. The "
+                  "history sections are the story of how the Declaration became the Constitution. Spend the first "
+                  "evening here and the rest of the test has somewhere to attach."),
+            ]),
+        ],
+        "faq": [
+            ("What is the supreme law of the land?", "The U.S. Constitution."),
+            ("What does \"We the People\" mean on the civics test?",
+             "Self-government. Popular sovereignty, consent of the governed, and social contract are also accepted."),
+            ("Is the United States a republic or a democracy, according to the civics test?",
+             "Both answers are accepted. The key lists republic, constitution-based federal republic, and representative democracy."),
+        ],
+        "sources": ["q128", "study"],
+        "related": ["three-branches", "why-questions", "map-of-the-test"],
+    },
+    {
+        **D4,
+        "slug": "three-branches",
+        "category": "The three branches",
+        "title": "The three branches on one page: who writes, who signs, who judges",
+        "excerpt": "System of Government is 47 questions, the biggest section on the test. Almost all of it is "
+                   "three branches doing three jobs. The structure, with the accepted answers.",
+        "lead": "System of Government is the largest section on the 2025 civics test, 47 of the 128 questions. "
+                "It looks like a wall of facts. It is one diagram: Congress writes the laws, the president "
+                "signs and enforces them, the courts explain them. Hold the diagram and most of the 47 answer "
+                "themselves.",
+        "sections": [
+            ("The frame", [
+                p("<strong>Name the three branches.</strong> Legislative, executive and judicial, or Congress, "
+                  "the president and the courts. <strong>Which branch is the president in charge of?</strong> The "
+                  "executive. <strong>What part of the federal government writes laws?</strong> Congress."),
+            ]),
+            ("Congress: writes the laws", [
+                ul("Two parts: the Senate and the House of Representatives.",
+                   "One power of Congress: writes laws. Also accepted: declares war; makes the federal budget.",
+                   "100 senators, 2 per state, 6-year terms. Each senator represents the people of their state, who elect them.",
+                   "435 voting members of the House, 2-year terms. Each represents the people of their district, who elect them.",
+                   "Why two senators per state? Equal representation for small states. Why do some states have more representatives? Population.",
+                   "Why shorter terms in the House? To more closely follow public opinion.",
+                   "The Speaker of the House: the current officeholder. Check house.gov the week of your interview."),
+            ]),
+            ("The president: signs, vetoes, enforces", [
+                ul("Elected for 4 years, at most two terms because of the 22nd Amendment.",
+                   "One power of the president: signs bills into law. Also accepted: vetoes bills; enforces laws.",
+                   "Who signs bills into law? The president. Who vetoes bills? The president. Who appoints federal judges? The president. Who is Commander in Chief? The president. Four questions, one answer.",
+                   "If the president can no longer serve, the Vice President becomes president.",
+                   "The executive branch has many parts: the president, the Cabinet, federal departments and agencies. The Cabinet advises the president. Two Cabinet-level positions: Secretary of State and Attorney General, among 22 accepted answers.",
+                   "Why is the Electoral College important? It decides who is elected president.",
+                   "The President and Vice President: the current officeholders. Check whitehouse.gov."),
+            ]),
+            ("The courts: explain the laws", [
+                ul("One part of the judicial branch: the Supreme Court. Also accepted: federal courts.",
+                   "What does the judicial branch do? Reviews laws. Also accepted: explains laws; resolves disputes about the law; decides if a law goes against the Constitution.",
+                   "The highest court: the Supreme Court. Nine seats. Five justices usually needed to decide a case.",
+                   "Justices serve for life, to be independent of politics.",
+                   "The Chief Justice: the current officeholder. Check supremecourt.gov."),
+            ]),
+            ("Federal and state", [
+                ul("One power only for the federal government: print money. Also accepted: mint coins; declare war; create an army; make treaties; set foreign policy.",
+                   "One power only for the states: provide schooling. Also accepted: police; fire departments; driver's licenses; zoning.",
+                   "The 10th Amendment: powers not given to the federal government belong to the states or the people.",
+                   "Your governor and your state capital: your own answers. DC residents answer that DC has no governor and no capital."),
+            ]),
+            ("How to study 47 questions", [
+                p("Draw the three boxes on paper and write the numbers into them: 100, 2, 6 and 435, 2 in "
+                  "Congress; 4 and two terms for the president; 9 and 5 for the Court. Then write the four "
+                  "questions whose answer is simply \"the president\" under the president box. Then the four "
+                  "names that change, with where to check them. What is left is a handful of why-questions, "
+                  "covered in <a href=\"/guides/why-questions\">their own guide</a>."),
+            ]),
+        ],
+        "faq": [
+            ("What are the three branches of government?",
+             "Legislative, executive and judicial. Congress, the president and the courts is also accepted."),
+            ("Who signs bills into law and who vetoes them?", "The President of the United States, in both cases."),
+            ("How many Supreme Court justices are there and how many are needed to decide a case?",
+             "Nine seats on the Court, and five justices are usually needed to decide a case."),
+        ],
+        "sources": ["q128", "study", "speaker", "whitehouse", "scotus"],
+        "related": ["constitution-basics", "numbers-and-dates", "answers-that-change"],
+    },
+    {
+        **D4,
+        "slug": "answers-that-change",
+        "category": "Answers that change",
+        "title": "Eight civics answers that change, and where to check each one the week of your interview",
+        "excerpt": "The President, the Vice President, the Speaker, the Chief Justice, your governor, your "
+                   "senator, your representative, your capital. The official sources for each.",
+        "lead": "Of the 128 questions on the 2025 civics test, 120 have answers that were true ten years ago "
+                "and will be true in ten more. Eight do not. Four ask who holds a national office now, and four "
+                "depend on where you live. Any study material, ours included, can be out of date on these the "
+                "morning after an election. Here is each one with the primary source to check it against.",
+        "sections": [
+            ("The four national offices", [
+                table(["Question", "Where to check", "Changes"], [
+                    ["What is the name of the President of the United States now?", "whitehouse.gov/administration", "After a presidential election, inaugurated January 20"],
+                    ["What is the name of the Vice President now?", "whitehouse.gov/administration", "Same day as the President"],
+                    ["What is the name of the Speaker of the House now?", "house.gov/leadership", "When a new Congress convenes on January 3, or whenever the House elects a new Speaker"],
+                    ["Who is the Chief Justice of the United States now?", "supremecourt.gov, current justices", "Rarely. Only on retirement or death and a new confirmation"],
+                ]),
+                p("The Speaker is the one people miss. It can change in the middle of a term, without an "
+                  "election, and it has."),
+            ]),
+            ("The four that depend on where you live", [
+                table(["Question", "Where to check", "Changes"], [
+                    ["Who is the governor of your state now?", "nga.org/governors", "After state elections; most new governors take office in January"],
+                    ["Who is one of your state's U.S. senators now?", "senate.gov/senators", "January 3 after an election; either of the two is a correct answer"],
+                    ["Name your U.S. representative.", "house.gov, find your representative, by ZIP code", "January 3 after every even-year election, and after any special election"],
+                    ["What is the capital of your state?", "Does not change", "Never. Learn it once"],
+                ]),
+                p("DC residents answer that DC has no governor, no U.S. senators, and, not being a state, no "
+                  "capital. Territory residents have a governor but no U.S. senators."),
+            ]),
+            ("When to check", [
+                p("Once when you start studying, and once more in the week before your interview. The second "
+                  "check is the one that matters. The next election night is November 3, 2026, and the people "
+                  "elected then take office in January 2027. If your interview falls between an election and "
+                  "the swearing-in, the answer is still the current officeholder, not the winner."),
+            ]),
+            ("How we keep them current", [
+                p("In our study material these eight answers are not typed into the app. They come from our "
+                  "server and are cross-checked against the sources in the tables above before every release, "
+                  "so a change reaches the app without an update. That is the right way to do it, and it is "
+                  "still not a substitute for you looking once the week before."),
+            ]),
+        ],
+        "faq": [
+            ("Which civics test answers change over time?",
+             "Eight on the 2025 test: the President, the Vice President, the Speaker of the House, the Chief Justice, your governor, one of your U.S. senators, your U.S. representative, and your state capital, though the capital does not in practice change."),
+            ("Where do I check who the Speaker of the House is for the civics test?",
+             "On house.gov under leadership. The Speaker can change in the middle of a term, so check the week of your interview."),
+            ("What do DC residents answer for the governor question?",
+             "That DC does not have a governor. DC residents also answer that DC has no U.S. senators and, not being a state, no capital."),
+        ],
+        "sources": ["q128", "whitehouse", "speaker", "scotus", "nga", "senate", "house"],
+        "related": ["state-questions", "three-branches", "sixty-five-twenty-questions"],
+    },
+    {
+        **D4,
+        "slug": "stopping-rule",
+        "category": "The stopping rule",
+        "title": "You may only be asked 12 questions: how the civics test stops early, and why your practice should too",
+        "excerpt": "The officer stops at 12 right or 9 wrong on the 2025 test, 6 right or 5 wrong on the 2008 "
+                   "test. What that means for how long the test is and how you should practice.",
+        "lead": "People picture the civics test as twenty questions. It almost never is. USCIS policy tells "
+                "the officer to stop the moment the result is decided, in either direction. Understanding that "
+                "rule changes how long the test feels, how a bad start plays out, and how you should be running "
+                "your practice tests.",
+        "sections": [
+            ("The rule, from the Policy Manual", [
+                p("On the 2025 test the officer asks from a set of 20 questions and stops once you have answered "
+                  "12 correctly, or 9 incorrectly. On the 2008 test the set is 10 and the officer stops at 6 "
+                  "correct or 5 incorrect. Passing is the same 60 percent line on both."),
+            ]),
+            ("What it means in the room", [
+                p("<strong>A strong start ends the test at question 12.</strong> Twelve right in a row, and the "
+                  "civics portion is over. Most well-prepared applicants never hear questions 13 to 20."),
+                p("<strong>You can miss eight and still pass.</strong> Twelve right and eight wrong is a pass. "
+                  "The test ends the moment the twelfth correct answer lands, whatever came before."),
+                p("<strong>The ninth wrong answer ends it.</strong> Not the twentieth question. If you have "
+                  "answered nine wrong, the officer stops, because a pass is no longer possible."),
+                p("<strong>Order is random.</strong> The officer works through the set on the form. You cannot "
+                  "skip or come back, so the answer you give is the answer that counts."),
+            ]),
+            ("Worked examples", [
+                table(["Sequence of answers", "Questions asked", "Result"], [
+                    ["12 right", "12", "Pass. Test ends at the twelfth correct answer"],
+                    ["3 wrong, then 12 right", "15", "Pass"],
+                    ["8 wrong, 12 right, in any order", "20", "Pass, on the last possible question"],
+                    ["9 wrong before 12 right", "Between 9 and 20", "Fail. Test ends at the ninth wrong answer"],
+                ]),
+                p("On the 2008 test the same shapes apply with 6 and 5: six right ends it, five wrong ends it, "
+                  "and six right with four wrong is a pass."),
+            ]),
+            ("Why your practice tests should stop early too", [
+                p("A practice test that always asks all 20 trains you for a test that does not exist. Two things "
+                  "go wrong. You never experience the test ending at question 12, so on the day an early stop "
+                  "reads as something being wrong. And you learn to pace for 20 when the real pressure is on "
+                  "the first dozen."),
+                p("Practice with the real rule: stop at 12 right or 9 wrong, 6 or 5 for the 2008 test. Note how "
+                  "many questions it took. A run of practice tests that keep ending at 12 or 13 questions is the "
+                  "clearest sign you are ready. Our practice tests use the real count and the real stopping rule "
+                  "for whichever version you are taking, because a test that stops when the officer would is the "
+                  "only honest rehearsal."),
+            ]),
+            ("Two things the rule does not change", [
+                p("You still answer out loud, and any answer on USCIS's accepted list counts. And if you do fail, "
+                  "you get a second interview 60 to 90 days later, retaking only the civics test, with a "
+                  "different set of questions. <a href=\"/guides/if-you-fail\">What happens if you fail.</a>"),
+            ]),
+        ],
+        "faq": [
+            ("How many questions are asked on the 2025 civics test?",
+             "Up to 20. The officer stops as soon as you have 12 correct or 9 incorrect, so a well-prepared applicant is often asked only 12."),
+            ("Can I fail the civics test before reaching question 20?",
+             "Yes. The officer stops at the ninth incorrect answer, because passing is no longer possible."),
+            ("How many questions can I get wrong and still pass the civics test?",
+             "Eight on the 2025 test, since 12 correct out of 20 passes. Four on the 2008 test, since 6 out of 10 passes."),
+        ],
+        "sources": ["policy", "study", "updates"],
+        "related": ["which-test", "if-you-fail", "how-to-study"],
     },
 ]
 
