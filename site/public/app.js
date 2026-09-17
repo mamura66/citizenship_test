@@ -1888,6 +1888,55 @@ const COUNTRY_NAMES = {
 };
 const countryName = (code) => COUNTRY_NAMES[code] || code || 'Unknown';
 
+/* ---------- paywall: real Paddle checkout ---------- */
+
+/** Paddle.js is initialised once, lazily, with whatever the server says the environment
+ *  is. Sandbox and live are separate Paddle accounts with separate tokens, so this is the
+ *  only thing that has to change to go live - no code edit.
+ *
+ *  RESTORED 2026-09-17. This function was deleted by accident during the multi-country /
+ *  multi-language refactor on 2026-09-07, leaving `initPaddle(checkout)` in paywall() as a
+ *  call to a function that no longer existed. Nobody noticed for ten days because
+ *  PADDLE_SALES_PAUSED was "true" that whole time: the Unlock button was disabled, so the
+ *  line never ran. It threw "Can't find variable: initPaddle" on the first real click,
+ *  minutes after sales were switched on. */
+let paddleReady = false;
+function initPaddle(cfg) {
+  if (paddleReady) return true;
+  // Checks the fields it actually needs, not a `configured` flag. This is called with the
+  // /api/checkout response, which has no such flag - /api/config does, and reading for it
+  // here meant the overlay silently refused to open every time.
+  if (!window.Paddle || !cfg || !cfg.token || !cfg.priceId) return false;
+  // Environment must be set before Initialize, and Initialize may only be called once per
+  // page - which is what `paddleReady` guards.
+  if (cfg.environment === 'sandbox') Paddle.Environment.set('sandbox');
+  Paddle.Initialize({
+    token: cfg.token,
+    eventCallback: (e) => {
+      if (!e) return;
+      // Every event, named, because the interesting failure was an event that never
+      // arrived and there was no way to tell that from one that arrived unhandled.
+      console.log(`Paddle event: ${e.name}`);
+      if (e.name === 'checkout.completed') {
+        // Paddle tells us the transaction id the moment the payment completes, which is
+        // what lets the server confirm it directly instead of waiting on the webhook.
+        const id = e.data && (e.data.transaction_id || e.data.id);
+        if (id) confirmPurchase(id);
+        return;
+      }
+      if (e.name === 'checkout.error' || e.name === 'checkout.warning') {
+        // Paddle's own overlay shows a generic "something went wrong". Without this the
+        // reason is thrown away, leaving both the customer and us with nothing to act on.
+        const detail = (e.data && (e.data.message || e.data.error || JSON.stringify(e.data))) || 'no detail';
+        console.error(`Paddle ${e.name}: ${detail}`);
+        showCheckoutError(detail);
+      }
+    },
+  });
+  paddleReady = true;
+  return true;
+}
+
 /** Surfaces a checkout failure on our own page. Paddle's overlay says "something went
  *  wrong" and offers to contact Paddle's support, which is not who can help with a problem
  *  at our end. */
