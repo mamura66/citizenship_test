@@ -101,10 +101,10 @@
     // before it is offered, so no value of this can conjure up a test we cannot teach.
     "COUNTRIES_OFFERED": "us",
     "PADDLE_ENVIRONMENT": "production",
-    // "true" while Paddle has not finished approving the account, so the paywall says so
-    // plainly instead of opening a checkout Paddle will refuse. Set to "false" the day
-    // website approval lands - that is the only change needed to start selling.
-    "PADDLE_SALES_PAUSED": "true",
+    // Was "true" while Paddle had not finished approving the account. Set to "false" on
+    // 2026-09-17, the day website approval landed (confirmed against Paddle's own live
+    // API first - see the diagnostic in this session's history - not just the email).
+    "PADDLE_SALES_PAUSED": "false",
     // The address password-reset mail is sent from. Must be on a domain on this
     // Cloudflare account, or Email Service refuses the send as an unverified sender.
     //
