@@ -90,6 +90,13 @@ nothing. So:
   screenshot. A transaction being recorded is **not** the same as an entitlement being
   granted.
 - A stub must say it is a stub, on screen.
+- **A feature flag that disables a button also hides broken code behind it.** `initPaddle`
+  was deleted in a refactor on 2026-09-07 and nobody noticed for ten days, because
+  `PADDLE_SALES_PAUSED` kept the only call site from ever running - it threw on the first
+  real click after sales went live. `node --check` does not catch an undefined identifier.
+  After any refactor of `site/public/app.js`, exercise the paid path in the browser with
+  `.dev.vars` (local dev sells in sandbox), or at minimum grep every `functionName(` call
+  for a matching `function functionName` definition.
 - Automated checks against production are **not counted** in site analytics, by two
   independent guards: `analytics.js` sends no beacon when `navigator.webdriver` is set
   (Playwright), and `/api/pulse` rejects `HeadlessChrome`, `curl` and the like by

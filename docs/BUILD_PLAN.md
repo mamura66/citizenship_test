@@ -2510,3 +2510,38 @@ Fixed live without a release: promotional text "practise" → "practice". Set on
 review: the description's `PRACTISE`, the support URL (was the old workers.dev address), the
 marketing URL, What's New. The competitors' 65k–104k ratings against our zero remain the
 real gap; the rating prompt in this build is the lever.
+
+## v40 — Payments live, and the bug that was waiting ten days for the switch (2026-09-17)
+
+Paddle approved the account on the 17th, a week after the enquiry email. Before flipping
+`PADDLE_SALES_PAUSED`, the live credentials were checked against Paddle's own API from
+inside the Worker (a temporary local-only route under `wrangler dev --remote`): the stored
+API key fetched the live price - "Full access", $9.99, tax_mode external, max quantity 1 -
+with a 200. A sandbox key gets a 403 there, so that was proof, not a prefix read.
+
+Sales on. First click on Unlock: **"Can't find variable: initPaddle."**
+
+- `initPaddle()` - environment set, `Paddle.Initialize` once, event callback - had been
+  deleted in the multi-language refactor of 2026-09-07. Its one call site survived. The
+  Unlock button had been disabled by the pause flag the entire time, so the line never
+  executed and no check caught it (`node --check` passes on undefined identifiers).
+  Restored verbatim from the initial import via `git cat-file`; the lesson is now in
+  CLAUDE.md.
+- With that fixed, Paddle answered the live checkout with a 400 and a generic overlay
+  error - the live account's **default payment link** was unset, exactly as
+  `docs/WEB-BACKEND-SETUP.md` recorded from the sandbox episode and predicted for live.
+  Dashboard-only; Sandeep set it.
+- Then the checkout showed $9.99 + $1.80 GST = $11.79 for a buyer in India: tax on top,
+  which is the rule. Sandeep did not want to spend $10 to test, so a one-use 100%-off code
+  (Catalog → Discounts, restricted to the product, expiring same day) took the real path
+  to $0.00. Our webhook checks `status === 'completed'` and the price ID, not the amount,
+  so it granted access. `payment_completed` = 1 in `analytics_counters`. End to end, live.
+
+Not exercised live: refund → access revoked (a $0 transaction cannot be refunded). Proven
+in sandbox with identical code; the first real refund will be the live proof.
+
+Tooling notes from the evening: `grep` on this Mac is `ugrep` and its `-c` counts disagreed
+with `-n` output - use Python for anything that has to be counted. `git show rev:path`
+inside a zsh `$var:path` expansion returned commit diffs rather than file contents; use
+`git cat-file -p rev:path`. Playwright `waitUntil: 'load'` hangs on pages that pull Google
+Fonts and paddle.js; `domcontentloaded` is the reliable wait.

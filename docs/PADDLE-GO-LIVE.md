@@ -1,5 +1,12 @@
 # Taking payments for real
 
+**Status: LIVE since 2026-09-17.** Paddle approved the account (email, 17 Sep). Sales
+unpaused the same day; the first live transaction (owner's, 100%-off code) completed, the
+signed webhook reached `/api/paddle/webhook`, and `payment_completed` was recorded. Two
+things bit on the way and are written up in `docs/BUILD_PLAN.md` v40: `initPaddle` had
+been deleted from app.js ten days earlier, and the live account needed its default
+payment link set (as this doc predicted). Payout details: Sandeep's, in the dashboard.
+
 Sandbox is done and proven end to end: a card payment through Paddle's overlay unlocks
 paid access in about 8 seconds, and a refund revokes it. Going live is a different Paddle
 account with different keys — nothing carries over.
