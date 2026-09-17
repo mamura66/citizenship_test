@@ -104,7 +104,11 @@
     // Was "true" while Paddle had not finished approving the account. Set to "false" on
     // 2026-09-17, the day website approval landed (confirmed against Paddle's own live
     // API first - see the diagnostic in this session's history - not just the email).
-    "PADDLE_SALES_PAUSED": "false",
+    // Paused again 2026-09-17 at Sandeep's instruction: receipts and invoices show his
+    // personal legal name instead of "Prepare for Citizenship". Paddle has to set the
+    // company display name (sellers@paddle.com, no self-service). Flip back to "false"
+    // once Paddle confirms - nothing else needs to change.
+    "PADDLE_SALES_PAUSED": "true",
     // The address password-reset mail is sent from. Must be on a domain on this
     // Cloudflare account, or Email Service refuses the send as an unverified sender.
     //
